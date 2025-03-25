@@ -39,7 +39,7 @@ export const NavigationMenuMobile = ({
           variant={isScrolled ? "secondary" : "ghost"}
           className={cn(
             "text-background border border-transparent",
-            isScrolled && "text-foreground border-border bg-sidebar"
+            isScrolled && "text-foreground border-border bg-background"
           )}
           size="icon"
         >
