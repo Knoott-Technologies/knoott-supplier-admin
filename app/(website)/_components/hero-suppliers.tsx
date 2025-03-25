@@ -40,7 +40,7 @@ export const HeroSuppliers = ({
                 libre.className
               )}
             >
-              Conviértete en proveedor de Knoott y obtén beneficios exclusivos
+              Vende tus productos en Knoott...
             </h1>
             <p className="text-base lg:text-lg text-background opacity-80">
               En Knoott nos apasiona impulsar el crecimiento de nuestros socios.
