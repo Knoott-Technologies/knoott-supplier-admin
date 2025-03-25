@@ -18,7 +18,7 @@ import Image from "next/image";
 
 export const ProductImageCarousel = ({ images }: { images: string[] }) => {
   return (
-    <Card className="w-full">
+    <Card className="w-full h-fit">
       <CardHeader>
         <CardTitle>Imágenes del producto</CardTitle>
         <CardDescription>
