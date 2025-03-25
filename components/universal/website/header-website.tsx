@@ -53,7 +53,7 @@ export const HeaderWebsite = ({
     <div
       className={cn(
         "w-full items-center justify-between flex px-5 md:px-7 lg:px-14 xl:px-36 2xl:px-56 py-3 h-14 fixed top-0 left-0 z-20 border-b border-transparent ease-in-out duration-300",
-        isScrolled && "bg-background border-border"
+        isScrolled && "bg-sidebar border-border"
       )}
     >
       <Link href="/" className="h-full">
