@@ -35,7 +35,7 @@ export const HeroSuppliers = ({
           <span className="w-full h-fit items-start justify-start flex flex-col gap-y-3">
             <h1
               className={cn(
-                "text-6xl font-semibold text-background",
+                "text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold text-background",
                 libre.className
               )}
             >
