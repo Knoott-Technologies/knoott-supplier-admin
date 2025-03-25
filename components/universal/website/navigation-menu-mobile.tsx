@@ -105,7 +105,7 @@ export const NavigationMenuMobile = ({
             {!user && (
               <Link
                 href={"/register"}
-                className="w-full bg-sidebar border p-3 mt-auto relative aspect-[16/6] flex flex-col"
+                className="w-full bg-sidebar border p-3 mt-auto relative aspect-video flex flex-col"
               >
                 <div className="absolute inset-0 z-0 overflow-hidden">
                   <Image
