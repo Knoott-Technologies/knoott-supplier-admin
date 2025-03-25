@@ -21,7 +21,7 @@ export const HeaderWebsite = ({
         branch: Database["public"]["Tables"]["provider_branches"]["Row"] & {
           business: Database["public"]["Tables"]["provider_business"]["Row"];
         };
-      })
+      })[]
     | null;
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -63,7 +63,7 @@ export const HeaderWebsite = ({
         {(user && (
           <UserDropdown
             user={user}
-            userProvider={userProvider}
+            userProviders={userProvider}
             isScrolled={isScrolled}
           />
         )) || (

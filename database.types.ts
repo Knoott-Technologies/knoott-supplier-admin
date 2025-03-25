@@ -573,6 +573,7 @@ export type Database = {
           branch_reference: string
           contact_phone_number: string
           created_at: string
+          description: string | null
           id: string
           provider_business_id: string
         }
@@ -581,6 +582,7 @@ export type Database = {
           branch_reference?: string
           contact_phone_number: string
           created_at?: string
+          description?: string | null
           id?: string
           provider_business_id: string
         }
@@ -589,6 +591,7 @@ export type Database = {
           branch_reference?: string
           contact_phone_number?: string
           created_at?: string
+          description?: string | null
           id?: string
           provider_business_id?: string
         }

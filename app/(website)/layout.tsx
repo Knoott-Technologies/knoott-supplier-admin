@@ -9,11 +9,11 @@ const MarketingLayout = async ({ children }: { children: React.ReactNode }) => {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: userProvider } = await supabase
+  const { data: userProvider, error } = await supabase
     .from("user_provider_branches")
     .select("*, branch:provider_branches(*, business:provider_business(*))")
     .eq("user_id", user?.id)
-    .single();
+
 
   return (
     <div className="w-full h-fit items-start justify-start flex flex-col">

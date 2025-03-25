@@ -16,7 +16,7 @@ export const NavigationMenuMobile = ({
         branch: Database["public"]["Tables"]["provider_branches"]["Row"] & {
           business: Database["public"]["Tables"]["provider_business"]["Row"];
         };
-      })
+      })[]
     | null;
   isScrolled: boolean;
 }) => {

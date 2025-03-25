@@ -106,7 +106,7 @@ export const SidebarProfile = ({
 
       <div className="bg-sidebar p-3 border-y mt-2">
         <div className="flex flex-col gap-0 items-start justify-start w-full max-w-full overflow-hidden">
-          <p className="mb-1 w-full">Mi Negocio</p>
+          <p className="mb-1 w-full">Mi Tienda</p>
           <span className="w-full h-fit items-center justify-start gap-x-1 flex">
             <Avatar className="size-4 rounded-none">
               <AvatarImage
@@ -132,7 +132,7 @@ export const SidebarProfile = ({
             className="flex items-center justify-between w-full"
             onClick={() => isMobile && setSheetOpen(false)}
           >
-            <span className="truncate">Ajustes de mi negocio</span>
+            <span className="truncate">Ajustes de mi tienda</span>
             <ArrowRight className="!size-3.5 flex-shrink-0 ml-2" />
           </Link>
         </Button>
@@ -299,7 +299,7 @@ export const SidebarProfile = ({
               <DropdownMenuGroup className="bg-sidebar p-1 border-y">
                 <DropdownMenuLabel>
                   <span className="flex flex-col gap-0 items-start justify-start w-full max-w-full overflow-hidden">
-                    <p className="mb-1 w-full">Mi Negocio</p>
+                    <p className="mb-1 w-full">Mi Tienda</p>
                     <span className="w-full h-fit items-center justify-start gap-x-1 flex">
                       <Avatar className="size-4 rounded-none">
                         <AvatarImage
@@ -328,7 +328,7 @@ export const SidebarProfile = ({
                       href={`/settings/${user.id}/${branch.id}/settings`}
                       className="flex items-center justify-between w-full"
                     >
-                      <span className="truncate">Ajustes de mi negocio</span>
+                      <span className="truncate">Ajustes de mi tienda</span>
                       <ArrowRight className="!size-3.5 flex-shrink-0 ml-2" />
                     </Link>
                   </Button>
