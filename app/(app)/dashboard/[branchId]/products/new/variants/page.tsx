@@ -252,7 +252,7 @@ export default function VariantsPage({
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 bg-sidebar">
           <Form {...form}>
             <form
               id="variants-form"

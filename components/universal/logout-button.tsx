@@ -32,7 +32,7 @@ export const LogoutButton = ({ inSidebar }: { inSidebar?: boolean }) => {
     <Button
       variant="ghost"
       onClick={signOut}
-      className="cursor-pointer items-center justify-between text-destructive hover:text-destructive hover:bg-destructive/10"
+      className="cursor-pointer items-center justify-between text-destructive hover:text-destructive hover:bg-destructive/10 w-full"
     >
       Cerrar sesión <LogOut className="size-4" />
     </Button>
