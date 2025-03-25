@@ -442,10 +442,11 @@ export function ImageUploadDropzone({
               </Button>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={handleSkipImage}>
-                Omitir
-              </Button>
-              <Button onClick={handleCropSave} disabled={isUploading}>
+              <Button
+                variant={"defaultBlack"}
+                onClick={handleCropSave}
+                disabled={isUploading}
+              >
                 {isUploading ? "Guardando..." : "Guardar"}
               </Button>
             </div>
