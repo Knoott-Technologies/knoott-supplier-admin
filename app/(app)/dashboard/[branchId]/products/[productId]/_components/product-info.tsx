@@ -109,7 +109,7 @@ export const ProductInfo = ({
               <span className="w-full flex flex-wrap gap-1">
                 {product.keywords &&
                   product.keywords.map((keyword) => (
-                    <Badge className="font-medium border-border" variant={"secondary"}>{keyword}</Badge>
+                    <Badge className="font-medium border-border text-muted-foreground bg-sidebar hover:bg-sidebar/80" variant={"outline"}>{keyword}</Badge>
                   ))}
               </span>
             </span>

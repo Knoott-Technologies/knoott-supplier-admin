@@ -18,8 +18,8 @@ import Image from "next/image";
 
 export const ProductImageCarousel = ({ images }: { images: string[] }) => {
   return (
-    <Card className="w-full h-fit">
-      <CardHeader>
+    <Card className="w-full h-fit lg:sticky lg:top-[calc(56px_+_28px)]">
+      <CardHeader gap->
         <CardTitle>Imágenes del producto</CardTitle>
         <CardDescription>
           Echa un vistazo a las imágenes de este producto.
