@@ -30,6 +30,7 @@ import {
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { Switch, SwitchTrash } from "@/components/ui/switch";
 
 interface Brand {
   id: number;
@@ -74,6 +75,7 @@ export function FilterBar({ brands, subcategories }: FilterBarProps) {
       ? new Date(searchParams.get("endDate") as string)
       : undefined
   );
+  const [showTrahsh, setShowTrash] = useState(searchParams.get("showTrash") === "true" || false);
 
   // Update local state when URL params change
   useEffect(() => {
@@ -152,6 +154,16 @@ export function FilterBar({ brands, subcategories }: FilterBarProps) {
     );
   };
 
+  const handleShowTrash = (value: boolean) => {
+    setShowTrash(value);
+    router.push(
+      `${pathname}?${createQueryString({
+        page: "1", // Reset to first page when filtering
+        showTrash: value ? "true" : "false",
+      })}`
+    );
+  };
+
   // Handle date range filter
   const handleDateFilter = (start?: Date, end?: Date) => {
     setStartDate(start);
@@ -207,6 +219,14 @@ export function FilterBar({ brands, subcategories }: FilterBarProps) {
         </form>
 
         <div className="flex flex-wrap gap-2 w-full sm:w-fit">
+          <div className="flex gap-2 h-9 items-center justify-start bg-sidebar px-3 border">
+            <p className="text-sm font-normal">Papelera</p>
+            <SwitchTrash
+              className="data-[state=checked]:bg-destructive"
+              checked={showTrahsh}
+              onCheckedChange={handleShowTrash}
+            />
+          </div>
           {/* Status filter */}
           <Select
             value={statusFilter || "all"}
@@ -318,7 +338,7 @@ export function FilterBar({ brands, subcategories }: FilterBarProps) {
                 variant="outline"
                 className={cn("justify-start text-left font-normal bg-sidebar")}
               >
-                <CalendarIcon className="!size-3.5"/>
+                <CalendarIcon className="!size-3.5" />
                 {startDate && endDate ? (
                   <>
                     {format(startDate, "dd/MM/yyyy", { locale: es })} -{" "}

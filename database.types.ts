@@ -1364,7 +1364,12 @@ export type Database = {
       banner_types: "brand" | "category" | "product"
       cart_status: "pending" | "completed" | "abandoned"
       order_status: "pending" | "shipped" | "delivered" | "canceled"
-      product_status: "active" | "archived" | "draft" | "requires_verification"
+      product_status:
+        | "active"
+        | "archived"
+        | "draft"
+        | "requires_verification"
+        | "deleted"
       transaction_status: "completed" | "pending" | "canceled"
       transaction_types: "income" | "egress" | "purchase"
       user_provider_branches_role: "admin" | "supervisor" | "cashier"

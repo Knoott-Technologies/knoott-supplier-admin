@@ -18,6 +18,7 @@ import Image from "next/image";
 import { Database } from "@/database.types";
 import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
+import { ProductActions } from "./product-actions";
 
 // Definir el tipo Product basado en el esquema de la base de datos
 export type Product = Database["public"]["Tables"]["products"]["Row"] & {
@@ -120,13 +121,16 @@ export const columns: ColumnDef<Product>[] = [
               "bg-success/20 text-success hover:bg-success/10",
             status === "archived" && "bg-muted text-foreground border",
             status === "requires_verification" &&
-              "bg-background text-muted-foreground border-border hover:bg-background/90 hover:text-muted-foreground"
+              "bg-background text-muted-foreground border-border hover:bg-background/90 hover:text-muted-foreground",
+            status === "deleted" &&
+              "bg-destructive/20 text-destructive hover:bg-destructive/10"
           )}
         >
           {status === "draft" && "Borrador"}
           {status === "active" && "Activo"}
           {status === "archived" && "Archivado"}
           {status === "requires_verification" && "En revisión"}
+          {status === "deleted" && "Eliminado"}
         </Badge>
       );
     },
@@ -172,38 +176,7 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       const product = row.original;
 
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size={"icon"} className="size-7">
-              <span className="sr-only">Abrir menú</span>
-              <EllipsisIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() =>
-                navigator.clipboard.writeText(product.id.toString())
-              }
-            >
-              Copiar ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Editar producto</DropdownMenuItem>
-            <DropdownMenuItem>Duplicar producto</DropdownMenuItem>
-            {product.status !== "active" ? (
-              <DropdownMenuItem>Publicar producto</DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem>Despublicar producto</DropdownMenuItem>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              Eliminar producto
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <ProductActions product={product} />;
     },
     size: 60, // Ancho fijo para evitar compresión
     enableHiding: false,

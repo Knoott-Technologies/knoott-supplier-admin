@@ -7,7 +7,6 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { DataTable } from "./_components/products-table";
 import { FilterBar } from "./_components/filter-bar";
-import { ExcelImportDialog } from "./_components/excel-import-dialog";
 
 const ProductsPage = async ({
   params,
@@ -23,19 +22,21 @@ const ProductsPage = async ({
     subcategoryId?: string;
     startDate?: string;
     endDate?: string;
+    showTrash?: string;
   };
 }) => {
   const supabase = createClient(cookies());
 
   // Get URL parameters with default values
-  const page = Number.parseInt(searchParams.page || "1", 10);
-  const pageSize = Number.parseInt(searchParams.pageSize || "100", 10); // 100 products per page as requested
+  const page = parseInt(searchParams.page || "1", 10);
+  const pageSize = parseInt(searchParams.pageSize || "100", 10); // 100 products per page as requested
   const search = searchParams.search || "";
   const status = searchParams.status || "";
   const brandId = searchParams.brandId || "";
   const subcategoryId = searchParams.subcategoryId || "";
   const startDate = searchParams.startDate || "";
   const endDate = searchParams.endDate || "";
+  const showTrash = searchParams.showTrash || false;
 
   // Calculate range for Supabase
   const from = (page - 1) * pageSize;
@@ -81,6 +82,12 @@ const ProductsPage = async ({
     query = query.lte("created_at", `${endDate}T23:59:59Z`);
   }
 
+  if (showTrash === "true") {
+    query = query.in("status", ["deleted"]);
+  } else {
+    query = query.in("status", ["draft", "active", "archived", "requires_verification"]);
+  }
+
   // First get total count for pagination
   const { count } = await query;
 
@@ -113,51 +120,38 @@ const ProductsPage = async ({
         title="Productos"
         description="Gestiona tus productos, agrega, edita y elimina los productos de tu negocio"
       >
-        <div className="flex gap-2">
-          {/* Excel Import Dialog */}
-          <div className="hidden lg:block">
-            <ExcelImportDialog branchId={params.branchId} />
-          </div>
-
-          <Button
-            variant={"defaultBlack"}
-            className="hidden lg:flex"
-            size={"default"}
-            asChild
+        <Button
+          variant={"defaultBlack"}
+          className="hidden lg:flex"
+          size={"default"}
+          asChild
+        >
+          <Link
+            href={`/dashboard/${params.branchId}/products/new/general-info`}
           >
-            <Link
-              href={`/dashboard/${params.branchId}/products/new/general-info`}
-            >
-              Agregar Producto <Plus className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-
-          <Button
-            variant={"defaultBlack"}
-            className="lg:hidden flex"
-            size={"icon"}
-            asChild
+            Agregar Producto <Plus />
+          </Link>
+        </Button>
+        <Button
+          variant={"defaultBlack"}
+          className="lg:hidden flex"
+          size={"icon"}
+          asChild
+        >
+          <Link
+            href={`/dashboard/${params.branchId}/products/new/general-info`}
           >
-            <Link
-              href={`/dashboard/${params.branchId}/products/new/general-info`}
-            >
-              <Plus />
-            </Link>
-          </Button>
-        </div>
+            <Plus />
+          </Link>
+        </Button>
       </PageHeader>
       <section className="w-full h-fit items-start justify-start flex flex-col gap-y-5 lg:gap-y-7">
         <div className="w-full h-fit items-start justify-start flex flex-col gap-y-4">
-          {/* Filter bar component with Excel import for mobile */}
-          <div className="flex flex-col sm:flex-row gap-2 w-full">
-            <FilterBar
-              brands={brands || []}
-              subcategories={subcategories || []}
-            />
-            <div className="lg:hidden">
-              <ExcelImportDialog branchId={params.branchId} />
-            </div>
-          </div>
+          {/* Filter bar component */}
+          <FilterBar
+            brands={brands || []}
+            subcategories={subcategories || []}
+          />
 
           {/* Data table component */}
           <DataTable
