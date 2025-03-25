@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { ChevronDown, Upload, X, ZoomIn, ZoomOut } from "lucide-react";
+import { ChevronDown, X, ZoomIn, ZoomOut } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -315,9 +315,8 @@ export function ImageUploadDropzone({
           <Carousel>
             <CarouselContent className="-ml-2">
               {value.map((url, index) => (
-                <CarouselItem className="basis-1/2 md:basis-1/3 lg:basis-1/4 pl-2">
+                <CarouselItem key={index} className="basis-1/2 md:basis-1/3 lg:basis-1/4 pl-2">
                   <div
-                    key={index}
                     className="relative group aspect-[3/4] bg-background overflow-hidden"
                   >
                     <Image
