@@ -6,7 +6,7 @@ import { Suspense } from "react";
 const LoginPage = () => {
   return (
     <main className="w-full h-fit items-center justify-center flex flex-col min-h-[calc(100dvh-56px)]">
-      <div className="w-full h-fit items-start justify-start flex flex-col max-w-lg">
+      <div className="w-full h-fit items-start justify-start flex flex-col max-w-lg px-3 md:px-5 lg:px-0">
         <PageHeader
           title="Ingresa a tu cuenta"
           description="Inicia sesión en tu cuenta de Knoott Suppliers, para acceder a nuestros servicios."
