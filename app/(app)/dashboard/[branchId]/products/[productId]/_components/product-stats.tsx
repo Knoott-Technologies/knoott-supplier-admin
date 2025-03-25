@@ -35,13 +35,13 @@ export const ProductStats = ({
 }) => {
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   return (
-    <div className="w-full h-fit items-start justify-start overflow-auto">
-      <div className="w-fit h-14 items-stretch gap-x-5 flex flex-wrap">
-        <span className="flex flex-col gap-y-1 items-start justify-start">
+    <div className="w-full h-fit items-start justify-start overflow-auto no-scrollbar">
+      <div className="w-fit h-fit items-stretch flex">
+        <span className="flex flex-col gap-y-1 items-start justify-start flex-1 pr-2.5">
           <p className="text-sm font-semibold">Creado el:</p>
           <Badge
             variant={"outline"}
-            className="bg-sidebar hover:bg-sidebar/80 cursor-default text-muted-foreground gap-x-1"
+            className="bg-sidebar whitespace-nowrap hover:bg-sidebar/80 cursor-default text-muted-foreground gap-x-1"
           >
             <Circle className="size-1.5 fill-current text-current opacity-50" />
             {formatInTimeZone(product.created_at, timeZone, "PPP hh:mm aa", {
@@ -50,11 +50,11 @@ export const ProductStats = ({
           </Badge>
         </span>
         <Separator className="h-full" orientation="vertical" />
-        <span className="flex flex-col gap-y-1 items-start justify-start">
+        <span className="flex flex-col gap-y-1 items-start justify-start flex-1 px-2.5 border-x">
           <p className="text-sm font-semibold">Última edición:</p>
           <Badge
             variant={"outline"}
-            className="bg-sidebar hover:bg-sidebar/80 cursor-default text-muted-foreground gap-x-1"
+            className="bg-sidebar whitespace-nowrap hover:bg-sidebar/80 cursor-default text-muted-foreground gap-x-1"
           >
             <Circle className="size-1.5 fill-current text-current opacity-50" />
             {formatInTimeZone(product.updated_at, timeZone, "PPP hh:mm aa", {
@@ -63,7 +63,7 @@ export const ProductStats = ({
           </Badge>
         </span>
         <Separator className="h-full" orientation="vertical" />
-        <span className="flex flex-col gap-y-1 items-start justify-start">
+        <span className="flex flex-col gap-y-1 items-start justify-start flex-1 pl-2.5">
           <p className="text-sm font-semibold">Estado:</p>
           <Badge
             variant={"secondary"}
