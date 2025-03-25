@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { DataTable } from "./_components/products-table";
 import { FilterBar } from "./_components/filter-bar";
+import { ProductCrawler } from "./_components/product-crawler";
 
 const ProductsPage = async ({
   params,
@@ -85,7 +86,12 @@ const ProductsPage = async ({
   if (showTrash === "true") {
     query = query.in("status", ["deleted"]);
   } else {
-    query = query.in("status", ["draft", "active", "archived", "requires_verification"]);
+    query = query.in("status", [
+      "draft",
+      "active",
+      "archived",
+      "requires_verification",
+    ]);
   }
 
   // First get total count for pagination
@@ -115,55 +121,58 @@ const ProductsPage = async ({
     .eq("level", 2);
 
   return (
-    <main className="h-fit w-full md:max-w-[95%] px-3 md:px-0 py-5 pb-14 lg:py-7 mx-auto no-scrollbar">
-      <PageHeader
-        title="Productos"
-        description="Gestiona tus productos, agrega, edita y elimina los productos de tu negocio"
-      >
-        <Button
-          variant={"defaultBlack"}
-          className="hidden lg:flex"
-          size={"default"}
-          asChild
+    <>
+      <main className="h-fit w-full md:max-w-[95%] px-3 md:px-0 py-5 pb-14 lg:py-7 mx-auto no-scrollbar">
+        <PageHeader
+          title="Productos"
+          description="Gestiona tus productos, agrega, edita y elimina los productos de tu negocio"
         >
-          <Link
-            href={`/dashboard/${params.branchId}/products/new/general-info`}
+          <Button
+            variant={"defaultBlack"}
+            className="hidden lg:flex"
+            size={"default"}
+            asChild
           >
-            Agregar Producto <Plus />
-          </Link>
-        </Button>
-        <Button
-          variant={"defaultBlack"}
-          className="lg:hidden flex"
-          size={"icon"}
-          asChild
-        >
-          <Link
-            href={`/dashboard/${params.branchId}/products/new/general-info`}
+            <Link
+              href={`/dashboard/${params.branchId}/products/new/general-info`}
+            >
+              Agregar Producto <Plus />
+            </Link>
+          </Button>
+          <Button
+            variant={"defaultBlack"}
+            className="lg:hidden flex"
+            size={"icon"}
+            asChild
           >
-            <Plus />
-          </Link>
-        </Button>
-      </PageHeader>
-      <section className="w-full h-fit items-start justify-start flex flex-col gap-y-5 lg:gap-y-7">
-        <div className="w-full h-fit items-start justify-start flex flex-col gap-y-4">
-          {/* Filter bar component */}
-          <FilterBar
-            brands={brands || []}
-            subcategories={subcategories || []}
-          />
+            <Link
+              href={`/dashboard/${params.branchId}/products/new/general-info`}
+            >
+              <Plus />
+            </Link>
+          </Button>
+        </PageHeader>
+        <section className="w-full h-fit items-start justify-start flex flex-col gap-y-5 lg:gap-y-7">
+          <div className="w-full h-fit items-start justify-start flex flex-col gap-y-4">
+            {/* Filter bar component */}
+            <FilterBar
+              brands={brands || []}
+              subcategories={subcategories || []}
+            />
 
-          {/* Data table component */}
-          <DataTable
-            columns={columns}
-            data={products || []}
-            totalCount={count || 0}
-            pageSize={pageSize}
-            currentPage={page}
-          />
-        </div>
-      </section>
-    </main>
+            {/* Data table component */}
+            <DataTable
+              columns={columns}
+              data={products || []}
+              totalCount={count || 0}
+              pageSize={pageSize}
+              currentPage={page}
+            />
+          </div>
+        </section>
+      </main>
+      <ProductCrawler />
+    </>
   );
 };
 

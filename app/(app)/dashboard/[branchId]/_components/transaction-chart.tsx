@@ -21,7 +21,13 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { format, parse, isWithinInterval, startOfWeek, endOfWeek } from "date-fns";
+import {
+  format,
+  parse,
+  isWithinInterval,
+  startOfWeek,
+  endOfWeek,
+} from "date-fns";
 import { es } from "date-fns/locale";
 import { ArrowUp, Loader2, X } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
@@ -210,15 +216,18 @@ const ChartComponent = ({
           textAnchor={isMobile ? "end" : "middle"}
           textRendering={"optimized"}
         />
-        <YAxis
-          tick={{ fontSize: 12 }}
-          tickFormatter={(value) => formatPrice(value)}
-          tickLine={false}
-          axisLine={false}
-        />
+        {!isMobile && (
+          <YAxis
+            tick={{ fontSize: 12 }}
+            tickFormatter={(value) => formatPrice(value)}
+            tickLine={false}
+            axisLine={false}
+          />
+        )}
         <Tooltip
           content={
             <ChartTooltipContent
+              className="rounded-none"
               labelClassName="font-semibold text-foreground text-sm border-b pb-1.5 mb-1.5"
               formatter={(value, name, item, index) => {
                 return (
@@ -254,6 +263,7 @@ const ChartComponent = ({
             />
           }
           defaultIndex={2}
+          cursor={false}
         />
         <Area
           type="monotone"

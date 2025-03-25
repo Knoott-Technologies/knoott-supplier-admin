@@ -25,6 +25,18 @@ import { Collapsible } from "@radix-ui/react-collapsible";
 import { CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+// Add custom styles for the cropper
+const cropperStyles = {
+  containerStyle: {
+    backgroundColor: "white",
+    width: "100%",
+    height: "100%",
+  },
+  cropAreaStyle: {
+    border: "1px solid #ffffff",
+  },
+};
+
 interface ImageUploadDropzoneProps {
   value: string[];
   onChange: (urls: string[]) => void;
@@ -259,7 +271,7 @@ export function ImageUploadDropzone({
   };
 
   const handleZoomOut = () => {
-    setZoom((prev) => Math.max(prev - 0.1, 1));
+    setZoom((prev) => Math.max(prev - 0.1, .5));
   };
 
   const handleCancelAll = () => {
@@ -315,10 +327,11 @@ export function ImageUploadDropzone({
           <Carousel>
             <CarouselContent className="-ml-2">
               {value.map((url, index) => (
-                <CarouselItem key={index} className="basis-1/2 md:basis-1/3 lg:basis-1/4 pl-2">
-                  <div
-                    className="relative group aspect-[3/4] bg-background overflow-hidden"
-                  >
+                <CarouselItem
+                  key={index}
+                  className="basis-1/2 md:basis-1/3 lg:basis-1/4 pl-2"
+                >
+                  <div className="relative group aspect-[3/4] bg-background overflow-hidden">
                     <Image
                       src={url || "/placeholder.svg"}
                       alt={`Imagen del producto ${index + 1}`}
@@ -361,8 +374,8 @@ export function ImageUploadDropzone({
               Ajustar imagen {currentImageIndex + 1} de {imagesToProcess.length}
             </DialogTitle>
           </DialogHeader>
-          <div className="w-full h-fit bg-sidebar">
-            <div className="relative h-auto aspect-video w-full bg-sidebar p-3">
+          <div className="w-full h-fit bg-white">
+            <div className="relative h-auto aspect-video w-full bg-white p-3">
               {currentImage && (
                 <Cropper
                   image={currentImage.preview}
@@ -375,9 +388,13 @@ export function ImageUploadDropzone({
                   onCropComplete={onCropComplete}
                   showGrid
                   zoomWithScroll={isMobile ? true : false}
-                  restrictPosition
+                  restrictPosition={false}
                   maxZoom={3}
-                  
+                  objectFit="contain"
+                  style={{
+                    cropAreaStyle: cropperStyles.cropAreaStyle,
+                    containerStyle: cropperStyles.containerStyle,
+                  }}
                 />
               )}
             </div>
@@ -388,7 +405,7 @@ export function ImageUploadDropzone({
                   variant="outline"
                   size="icon"
                   onClick={handleZoomOut}
-                  disabled={zoom <= 1}
+                  disabled={zoom <= 0.5}
                 >
                   <ZoomOut className="h-4 w-4" />
                 </Button>
