@@ -138,12 +138,12 @@ export const NavigationMenuMobile = ({
                       fill
                       className="object-cover"
                     />
-                    <span className="absolute inset-0 z-[1] bg-gradient-to-t from-foreground/80 to-foreground/20" />
+                    <span className="absolute inset-0 z-[1] bg-foreground/70" />
                   </div>
                   <div className="w-full relative z-[1] flex flex-col flex-1 justify-between">
-                    <p className="self-end text-background text-sm flex gap-x-1 items-center">
-                      Comienza <ArrowRight className="size-3" />
-                    </p>
+                    <span className="self-end text-background text-sm flex gap-x-1 items-center">
+                      <ArrowRight className="size-4" />
+                    </span>
                     <span>
                       <h3 className="text-background font-semibold">
                         Knoott Suppliers
