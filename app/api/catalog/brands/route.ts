@@ -5,7 +5,10 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   const supabase = createClient(cookies());
 
-  const { data, error } = await supabase.from("catalog_brands").select("*");
+  const { data, error } = await supabase
+    .from("catalog_brands")
+    .select("*")
+    .order("name", { ascending: true });
 
   if (error) {
     console.error("Error fetching catalog brands:", error);

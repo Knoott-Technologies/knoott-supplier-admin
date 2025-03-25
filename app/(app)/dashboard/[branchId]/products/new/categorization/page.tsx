@@ -47,6 +47,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import ResponsiveSelector from "@/components/universal/responsive-selector";
 
 interface Brand {
   id: number;
@@ -170,138 +171,28 @@ export default function CategorizationPage({
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-4"
             >
-              <FormField
-                control={form.control}
-                name="brand_id"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Marca</FormLabel>
-                    <Popover open={openBrand} onOpenChange={setOpenBrand}>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={openBrand}
-                            className={cn(
-                              "w-full justify-between",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value
-                              ? brandsData.find(
-                                  (brand) => brand.id === field.value
-                                )?.name
-                              : "Selecciona una marca"}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                        <Command>
-                          <CommandInput
-                            placeholder="Buscar marca..."
-                            className="h-9"
-                          />
-                          <CommandList>
-                            <CommandEmpty>
-                              No se encontraron marcas.
-                            </CommandEmpty>
-                            <CommandGroup>
-                              {brandsData.map((brand) => (
-                                <CommandItem
-                                  key={brand.id}
-                                  value={brand.name}
-                                  onSelect={() => {
-                                    form.setValue("brand_id", brand.id);
-                                    setOpenBrand(false);
-                                  }}
-                                >
-                                  {brand.name}
-                                  <Check
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      field.value === brand.id
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <ResponsiveSelector
+                label="Marca"
+                items={brandsData}
+                value={form.watch("brand_id")}
+                onChange={(value) => form.setValue("brand_id", value)}
+                placeholder="Selecciona una marca"
+                searchPlaceholder="Buscar marca..."
+                emptyMessage="No se encontraron marcas."
+                sheetTitle="Seleccionar marca"
+                sheetDescription="Selecciona la marca de tu producto."
               />
 
-              <FormField
-                control={form.control}
-                name="subcategory_id"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Categoría</FormLabel>
-                    <Popover open={openCategory} onOpenChange={setOpenCategory}>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={openCategory}
-                            className="w-full justify-between"
-                          >
-                            {categoriesData.find(
-                              (category) => category.id === field.value
-                            )?.name || "Selecciona una categoría"}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                        <Command>
-                          <CommandInput
-                            placeholder="Buscar categoría..."
-                            className="h-9"
-                          />
-                          <CommandList>
-                            <CommandEmpty>
-                              No se encontraron categorías.
-                            </CommandEmpty>
-                            <CommandGroup>
-                              {categoriesData.map((category) => (
-                                <CommandItem
-                                  key={category.id}
-                                  value={category.name}
-                                  onSelect={() => {
-                                    form.setValue(
-                                      "subcategory_id",
-                                      category.id
-                                    );
-                                    setOpenCategory(false);
-                                  }}
-                                >
-                                  {category.name}
-                                  <Check
-                                    className={cn(
-                                      "ml-auto h-4 w-4",
-                                      field.value === category.id
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <ResponsiveSelector
+                label="Categoría"
+                items={categoriesData}
+                value={form.watch("subcategory_id")}
+                onChange={(value) => form.setValue("subcategory_id", value)}
+                placeholder="Selecciona una categoría"
+                searchPlaceholder="Buscar categoría..."
+                emptyMessage="No se encontraron categorías."
+                sheetTitle="Seleccionar categoría"
+                sheetDescription="Selecciona la categoría que mejor se adapte a tu producto."
               />
             </form>
           </Form>

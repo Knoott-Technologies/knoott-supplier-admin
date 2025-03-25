@@ -174,7 +174,7 @@ export function ProductCrawler() {
           <Link />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-fit min-w-[400px] p-0 border-0" align="end">
+      <PopoverContent className="w-fit min-w-[200px] max-w-xl max-h-[80dvh] p-0 border-0" align="end">
         <Card>
           <CardHeader>
             <CardTitle>Extractor de Productos con IA</CardTitle>

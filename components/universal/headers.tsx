@@ -92,7 +92,7 @@ export const PageHeaderBackButton = ({
         className
       )}
     >
-      <div className="flex flex-col gap-y-1 items-start justify-start">
+      <div className="flex flex-col gap-y-1 items-start justify-start max-w-3xl">
         <div
           className="flex gap-x-2 items-center cursor-pointer"
           onClick={() => back && router.back()}

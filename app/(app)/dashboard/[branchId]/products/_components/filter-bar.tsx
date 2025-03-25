@@ -30,7 +30,7 @@ import {
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { Switch, SwitchTrash } from "@/components/ui/switch";
+import { Switch } from "@/components/ui/switch";
 
 interface Brand {
   id: number;
@@ -75,7 +75,9 @@ export function FilterBar({ brands, subcategories }: FilterBarProps) {
       ? new Date(searchParams.get("endDate") as string)
       : undefined
   );
-  const [showTrahsh, setShowTrash] = useState(searchParams.get("showTrash") === "true" || false);
+  const [showTrahsh, setShowTrash] = useState(
+    searchParams.get("showTrash") === "true" || false
+  );
 
   // Update local state when URL params change
   useEffect(() => {
@@ -172,8 +174,8 @@ export function FilterBar({ brands, subcategories }: FilterBarProps) {
     router.push(
       `${pathname}?${createQueryString({
         page: "1", // Reset to first page when filtering
-        startDate: start ? start.toISOString().split("T")[0] : null,
-        endDate: end ? end.toISOString().split("T")[0] : null,
+        startDate: start ? start.toISOString() : null,
+        endDate: end ? end.toISOString() : null,
       })}`
     );
   };
@@ -220,9 +222,9 @@ export function FilterBar({ brands, subcategories }: FilterBarProps) {
 
         <div className="flex flex-wrap gap-2 w-full sm:w-fit">
           <div className="flex gap-2 h-9 items-center justify-start bg-sidebar px-3 border">
-            <p className="text-sm font-normal">Papelera</p>
-            <SwitchTrash
-              className="data-[state=checked]:bg-destructive"
+            <p className="text-sm font-normal">Archivo</p>
+            <Switch
+              className="data-[state=checked]:bg-foreground"
               checked={showTrahsh}
               onCheckedChange={handleShowTrash}
             />
@@ -239,7 +241,6 @@ export function FilterBar({ brands, subcategories }: FilterBarProps) {
               <SelectItem value="all">Estatus</SelectItem>
               <SelectItem value="draft">Borrador</SelectItem>
               <SelectItem value="active">Activo</SelectItem>
-              <SelectItem value="archived">Archivado</SelectItem>
               <SelectItem value="requires_verification">En revisión</SelectItem>
             </SelectContent>
           </Select>
@@ -345,7 +346,7 @@ export function FilterBar({ brands, subcategories }: FilterBarProps) {
                     {format(endDate, "dd/MM/yyyy", { locale: es })}
                   </>
                 ) : (
-                  "Rango de creación"
+                  "Fecha de creación"
                 )}
               </Button>
             </PopoverTrigger>

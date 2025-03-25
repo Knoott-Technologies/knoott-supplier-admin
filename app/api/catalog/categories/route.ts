@@ -8,7 +8,8 @@ export async function GET(req: NextRequest) {
   const { data, error } = await supabase
     .from("catalog_collections")
     .select("*")
-    .eq("level", 2);
+    .eq("level", 2)
+    .order("name", { ascending: true });
 
   if (error) {
     console.error("Error fetching catalog brands:", error);

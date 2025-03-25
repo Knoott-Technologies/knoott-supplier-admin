@@ -84,14 +84,9 @@ const ProductsPage = async ({
   }
 
   if (showTrash === "true") {
-    query = query.in("status", ["deleted"]);
+    query = query.in("status", ["deleted", "archived"]);
   } else {
-    query = query.in("status", [
-      "draft",
-      "active",
-      "archived",
-      "requires_verification",
-    ]);
+    query = query.in("status", ["draft", "active", "requires_verification"]);
   }
 
   // First get total count for pagination
