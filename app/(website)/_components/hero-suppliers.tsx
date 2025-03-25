@@ -67,8 +67,11 @@ export const HeroSuppliers = ({
                   variant={"defaultBlack"}
                   size={"lg"}
                   className="w-full md:w-auto"
+                  asChild
                 >
-                  Entrar a mi dashboard <ArrowRight />
+                  <Link href={`/dashboard`}>
+                    Entrar a mi dashboard <ArrowRight />
+                  </Link>
                 </Button>
               </div>
             )) || (
