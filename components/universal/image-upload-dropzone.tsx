@@ -35,6 +35,9 @@ const cropperStyles = {
   cropAreaStyle: {
     border: "1px solid #ffffff",
   },
+  mediaStyle: {
+    backgroundColor: "white", // Asegura que el fondo de la imagen sea blanco
+  },
 };
 
 interface ImageUploadDropzoneProps {
@@ -271,7 +274,7 @@ export function ImageUploadDropzone({
   };
 
   const handleZoomOut = () => {
-    setZoom((prev) => Math.max(prev - 0.1, .5));
+    setZoom((prev) => Math.max(prev - 0.1, 0.5));
   };
 
   const handleCancelAll = () => {
@@ -394,6 +397,7 @@ export function ImageUploadDropzone({
                   style={{
                     cropAreaStyle: cropperStyles.cropAreaStyle,
                     containerStyle: cropperStyles.containerStyle,
+                    mediaStyle: cropperStyles.mediaStyle,
                   }}
                 />
               )}

@@ -169,7 +169,7 @@ export function ProductCrawler() {
         <Button
           className="fixed bottom-4 right-4 z-20"
           size={"icon"}
-          variant="outline"
+          variant="defaultBlack"
         >
           <Link />
         </Button>
