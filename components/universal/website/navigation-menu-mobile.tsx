@@ -2,6 +2,7 @@ import { libre } from "@/components/fonts/font-def";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetFooter,
   SheetHeader,
@@ -11,9 +12,10 @@ import {
 import { Database } from "@/database.types";
 import { cn } from "@/lib/utils";
 import { User } from "@supabase/supabase-js";
-import { ArrowRight, Menu } from "lucide-react";
+import { ArrowRight, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Logo } from "../logo";
 
 export const NavigationMenuMobile = ({
   user,
@@ -44,10 +46,19 @@ export const NavigationMenuMobile = ({
           <Menu />
         </Button>
       </SheetTrigger>
-      <SheetContent className="[&>button]:hidden p-0 bg-sidebar">
+      <SheetContent className="[&>button]:hidden p-0 bg-sidebar sm:max-w-none w-full">
         <div className="flex h-full w-full flex-col">
-          <SheetHeader className="p-3 bg-sidebar border-b text-start">
-            <SheetTitle className={cn(libre.className)}>Navegación</SheetTitle>
+          <SheetHeader className="p-3 h-14 bg-sidebar border-b text-start space-y-0">
+            <div className="w-full h-full items-center justify-between flex">
+              <Link href="/" className="h-full">
+                <Logo variant={"black"} />
+              </Link>
+              <SheetClose asChild>
+                <Button variant={"outline"} size={"icon"}>
+                  <X />
+                </Button>
+              </SheetClose>
+            </div>
           </SheetHeader>
           <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto bg-background p-3">
             <div className="w-full h-fit items-start justify-start flex flex-col gap-y-1">
@@ -118,7 +129,7 @@ export const NavigationMenuMobile = ({
                 </div>
                 <div className="w-full relative z-[1] flex flex-col flex-1 justify-between">
                   <p className="self-end text-background text-sm flex gap-x-1 items-center">
-                    Comienza <ArrowRight className="size-3"/>
+                    Comienza <ArrowRight className="size-3" />
                   </p>
                   <span>
                     <h3 className="text-background font-semibold">
