@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/universal/headers";
 import { LoginTypesRenderer } from "./_components/login-types-renderer";
+import { Suspense } from "react";
 
 const LoginPage = () => {
   return (
@@ -12,7 +13,9 @@ const LoginPage = () => {
         />
         <Card className="w-full">
           <CardContent className="bg-sidebar">
-            <LoginTypesRenderer />
+            <Suspense>
+              <LoginTypesRenderer />
+            </Suspense>
           </CardContent>
         </Card>
       </div>
