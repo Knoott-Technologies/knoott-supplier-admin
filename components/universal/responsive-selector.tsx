@@ -22,9 +22,10 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Database } from "@/database.types";
 
-type Item =
-  | Database["public"]["Tables"]["catalog_brands"]["Row"]
-  | Database["public"]["Tables"]["catalog_collections"]["Row"];
+interface Item {
+  id: number;
+  name: string;
+}
 
 interface ResponsiveSelectorProps {
   label: string;
