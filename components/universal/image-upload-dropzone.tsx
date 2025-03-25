@@ -128,6 +128,9 @@ export function ImageUploadDropzone({
         canvas.width = pixelCrop.width;
         canvas.height = pixelCrop.height;
 
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
         // Draw the cropped image onto the canvas
         ctx.drawImage(
           image,
@@ -248,25 +251,6 @@ export function ImageUploadDropzone({
     const newImages = [...value];
     newImages.splice(index, 1);
     onChange(newImages);
-  };
-
-  const handleSkipImage = () => {
-    if (!currentImage) return;
-
-    // Clean up current image
-    URL.revokeObjectURL(currentImage.preview);
-
-    // Move to next image or close dialog
-    if (currentImageIndex < imagesToProcess.length - 1) {
-      setCurrentImageIndex(currentImageIndex + 1);
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
-    } else {
-      // All images processed
-      setImagesToProcess([]);
-      setCurrentImageIndex(0);
-      setCropDialogOpen(false);
-    }
   };
 
   const handleZoomIn = () => {
