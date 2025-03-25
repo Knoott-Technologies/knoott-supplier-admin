@@ -5,6 +5,7 @@ import { Database } from "@/database.types";
 import { cn } from "@/lib/utils";
 import { User } from "@supabase/supabase-js";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export const HeroSuppliers = ({
   user,
@@ -83,8 +84,11 @@ export const HeroSuppliers = ({
                   variant={"ghost"}
                   size={"lg"}
                   className="w-full md:w-auto bg-transparent text-background"
+                  asChild
                 >
-                  Ingresa a tu cuenta <ArrowRight />
+                  <Link href="/login">
+                    Ingresa a tu cuenta <ArrowRight />
+                  </Link>
                 </Button>
               </div>
             )}
