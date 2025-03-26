@@ -36,7 +36,7 @@ export const HeroSuppliers = ({
           <span className="w-full h-fit items-start justify-start flex flex-col gap-y-3">
             <h1
               className={cn(
-                "text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold text-background",
+                "text-5xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold text-background",
                 libre.className
               )}
             >
@@ -81,7 +81,7 @@ export const HeroSuppliers = ({
                   size={"lg"}
                   className="w-full md:w-auto"
                 >
-                  Unirse a Knoott Suppliers
+                  Comienza ahora
                 </Button>
                 <Button
                   variant={"ghost"}

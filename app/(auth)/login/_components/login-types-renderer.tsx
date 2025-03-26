@@ -1,12 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, KeyRound, Mail, Phone } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { libre } from "@/components/fonts/font-def";
 import { LoginFormEmail } from "./login-form-email";
 import { LoginFormPhone } from "./login-form-phone";
 import { LoginFormOtp } from "./login-form-otp";

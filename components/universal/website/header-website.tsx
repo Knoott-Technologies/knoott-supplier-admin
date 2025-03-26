@@ -77,11 +77,11 @@ export const HeaderWebsite = ({
               asChild
             >
               <Link href="/login">
-                Iniciar Sesión <ArrowRight />
+                Ingresa a tu cuenta <ArrowRight />
               </Link>
             </Button>
             <Button variant={"defaultBlack"} asChild>
-              <Link href="/login">Unirse a Knoott Suppliers</Link>
+              <Link href="/login">Comienza ahora</Link>
             </Button>
           </>
         )}
