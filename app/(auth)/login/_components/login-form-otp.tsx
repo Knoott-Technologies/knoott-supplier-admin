@@ -229,30 +229,8 @@ export function LoginFormOtp() {
 
       if (user) {
         // Mostrar mensaje de éxito general
-        toast.success("¡Autenticación exitosa!", {
-          description: "Procesando...",
-        });
-
-        const { data: userProvider, error: userProviderError } = await supabase
-          .from("user_provider_branches")
-          .select("*, branch:provider_branches(*)")
-          .eq("user_id", user.id)
-          .single();
-
-        if (userProviderError && userProviderError.code !== "PGRST116") {
-          console.error(
-            "Error al obtener datos del proveedor:",
-            userProviderError
-          );
-          toast.error("Error al cargar información del usuario");
-        }
-
-        // Si encontramos userProvider, redirigir a la página específica
-        if (userProvider) {
-          console.log("Datos de userProvider:", userProvider);
-          // Usar return para asegurar que la función termine aquí
-          return router.push(`/dashboard/${userProvider.provider_id}`);
-        }
+        toast.success("Inicio de sesión exitoso");
+       
 
         // Si no encuentra userProvider, redirigir a la ruta general
         return router.push("/dashboard");
@@ -412,19 +390,6 @@ export function LoginFormOtp() {
             onSubmit={otpForm.handleSubmit(onSubmitOtp)}
             className="flex flex-col w-full gap-y-4"
           >
-            <div className="flex items-center gap-2 mb-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="p-0 h-auto"
-                onClick={goBack}
-              >
-                <ArrowLeft className="size-4 mr-1" />
-                <span className="text-sm">Volver</span>
-              </Button>
-            </div>
-
             <p className="text-sm text-muted-foreground">
               Hemos enviado un código de verificación de 6 dígitos al{" "}
               <span className="font-medium text-foreground">

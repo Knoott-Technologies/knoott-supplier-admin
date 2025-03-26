@@ -63,26 +63,7 @@ export function LoginFormPhone() {
         throw new Error("No se pudo iniciar sesión");
       }
 
-      const { data: userProvider, error: userProviderError } = await supabase
-        .from("user_provider_branches")
-        .select("*, branch:provider_branches(*)")
-        .eq("user_id", data.user.id)
-        .single();
-
-      if (userProviderError && userProviderError.code !== "PGRST116") {
-        console.error(
-          "Error al obtener datos del proveedor:",
-          userProviderError
-        );
-        toast.error("Error al cargar información del usuario");
-      }
-
-      // Si encontramos userProvider, redirigir a la página específica
-      if (userProvider) {
-        console.log("Datos de userProvider:", userProvider);
-        // Usar return para asegurar que la función termine aquí
-        return router.push(`/dashboard/${userProvider.provider_id}`);
-      }
+      toast.success("Inicio de sesión exitoso");
 
       // Si no encuentra userProvider, redirigir a la ruta general
       return router.push("/dashboard");
