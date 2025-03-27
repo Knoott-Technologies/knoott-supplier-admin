@@ -74,7 +74,7 @@ export async function GET(request: Request) {
 
     // Obtener todas las integraciones de API con sincronización automática habilitada
     // Si se proporciona un branchId específico, solo sincronizar ese
-    let query = supabase
+    const query = supabase
       .from("api_integrations")
       .select("*")
       .eq("auto_sync", true);
