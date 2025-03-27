@@ -100,24 +100,7 @@ export const OrderStats = ({ order }: { order: Order }) => {
   return (
     <div className="w-full h-fit items-stretch overflow-auto no-scrollbar">
       <div className="w-fit h-fit items-stretch flex">
-        {relevantDates.map((dateInfo, index) => (
-          <React.Fragment key={dateInfo.label}>
-            <span className="flex flex-col gap-y-1 items-start justify-start flex-1 px-2.5 py-1 first:border-l-0 border-l first:pl-0 last:pr-0">
-              <p className="text-sm font-semibold">{dateInfo.label}:</p>
-              <Badge
-                variant={"outline"}
-                className="bg-sidebar whitespace-nowrap hover:bg-sidebar/80 cursor-default text-muted-foreground gap-x-1"
-              >
-                {dateInfo.icon}
-                {formatInTimeZone(dateInfo.date, timeZone, "PPP hh:mm aa", {
-                  locale: es,
-                })}
-              </Badge>
-            </span>
-          </React.Fragment>
-        ))}
-
-        <span className="flex flex-col gap-y-1 items-start justify-start flex-1 pl-2.5 py-1 border-l">
+        <span className="flex flex-col gap-y-1 items-start justify-start flex-1 pr-2.5 py-1">
           <p className="text-sm font-semibold">Estado:</p>
           <Badge
             variant={"secondary"}
@@ -140,6 +123,22 @@ export const OrderStats = ({ order }: { order: Order }) => {
             {getStatusLabel(order.status)}
           </Badge>
         </span>
+        {relevantDates.map((dateInfo, index) => (
+          <React.Fragment key={dateInfo.label}>
+            <span className="flex flex-col gap-y-1 items-start justify-start flex-1 px-2.5 py-1 first:border-l-0 border-l last:pr-0">
+              <p className="text-sm font-semibold">{dateInfo.label}:</p>
+              <Badge
+                variant={"outline"}
+                className="bg-sidebar whitespace-nowrap hover:bg-sidebar/80 cursor-default text-muted-foreground gap-x-1"
+              >
+                {dateInfo.icon}
+                {formatInTimeZone(dateInfo.date, timeZone, "PPP hh:mm aa", {
+                  locale: es,
+                })}
+              </Badge>
+            </span>
+          </React.Fragment>
+        ))}
       </div>
     </div>
   );
