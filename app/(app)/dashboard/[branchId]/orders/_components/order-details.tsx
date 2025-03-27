@@ -17,6 +17,7 @@ import {
   ChevronDown,
   ChevronRight,
   Circle,
+  PanelBottomOpen,
   PanelRightOpen,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -67,7 +68,8 @@ export const OrderDetails = ({ order }: { order: Order }) => {
           variant={"ghost"}
           size={"icon"}
         >
-          <PanelRightOpen className="!size-3.5" />
+          <PanelRightOpen className="!size-3.5 hidden md:flex" />
+          <PanelBottomOpen className="!size-3.5 md:hidden" />
         </Button>
       </SheetTrigger>
       <SheetContent
