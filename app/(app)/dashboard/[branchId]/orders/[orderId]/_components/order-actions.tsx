@@ -40,17 +40,17 @@ const getStatusText = (status: string): string => {
 const getStatusActionBannerClass = (status: string) => {
   switch (status) {
     case "requires_confirmation":
-      return "bg-contrast/20";
+      return "bg-contrast/20 border-confirmation/50";
     case "pending":
-      return "bg-primary/20";
+      return "bg-primary/20 border-primary/50";
     case "paid":
-      return "bg-contrast2/20";
+      return "bg-contrast2/20 border-contrast2/50";
     case "shipped":
-      return "bg-tertiary/20";
+      return "bg-tertiary/20 border-tertiary/50";
     case "delivered":
-      return "bg-success/20";
+      return "bg-success/20 border-success/50";
     case "canceled":
-      return "bg-destructive/20";
+      return "bg-destructive/20 border-destructive/50";
     default:
       return "bg-background";
   }
@@ -196,10 +196,10 @@ export const OrderActions = ({
   // Renderizar un botón simple para el estado "pending"
   if (order.status === "pending") {
     return (
-      <div className="bg-background z-50 border-t sticky bottom-0 w-full mt-auto">
+      <div className="bg-background z-50 sticky bottom-0 w-full mt-auto">
         <div
           className={cn(
-            "w-full h-fit p-3 py-2 pb-8 md:pb-2",
+            "w-full h-fit p-3 py-2 pb-8 md:pb-2 border-t",
             getStatusActionBannerClass(order.status)
           )}
         >
@@ -228,10 +228,10 @@ export const OrderActions = ({
   if (order.status === "paid") {
     return (
       <>
-        <div className="bg-background z-50 border-t sticky bottom-0 w-full mt-auto">
+        <div className="bg-background z-50 sticky bottom-0 w-full mt-auto">
           <div
             className={cn(
-              "w-full h-fit p-3 py-2 pb-8 md:pb-2",
+              "w-full h-fit p-3 py-2 pb-8 md:pb-2 border-t",
               getStatusActionBannerClass(order.status)
             )}
           >
@@ -270,10 +270,10 @@ export const OrderActions = ({
   // Renderizar el dropdown para los demás estados
   return (
     <>
-      <div className="bg-background z-50 border-t sticky bottom-0 w-full mt-auto">
+      <div className="bg-background z-50 sticky bottom-0 w-full mt-auto">
         <div
           className={cn(
-            "w-full h-fit p-3 py-2 pb-8 md:pb-2",
+            "w-full h-fit p-3 py-2 pb-8 md:pb-2 border-t",
             getStatusActionBannerClass(order.status)
           )}
         >
