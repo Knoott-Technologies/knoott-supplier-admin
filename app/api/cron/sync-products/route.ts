@@ -62,11 +62,12 @@ export async function GET(request: Request) {
   try {
     // Verificar clave secreta para seguridad
     const { searchParams } = new URL(request.url);
-    const secret = searchParams.get("secret");
-    const specificBranchId = searchParams.get("branchId");
+    const authHeader = request.headers.get("authorization");
 
-    if (!secret || secret !== process.env.CRON_SECRET) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return new Response("Unauthorized", {
+        status: 401,
+      });
     }
 
     // Crear cliente de Supabase con permisos de administrador para operaciones de escritura
@@ -78,10 +79,6 @@ export async function GET(request: Request) {
       .from("api_integrations")
       .select("*")
       .eq("auto_sync", true);
-
-    if (specificBranchId) {
-      query = query.eq("provider_branch_id", specificBranchId);
-    }
 
     const { data: integrations, error: integrationError } = await query;
 
