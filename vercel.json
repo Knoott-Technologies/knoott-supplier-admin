@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "https://knoott-supplier-admin.vercel.app/api/cron/sync-products?secret=knoottIKKCfrcsGKnSX82wKdVNxVjt2A360WJULUFSO7xT6qXwQzySd7gvAOi1WiDk9cygPQjkwHsn12hoH9taoiebkDEOFVrrQlVjUfMVakt960mIhlbGw7Y8lMQ7M2",
+      "path": "/api/cron/sync-products?secret=${CRON_SECRET}",
       "schedule": "0 3 * * *"
     }
   ]
