@@ -1,6 +1,4 @@
 "use client";
-
-import { useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -32,7 +30,7 @@ import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import { OrderDetails } from "./order-details";
 import { source } from "@/components/fonts/font-def";
-import { Order } from "../page";
+import type { Order } from "../page";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -242,7 +240,6 @@ export function OrdersTable({
             maxSize: 250,
             minSize: 150,
           },
-          { id: "actions", label: "", size: 42, maxSize: 42, minSize: 42 },
         ];
 
         return (
@@ -298,9 +295,9 @@ export function OrdersTable({
                             statusOrders.map((order) => (
                               <TableRow
                                 key={order.id}
-                                className="whitespace-nowrap"
+                                className="whitespace-nowrap group"
                               >
-                                {/* Actions column */}
+                                {/* Actions column - Mantener fuera del Link */}
                                 <TableCell
                                   style={{
                                     width: 42,
@@ -311,116 +308,105 @@ export function OrdersTable({
                                   <OrderDetails order={order} />
                                 </TableCell>
 
-                                {/* ID column */}
-                                <TableCell
-                                  style={{
-                                    width: 42,
-                                    maxWidth: 42,
-                                    minWidth: 42,
-                                  }}
+                                {/* Columnas clickables dentro del Link */}
+                                <Link
+                                  href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
+                                  className="contents hover:bg-muted/50 cursor-pointer"
                                 >
-                                  <Link
-                                    href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
-                                    className="flex-1"
+                                  {/* ID column */}
+                                  <TableCell
+                                    style={{
+                                      width: 42,
+                                      maxWidth: 42,
+                                      minWidth: 42,
+                                    }}
+                                    className="group-hover:bg-muted/50"
                                   >
                                     {order.id}
-                                  </Link>
-                                </TableCell>
+                                  </TableCell>
 
-                                {/* Status column */}
-                                <TableCell
-                                  style={{
-                                    width: 150,
-                                    maxWidth: 150,
-                                    minWidth: 150,
-                                  }}
-                                >
-                                  <Badge
-                                    className={cn(
-                                      getStatusBadgeClass(order.status)
-                                    )}
+                                  {/* Status column */}
+                                  <TableCell
+                                    style={{
+                                      width: 150,
+                                      maxWidth: 150,
+                                      minWidth: 150,
+                                    }}
+                                    className="group-hover:bg-muted/50"
                                   >
-                                    {order.status === "requires_confirmation" &&
-                                      "Requiere confirmación"}
-                                    {order.status === "pending" && "Pendiente"}
-                                    {order.status === "paid" &&
-                                      "Lista para envío"}
-                                    {order.status === "delivered" &&
-                                      "Entregado"}
-                                    {order.status === "shipped" &&
-                                      "En tránsito"}
-                                    {order.status === "canceled" && "Cancelado"}
-                                  </Badge>
-                                </TableCell>
-
-                                {/* Dynamic date column based on status */}
-                                <TableCell
-                                  style={{
-                                    width: 140,
-                                    maxWidth: 140,
-                                    minWidth: 140,
-                                  }}
-                                >
-                                  {getStatusDate(order)
-                                    ? formatInTimeZone(
-                                        getStatusDate(order),
-                                        timeZone,
-                                        "PP h:mm a",
-                                        { locale: es }
-                                      )
-                                    : "No disponible"}
-                                </TableCell>
-
-                                {/* Client column */}
-                                <TableCell
-                                  style={{
-                                    width: 150,
-                                    maxWidth: 200,
-                                    minWidth: 100,
-                                  }}
-                                >
-                                  <p className="truncate">
-                                    {order.client.first_name}{" "}
-                                    {order.client.last_name}
-                                  </p>
-                                </TableCell>
-
-                                {/* Address column */}
-                                <TableCell
-                                  style={{
-                                    width: 200,
-                                    maxWidth: 250,
-                                    minWidth: 150,
-                                  }}
-                                >
-                                  <p className="truncate">
-                                    {order.address.street_address},{" "}
-                                    {order.address.city},{" "}
-                                    {order.address.postal_code},{" "}
-                                    {order.address.state}
-                                  </p>
-                                </TableCell>
-                                <TableCell
-                                  style={{
-                                    width: 80,
-                                    maxWidth: 80,
-                                    minWidth: 80,
-                                  }}
-                                  className="text-right"
-                                >
-                                  <Button
-                                    variant={"ghost"}
-                                    asChild
-                                    size={"sm"}
-                                    className="font-normal text-muted-foreground"
-                                  >
-                                    <Link
-                                      href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
+                                    <Badge
+                                      className={cn(
+                                        getStatusBadgeClass(order.status)
+                                      )}
                                     >
-                                      Ver <ArrowRight className="!size-3.5" />
-                                    </Link>
-                                  </Button>
-                                </TableCell>
+                                      {order.status ===
+                                        "requires_confirmation" &&
+                                        "Requiere confirmación"}
+                                      {order.status === "pending" &&
+                                        "Pendiente"}
+                                      {order.status === "paid" &&
+                                        "Lista para envío"}
+                                      {order.status === "delivered" &&
+                                        "Entregado"}
+                                      {order.status === "shipped" &&
+                                        "En tránsito"}
+                                      {order.status === "canceled" &&
+                                        "Cancelado"}
+                                    </Badge>
+                                  </TableCell>
+
+                                  {/* Dynamic date column based on status */}
+                                  <TableCell
+                                    style={{
+                                      width: 140,
+                                      maxWidth: 140,
+                                      minWidth: 140,
+                                    }}
+                                    className="group-hover:bg-muted/50"
+                                  >
+                                    {getStatusDate(order)
+                                      ? formatInTimeZone(
+                                          getStatusDate(order),
+                                          timeZone,
+                                          "PP h:mm a",
+                                          { locale: es }
+                                        )
+                                      : "No disponible"}
+                                  </TableCell>
+
+                                  {/* Client column */}
+                                  <TableCell
+                                    style={{
+                                      width: 150,
+                                      maxWidth: 200,
+                                      minWidth: 100,
+                                    }}
+                                    className="group-hover:bg-muted/50"
+                                  >
+                                    <p className="truncate">
+                                      {order.client.first_name}{" "}
+                                      {order.client.last_name}
+                                    </p>
+                                  </TableCell>
+
+                                  {/* Address column */}
+                                  <TableCell
+                                    style={{
+                                      width: 200,
+                                      maxWidth: 250,
+                                      minWidth: 150,
+                                    }}
+                                    className="group-hover:bg-muted/50"
+                                  >
+                                    <p className="truncate">
+                                      {order.address.street_address},{" "}
+                                      {order.address.city},{" "}
+                                      {order.address.postal_code},{" "}
+                                      {order.address.state}
+                                    </p>
+                                  </TableCell>
+                                </Link>
+
                               </TableRow>
                             ))
                           ) : (

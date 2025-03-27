@@ -53,20 +53,7 @@ const ProductPage = async ({
           description={
             "Revisa todos los detalles de la orden y realiza acciones disponibles."
           }
-        >
-          <Button
-            variant="outline"
-            size="icon"
-            className="text-muted-foreground xl:hidden bg-sidebar"
-            asChild
-          >
-            <Link
-              href={`/dashboard/${params.branchId}/orders/${params.orderId}#timeline`}
-            >
-              <ChartNoAxesGantt />
-            </Link>
-          </Button>
-        </PageHeaderBackButton>
+        />
         <section className="w-full flex flex-col items-start justify-start gap-y-5 lg:gap-y-7">
           <OrderStats order={order} />
           <div className="grid gap-5 lg:gap-7 items-start justify-start grid-cols-1 xl:grid-cols-[2fr_1fr] 2xl:grid-cols-[2.5fr_1fr] w-full">
