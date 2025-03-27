@@ -1390,6 +1390,7 @@ export type Database = {
       banner_types: "brand" | "category" | "product"
       cart_status: "pending" | "completed" | "abandoned"
       order_status:
+        | "created"
         | "pending"
         | "shipped"
         | "delivered"

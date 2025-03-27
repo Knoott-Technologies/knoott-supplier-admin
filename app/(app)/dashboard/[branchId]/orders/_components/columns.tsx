@@ -13,7 +13,15 @@ export type Order =
   Database["public"]["Tables"]["wedding_product_orders"]["Row"] & {
     address: Database["public"]["Tables"]["wedding_addresses"]["Row"];
     client: Database["public"]["Tables"]["users"]["Row"];
-    product: Database["public"]["Tables"]["wedding_products"]["Row"];
+    provider_user: Database["public"]["Tables"]["users"]["Row"];
+    provider_shipped_user: Database["public"]["Tables"]["users"]["Row"];
+    product: Database["public"]["Tables"]["wedding_products"]["Row"] & {
+      variant: Database["public"]["Tables"]["products_variant_options"]["Row"];
+      product_info: Database["public"]["Tables"]["products"]["Row"] & {
+        brand: Database["public"]["Tables"]["catalog_brands"]["Row"];
+        subcategory: Database["public"]["Tables"]["catalog_collections"]["Row"];
+      };
+    };
   };
 
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -84,6 +92,8 @@ export const columns: ColumnDef<Order>[] = [
       return (
         <Badge
           className={cn(
+            status === "created" &&
+              "bg-background text-muted-foreground hover:bg-background border-border",
             status === "requires_confirmation" &&
               "bg-contrast/20 text-contrast hover:bg-contrast/10",
             status === "pending" &&
@@ -92,15 +102,16 @@ export const columns: ColumnDef<Order>[] = [
               "bg-success/20 text-success hover:bg-success/10",
             status === "shipped" &&
               "bg-tertiary/20 text-tertiary border hover:bg-tertiary/10 hover:text-tertiary",
-            status === "deleted" &&
+            status === "canceled" &&
               "bg-destructive/20 text-destructive hover:bg-destructive/10"
           )}
         >
+          {status === "created" && "Orden creada"}
           {status === "requires_confirmation" && "Requiere confirmación"}
           {status === "pending" && "Pendiente"}
           {status === "delivered" && "Entregado"}
           {status === "shipped" && "En tránsito"}
-          {status === "deleted" && "Cancelado"}
+          {status === "canceled" && "Cancelado"}
         </Badge>
       );
     },
@@ -112,7 +123,6 @@ export const columns: ColumnDef<Order>[] = [
     id: "actions",
     header: () => <span className="sr-only">Acciones</span>,
     cell: ({ row }) => {
-
       return <OrderDetails order={row.original} />;
     },
     size: 60, // Ancho fijo para evitar compresión

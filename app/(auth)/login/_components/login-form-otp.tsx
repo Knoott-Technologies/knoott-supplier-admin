@@ -166,8 +166,6 @@ export function LoginFormOtp() {
         },
       });
 
-      console.log("Solicitud OTP enviada:", data, error);
-
       if (error) {
         toast.error("Hubo un error al enviar el código OTP", {
           description:

@@ -131,6 +131,12 @@ export function FilterBar() {
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="created">
+                <span className="flex items-center justify-start gap-x-2">
+                  <Circle className="!size-2 fill-muted-foreground text-muted-foreground" />
+                  Creada
+                </span>
+              </SelectItem>
               <SelectItem value="requires_confirmation">
                 <span className="flex items-center justify-start gap-x-2">
                   <Circle className="!size-2 fill-contrast text-contrast" />
@@ -155,7 +161,7 @@ export function FilterBar() {
                   Entregado
                 </span>
               </SelectItem>
-              <SelectItem value="deleted">
+              <SelectItem value="canceled">
                 <span className="flex items-center justify-start gap-x-2">
                   <Circle className="!size-2 fill-destructive text-destructive" />
                   Cancelado
@@ -229,7 +235,7 @@ export function FilterBar() {
               {statusFilter === "pending" && "Pendiente"}
               {statusFilter === "delivered" && "Entregado"}
               {statusFilter === "shipped" && "En tránsito"}
-              {statusFilter === "deleted" && "Cancelado"}
+              {statusFilter === "canceled" && "Cancelado"}
             </Badge>
           )}
 

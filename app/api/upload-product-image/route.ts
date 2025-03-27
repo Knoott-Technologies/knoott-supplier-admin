@@ -42,8 +42,6 @@ export async function POST(request: Request) {
         upsert: false,
       });
 
-      console.log(data, error);
-
     if (error) {
       console.error("Error uploading to Supabase:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });

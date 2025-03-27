@@ -3,7 +3,6 @@ import { DataTable } from "./_components/orders-table";
 import { columns } from "./_components/columns";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { FilterBar } from "./_components/filter-bar";
-import Component from "@/components/comp-518";
 
 const OrdersPage = async ({
   params,
@@ -39,7 +38,7 @@ const OrdersPage = async ({
   let query = supabase
     .from("wedding_product_orders")
     .select(
-      "*, address:wedding_addresses(*), client:users!wedding_product_orders_ordered_by_fkey(*), product:wedding_products!wedding_products_order_id_fkey(id, product_info:products(*))",
+      "*, address:wedding_addresses(*), client:users!wedding_product_orders_ordered_by_fkey(*), provider_shipped_user:users!wedding_product_orders_shipped_ordered_by_fkey(*), provider_user:users!wedding_product_orders_confirmed_by_fkey(*), product:wedding_products!wedding_product_orders_product_id_fkey(id, variant:products_variant_options(*), product_info:products(*, brand:catalog_brands(*), subcategory:catalog_collections(*)))",
       {
         count: "exact",
       }
