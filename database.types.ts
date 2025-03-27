@@ -9,6 +9,65 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      api_integrations: {
+        Row: {
+          additional_params: Json | null
+          api_key: string
+          api_secret: string | null
+          api_url: string
+          auto_sync: boolean
+          created_at: string
+          id: number
+          last_sync_at: string | null
+          last_sync_message: string | null
+          last_sync_status: string | null
+          provider: string
+          provider_branch_id: string
+          sync_frequency: string | null
+          updated_at: string
+        }
+        Insert: {
+          additional_params?: Json | null
+          api_key: string
+          api_secret?: string | null
+          api_url: string
+          auto_sync?: boolean
+          created_at?: string
+          id?: number
+          last_sync_at?: string | null
+          last_sync_message?: string | null
+          last_sync_status?: string | null
+          provider: string
+          provider_branch_id: string
+          sync_frequency?: string | null
+          updated_at?: string
+        }
+        Update: {
+          additional_params?: Json | null
+          api_key?: string
+          api_secret?: string | null
+          api_url?: string
+          auto_sync?: boolean
+          created_at?: string
+          id?: number
+          last_sync_at?: string | null
+          last_sync_message?: string | null
+          last_sync_status?: string | null
+          provider?: string
+          provider_branch_id?: string
+          sync_frequency?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_integrations_provider_branch_id_fkey"
+            columns: ["provider_branch_id"]
+            isOneToOne: false
+            referencedRelation: "provider_branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cart_items: {
         Row: {
           amount: number
@@ -688,6 +747,7 @@ export type Database = {
       }
       push_subscriptions: {
         Row: {
+          app_reference: string
           auth: string
           created_at: string
           endpoint: string
@@ -696,6 +756,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          app_reference?: string
           auth: string
           created_at?: string
           endpoint: string
@@ -704,6 +765,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          app_reference?: string
           auth?: string
           created_at?: string
           endpoint?: string
