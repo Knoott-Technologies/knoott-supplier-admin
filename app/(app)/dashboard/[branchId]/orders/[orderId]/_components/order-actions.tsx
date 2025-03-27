@@ -214,8 +214,8 @@ export const OrderActions = ({
                 size="sm"
                 disabled={true}
               >
-                <Loader2 className="animate-spin mr-2" />
                 {getStatusText(order.status)}
+                <Loader2 className="animate-spin" />
               </Button>
             </div>
           </div>
@@ -247,8 +247,8 @@ export const OrderActions = ({
                   disabled={isLoading}
                   onClick={() => setIsUploadModalOpen(true)}
                 >
-                  {isLoading && <Loader2 className="animate-spin" />}
                   {getStatusText(order.status)}
+                  {isLoading && <Loader2 className="animate-spin" />}
                   {!isLoading && <ArrowRight />}
                 </Button>
               </div>
@@ -290,8 +290,8 @@ export const OrderActions = ({
                     size="sm"
                     disabled={isLoading}
                   >
-                    {isLoading && <Loader2 className="animate-spin" />}
                     {getStatusText(order.status)}
+                    {isLoading && <Loader2 className="animate-spin" />}
                     {!isLoading && <ArrowRight />}
                   </Button>
                 </DropdownMenuTrigger>
