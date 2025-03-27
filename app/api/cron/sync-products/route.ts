@@ -1,18 +1,7 @@
 import { NextResponse } from "next/server";
 import { decrypt } from "@/utils/encryption";
 import { createAdminClient } from "@/utils/supabase/admin";
-import { z } from "zod";
-
-// Esquemas de validación para productos
-const dimensionItemSchema = z.object({
-  label: z.string().min(1),
-  value: z.string().min(1),
-});
-
-const specItemSchema = z.object({
-  label: z.string().min(1),
-  value: z.string().min(1),
-});
+import { Database } from "@/database.types";
 
 // Definir tipos para mejorar la seguridad y legibilidad del código
 interface SyncStats {
@@ -35,17 +24,7 @@ interface ProcessedCount {
   error: number;
 }
 
-interface ApiIntegration {
-  id: number;
-  provider_branch_id: string;
-  provider: string;
-  api_url: string;
-  api_key: string;
-  api_secret: string | null;
-  additional_params: any;
-  sync_frequency: string;
-  last_sync_at: string | null;
-}
+type ApiIntegration = Database["public"]["Tables"]["api_integrations"]["Row"];
 
 interface MappedProduct {
   name: string;
