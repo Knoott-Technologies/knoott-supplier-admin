@@ -35,7 +35,6 @@ import {
 } from "@/components/ui/card";
 import { Loader2, Save, Webhook } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
   Magento,
   Shopify,
@@ -43,17 +42,11 @@ import {
   WooCommerce,
 } from "@/components/svgs/icons";
 
-// Esquema de validación para el formulario
+// Validación del formulario
 const apiIntegrationSchema = z.object({
-  provider: z.string({
-    required_error: "Por favor selecciona un proveedor",
-  }),
-  api_url: z.string().url({
-    message: "Por favor ingresa una URL válida",
-  }),
-  api_key: z.string().min(1, {
-    message: "Por favor ingresa la clave API",
-  }),
+  provider: z.string({ required_error: "Por favor selecciona un proveedor" }),
+  api_url: z.string().url({ message: "Debes ingresar una URL válida" }),
+  api_key: z.string().min(1, { message: "La clave API es obligatoria" }),
   api_secret: z.string().optional(),
   additional_params: z.string().optional(),
   auto_sync: z.boolean().default(true),
@@ -62,7 +55,6 @@ const apiIntegrationSchema = z.object({
 
 type ApiIntegrationFormValues = z.infer<typeof apiIntegrationSchema>;
 
-// Tipo para los datos iniciales que vienen del servidor
 type ApiIntegrationData = {
   id?: number;
   provider?: string;
@@ -87,7 +79,6 @@ export function ApiIntegrationForm({
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Inicializar el formulario con los datos existentes o valores predeterminados
   const form = useForm<ApiIntegrationFormValues>({
     resolver: zodResolver(apiIntegrationSchema),
     defaultValues: {
@@ -103,50 +94,47 @@ export function ApiIntegrationForm({
   });
 
   const selectedProvider = form.watch("provider");
-  const autoSync = form.watch("auto_sync");
 
   const onSubmit = async (data: ApiIntegrationFormValues) => {
     setIsSubmitting(true);
 
     try {
-      // Validar el formato JSON de los parámetros adicionales
       if (data.additional_params) {
         try {
           JSON.parse(data.additional_params);
-        } catch (e) {
+        } catch {
           toast.error(
-            "El formato JSON de los parámetros adicionales es inválido"
+            "El formato de los parámetros adicionales no es un JSON válido."
           );
           setIsSubmitting(false);
           return;
         }
       }
 
-      // Enviar los datos al servidor
       const response = await fetch(
         `/api/branches/${branchId}/api-integration`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Error al guardar la configuración");
+        throw new Error(
+          errorData.error || "Error al guardar la configuración."
+        );
       }
 
-      toast.success("Configuración de API guardada correctamente");
-      router.refresh(); // Actualizar los datos de la página
+      toast.success("Integración configurada correctamente.");
+      router.refresh();
     } catch (error) {
       console.error("Error saving API configuration:", error);
       toast.error(
         error instanceof Error
           ? error.message
-          : "Error al guardar la configuración"
+          : "Error al guardar la configuración."
       );
     } finally {
       setIsSubmitting(false);
@@ -157,7 +145,9 @@ export function ApiIntegrationForm({
     const values = form.getValues();
 
     if (!values.api_url || !values.api_key) {
-      toast.error("Por favor completa la URL de la API y la clave API");
+      toast.error(
+        "Debes ingresar la URL de la API y la clave o token de acceso."
+      );
       return;
     }
 
@@ -167,23 +157,21 @@ export function ApiIntegrationForm({
         `/api/branches/${branchId}/api-integration/test`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(values),
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Error al probar la conexión");
+        throw new Error(errorData.error || "No se pudo establecer conexión.");
       }
 
-      toast.success("Conexión exitosa con la API");
+      toast.success("Conexión establecida exitosamente.");
     } catch (error) {
       console.error("Error testing API connection:", error);
       toast.error(
-        error instanceof Error ? error.message : "Error al probar la conexión"
+        error instanceof Error ? error.message : "Error al probar la conexión."
       );
     } finally {
       setIsSubmitting(false);
@@ -193,11 +181,10 @@ export function ApiIntegrationForm({
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Configuración de API</CardTitle>
+        <CardTitle>Integración con API</CardTitle>
         <CardDescription>
-          Configura la conexión con la API de tu proveedor para importar
-          productos automáticamente. Los productos se sincronizarán diariamente
-          con tu tienda.
+          Conecta tu tienda con un proveedor externo para sincronizar productos
+          automáticamente. Puedes configurar claves y parámetros personalizados.
         </CardDescription>
       </CardHeader>
 
@@ -209,7 +196,7 @@ export function ApiIntegrationForm({
               name="provider"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Proveedor</FormLabel>
+                  <FormLabel>Proveedor de integración</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -220,34 +207,31 @@ export function ApiIntegrationForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem className="cursor-pointer" value="wondersign">
+                      <SelectItem value="wondersign">
                         <span className="flex items-center gap-x-2">
                           <Wondersign className="size-4" />
                           Wondersign
                         </span>
                       </SelectItem>
-                      <SelectItem className="cursor-pointer" value="shopify">
+                      <SelectItem value="shopify">
                         <span className="flex items-center gap-x-2">
                           <Shopify className="size-4" />
                           Shopify
                         </span>
                       </SelectItem>
-                      <SelectItem
-                        className="cursor-pointer"
-                        value="woocommerce"
-                      >
+                      <SelectItem value="woocommerce">
                         <span className="flex items-center gap-x-2">
                           <WooCommerce className="size-4" />
                           WooCommerce
                         </span>
                       </SelectItem>
-                      <SelectItem className="cursor-pointer" value="magento">
+                      <SelectItem value="magento">
                         <span className="flex items-center gap-x-2">
                           <Magento className="size-4" />
                           Magento
                         </span>
                       </SelectItem>
-                      <SelectItem className="cursor-pointer" value="custom">
+                      <SelectItem value="custom">
                         <span className="flex items-center gap-x-2">
                           <Webhook className="size-4" />
                           API Personalizada
@@ -256,7 +240,8 @@ export function ApiIntegrationForm({
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Selecciona el proveedor de la API que deseas integrar
+                    Selecciona el servicio con el cual deseas sincronizar tu
+                    catálogo de productos.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -268,7 +253,7 @@ export function ApiIntegrationForm({
               name="api_url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>URL de la API</FormLabel>
+                  <FormLabel>URL base de la API</FormLabel>
                   <FormControl>
                     <Input
                       className="bg-background"
@@ -281,7 +266,7 @@ export function ApiIntegrationForm({
                       ? "Ejemplo: https://api.wondersign.com/v2"
                       : selectedProvider === "shopify"
                       ? "Ejemplo: https://tu-tienda.myshopify.com/admin/api/2023-01"
-                      : "URL base de la API del proveedor"}
+                      : "Ingresa la URL base proporcionada por el proveedor."}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -293,21 +278,19 @@ export function ApiIntegrationForm({
               name="api_key"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Clave API / Token</FormLabel>
+                  <FormLabel>Clave API / Token de acceso</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
                       className="bg-background"
-                      placeholder="Ingresa tu clave API o token"
+                      placeholder="Ingresa tu clave o token de autenticación"
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    {selectedProvider === "wondersign"
-                      ? "Tu clave API de Wondersign"
-                      : selectedProvider === "shopify"
-                      ? "Tu token de acceso de Shopify"
-                      : "Clave de autenticación para la API"}
+                    Este valor es encriptado y almacenado bajo estándares de
+                    seguridad. Asegúrate de copiarlo correctamente desde tu
+                    proveedor.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -323,19 +306,18 @@ export function ApiIntegrationForm({
                 name="api_secret"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Secreto API / Contraseña</FormLabel>
+                    <FormLabel>Secreto API / Contraseña adicional</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
                         className="bg-background"
-                        placeholder="Ingresa el secreto API o contraseña"
+                        placeholder="Ingresa el secreto o contraseña de la API"
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      {selectedProvider === "shopify"
-                        ? "Tu clave secreta de API de Shopify"
-                        : "Secreto adicional requerido para la autenticación"}
+                      Campo adicional para autenticación. Este dato también será
+                      protegido mediante encriptación.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -348,7 +330,7 @@ export function ApiIntegrationForm({
               name="additional_params"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Parámetros adicionales (JSON)</FormLabel>
+                  <FormLabel>Parámetros adicionales (formato JSON)</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder='{"param1": "valor1", "param2": "valor2"}'
@@ -357,8 +339,8 @@ export function ApiIntegrationForm({
                     />
                   </FormControl>
                   <FormDescription>
-                    Parámetros adicionales en formato JSON para la configuración
-                    de la API
+                    Si tu proveedor requiere parámetros extra, puedes
+                    ingresarlos aquí en formato JSON válido.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -366,29 +348,31 @@ export function ApiIntegrationForm({
             />
           </CardContent>
 
-          <CardFooter className="flex justify-between border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleTestConnection}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              Probar conexión
-            </Button>
+          <CardFooter className="flex gap-2 justify-end border-t">
+            {!isSubmitting && (
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={handleTestConnection}
+              >
+                Probar conexión
+              </Button>
+            )}
             <Button
               type="submit"
+              size="sm"
               variant="defaultBlack"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Guardando...
+                </>
               ) : (
-                <Save className="mr-2 h-4 w-4" />
+                "Guardar configuración"
               )}
-              Guardar configuración
             </Button>
           </CardFooter>
         </form>

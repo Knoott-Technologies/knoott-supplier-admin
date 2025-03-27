@@ -166,7 +166,6 @@ const ProductsPage = async ({
           </div>
         </section>
       </main>
-      <ProductCrawler />
     </>
   );
 };
