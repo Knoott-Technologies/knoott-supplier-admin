@@ -110,7 +110,7 @@ export const StepperTimeline = ({ order }: { order: Order }) => {
           <div className="items-start pb-12 last:pb-0 w-full flex">
             <StepperIndicator icon={icon} />
             {step === 2 ? (
-              (order.confirmed_at && order.provider_user && (
+              (order.verified_at && order.provider_user && (
                 <div className="pl-4 px-2 text-left flex flex-col gap-y-0.5">
                   <StepperTitle>Órden verificada por el negocio</StepperTitle>
                   <StepperDescription>
@@ -120,6 +120,32 @@ export const StepperTimeline = ({ order }: { order: Order }) => {
                       {order.provider_user.last_name}
                     </span>{" "}
                     el día{" "}
+                    <span className="text-foreground font-medium">
+                      {formatInTimeZone(
+                        new Date(order.verified_at),
+                        timeZone,
+                        "PPP 'a las' h:mm aa",
+                        { locale: es }
+                      )}
+                    </span>
+                  </StepperDescription>
+                </div>
+              )) || (
+                <div className="pl-4 px-2 text-left flex flex-col gap-y-0.5">
+                  <StepperTitle>{title}</StepperTitle>
+                  <StepperDescription>{description}</StepperDescription>
+                </div>
+              )
+            ) : step === 3 ? (
+              (order.confirmed_at && (
+                <div className="pl-4 px-2 text-left flex flex-col gap-y-0.5">
+                  <StepperTitle>Hemos enviado el pago</StepperTitle>
+                  <StepperDescription>
+                    Hemos enviado el pago por{" "}
+                    <span className="text-foreground font-medium">
+                      MXN {formatPrice(order.povider_received_amount)}
+                    </span>{" "}
+                    a la cuenta de banco de tu negocio, el día{" "}
                     <span className="text-foreground font-medium">
                       {formatInTimeZone(
                         new Date(order.confirmed_at),
@@ -136,17 +162,6 @@ export const StepperTimeline = ({ order }: { order: Order }) => {
                   <StepperDescription>{description}</StepperDescription>
                 </div>
               )
-            ) : step === 3 ? (
-              <div className="pl-4 px-2 text-left flex flex-col gap-y-0.5">
-                <StepperTitle>Hemos enviado el pago</StepperTitle>
-                <StepperDescription>
-                  Hemos enviado el pago por{" "}
-                  <span className="text-foreground font-medium">
-                    MXN {formatPrice(order.povider_received_amount)}
-                  </span>{" "}
-                  a la cuenta de banco de tu negocio
-                </StepperDescription>
-              </div>
             ) : step === 4 ? (
               (order.shipped_at && order.provider_shipped_user && (
                 <div className="pl-4 px-2 text-left flex flex-col gap-y-0.5">

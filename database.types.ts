@@ -1062,6 +1062,7 @@ export type Database = {
           shipping_guide_url: string | null
           status: Database["public"]["Enums"]["order_status"]
           total_amount: number
+          verified_at: string | null
           wedding_id: string
         }
         Insert: {
@@ -1083,6 +1084,7 @@ export type Database = {
           shipping_guide_url?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           total_amount?: number
+          verified_at?: string | null
           wedding_id: string
         }
         Update: {
@@ -1104,6 +1106,7 @@ export type Database = {
           shipping_guide_url?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           total_amount?: number
+          verified_at?: string | null
           wedding_id?: string
         }
         Relationships: [
