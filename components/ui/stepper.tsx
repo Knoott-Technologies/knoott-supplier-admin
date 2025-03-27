@@ -205,7 +205,7 @@ function StepperIndicator({
     <span
       data-slot="stepper-indicator"
       className={cn(
-        "bg-muted text-muted-foreground border border-border data-[state=active]:border-success data-[state=active]:bg-success data-[state=completed]:bg-success data-[state=active]:text-background data-[state=completed]:text-background relative flex size-6 shrink-0 items-center justify-center text-xs font-medium",
+        "bg-muted text-muted-foreground data-[state=active]:bg-muted data-[state=completed]:bg-success data-[state=active]:text-muted-foreground data-[state=completed]:text-background relative flex size-6 shrink-0 items-center justify-center text-xs font-medium",
         className
       )}
       data-state={state}
