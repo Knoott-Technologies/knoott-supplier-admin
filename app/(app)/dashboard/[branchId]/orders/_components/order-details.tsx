@@ -61,6 +61,8 @@ export const OrderDetails = ({ order }: { order: Order }) => {
               <Badge
                 className={cn(
                   "shrink-0",
+                  order.status === "created" &&
+                    "bg-background text-muted-foreground hover:bg-background border-border",
                   order.status === "requires_confirmation" &&
                     "bg-contrast/20 text-contrast hover:bg-contrast/10",
                   order.status === "pending" &&
@@ -73,6 +75,7 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                     "bg-destructive/20 text-destructive hover:bg-destructive/10"
                 )}
               >
+                {order.status === "created" && "Orden creada"}
                 {order.status === "requires_confirmation" &&
                   "Requiere confirmación"}
                 {order.status === "pending" && "Pendiente"}
