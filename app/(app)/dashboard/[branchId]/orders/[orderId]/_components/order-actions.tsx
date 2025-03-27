@@ -190,7 +190,7 @@ export const OrderActions = ({
       <div className="bg-background z-50 border-t sticky bottom-0 w-full mt-auto">
         <div
           className={cn(
-            "w-full h-fit p-3 py-2",
+            "w-full h-fit p-3 py-2 pb-8 md:pb-2",
             getStatusActionBannerClass(order.status)
           )}
         >

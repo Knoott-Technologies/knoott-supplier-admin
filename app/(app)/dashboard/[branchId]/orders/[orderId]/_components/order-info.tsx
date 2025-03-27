@@ -10,6 +10,8 @@ import { cn, formatPrice } from "@/lib/utils";
 import Image from "next/image";
 import { libre } from "@/components/fonts/font-def";
 import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
+import { Download, ExternalLink } from "lucide-react";
 
 export const OrderInfo = ({ order }: { order: Order }) => {
   return (
@@ -80,6 +82,19 @@ export const OrderInfo = ({ order }: { order: Order }) => {
                   >
                     {order.address.additional_notes}
                   </p>
+                </span>
+              )}
+              {order.shipping_guide_url && (
+                <span className="w-full flex flex-col gap-y-1">
+                  <p className="text-sm font-semibold">Guía de envío:</p>
+                  <Link
+                    href={order.shipping_guide_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm line-clamp-2 font-medium text-tertiary hover:underline hover:text-tertiary/80 flex items-center gap-x-1.5"
+                  >
+                    Ver guía <ExternalLink className="size-3.5"/>
+                  </Link>
                 </span>
               )}
             </CardContent>
