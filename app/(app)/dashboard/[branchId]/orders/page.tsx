@@ -1,8 +1,27 @@
 import { PageHeader } from "@/components/universal/headers";
-import { DataTable } from "./_components/orders-table";
-import { columns } from "./_components/columns";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { FilterBar } from "./_components/filter-bar";
+import { OrdersSummary } from "./_components/orders-summary";
+import { OrdersTable } from "./_components/orders-table";
+import { OrdersAlerts } from "./_components/orders-alert";
+import { Database } from "@/database.types";
+
+export type Order =
+  Database["public"]["Tables"]["wedding_product_orders"]["Row"] & {
+    address: Database["public"]["Tables"]["wedding_addresses"]["Row"];
+    client: Database["public"]["Tables"]["users"]["Row"];
+    provider_user: Database["public"]["Tables"]["users"]["Row"];
+    provider_shipped_user: Database["public"]["Tables"]["users"]["Row"];
+    product: Database["public"]["Tables"]["wedding_products"]["Row"] & {
+      variant: Database["public"]["Tables"]["products_variant_options"]["Row"] & {
+        variant_list: Database["public"]["Tables"]["products_variants"]["Row"];
+      };
+      product_info: Database["public"]["Tables"]["products"]["Row"] & {
+        brand: Database["public"]["Tables"]["catalog_brands"]["Row"];
+        subcategory: Database["public"]["Tables"]["catalog_collections"]["Row"];
+      };
+    };
+  };
 
 const OrdersPage = async ({
   params,
@@ -24,8 +43,8 @@ const OrdersPage = async ({
   const supabase = createAdminClient();
 
   // Get URL parameters with default values
-  const page = parseInt(searchParams.page || "1", 10);
-  const pageSize = parseInt(searchParams.pageSize || "100", 10); // 100 products per page as requested
+  const page = Number.parseInt(searchParams.page || "1", 10);
+  const pageSize = Number.parseInt(searchParams.pageSize || "100", 10);
   const status = searchParams.status || "";
   const startDate = searchParams.startDate || "";
   const endDate = searchParams.endDate || "";
@@ -38,7 +57,7 @@ const OrdersPage = async ({
   let query = supabase
     .from("wedding_product_orders")
     .select(
-      "*, address:wedding_addresses(*), client:users!wedding_product_orders_ordered_by_fkey(*), provider_shipped_user:users!wedding_product_orders_shipped_ordered_by_fkey(*), provider_user:users!wedding_product_orders_confirmed_by_fkey(*), product:wedding_products!wedding_product_orders_product_id_fkey(id, variant:products_variant_options(*), product_info:products(*, brand:catalog_brands(*), subcategory:catalog_collections(*)))",
+      "*, address:wedding_addresses(*), client:users!wedding_product_orders_ordered_by_fkey(*), provider_shipped_user:users!wedding_product_orders_shipped_ordered_by_fkey(*), provider_user:users!wedding_product_orders_confirmed_by_fkey(*), product:wedding_products!wedding_product_orders_product_id_fkey(id, variant:products_variant_options(*, variant_list:products_variants(*)), product_info:products(*, brand:catalog_brands(*), subcategory:catalog_collections(*)))",
       {
         count: "exact",
       }
@@ -69,30 +88,51 @@ const OrdersPage = async ({
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching products:", error);
-    // You could handle the error here, for example, showing a message to the user
+    console.error("Error fetching orders:", error);
   }
 
-  return (
-    <main className="h-fit w-full md:max-w-[95%] px-3 md:px-0 py-5 pb-14 lg:py-7 mx-auto no-scrollbar">
-      <PageHeader
-        title="Órdenes"
-        description="Visualiza y administra las órdenes de tus clientes."
-      />
+  // Get all orders for summary stats (without pagination)
+  const { data: allOrders, error: allOrdersError } = await supabase
+    .from("wedding_product_orders")
+    .select("*")
+    .eq("provider_branch_id", params.branchId);
 
-      <section className="w-full h-fit items-start justify-start flex flex-col gap-y-5 lg:gap-y-7">
-        <div className="w-full h-fit items-start justify-start flex flex-col gap-y-4">
-          <FilterBar />
-          <DataTable
-            columns={columns}
-            pageSize={pageSize}
-            data={orders || []}
-            totalCount={count || 0}
-            currentPage={page}
-          />
-        </div>
-      </section>
-    </main>
+  if (allOrdersError) {
+    console.error("Error fetching all orders:", allOrdersError);
+  }
+
+  // Find orders that require attention (status is "requires_confirmation" or "created")
+  const ordersRequiringAttention =
+    allOrders?.filter(
+      (order) =>
+        order.status === "requires_confirmation" || order.status === "created"
+    ) || [];
+
+  return (
+    <>
+      <OrdersAlerts orders={allOrders || []} />
+      <main className="h-fit w-full md:max-w-[95%] px-3 md:px-0 py-5 pb-14 lg:py-7 mx-auto no-scrollbar z-0">
+        <PageHeader
+          title="Órdenes"
+          description="Visualiza y administra las órdenes de tus clientes."
+        />
+
+        <section className="w-full h-fit items-start justify-start flex flex-col gap-y-5 lg:gap-y-7">
+          {/* Summary Cards */}
+          <OrdersSummary branchId={params.branchId} orders={allOrders || []} />
+
+          <div className="w-full h-fit items-start justify-start flex flex-col gap-y-4">
+            <FilterBar />
+            <OrdersTable
+              orders={orders || []}
+              totalCount={count || 0}
+              currentPage={page}
+              pageSize={pageSize}
+            />
+          </div>
+        </section>
+      </main>
+    </>
   );
 };
 

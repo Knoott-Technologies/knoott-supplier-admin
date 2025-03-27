@@ -14,14 +14,11 @@ import {
 import {
   AlertTriangle,
   ArrowRight,
-  ArrowRightIcon,
   ChevronDown,
   ChevronRight,
   Circle,
-  Eclipse,
   PanelRightOpen,
 } from "lucide-react";
-import { Order } from "./columns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, formatPrice } from "@/lib/utils";
 import { StepperTimeline } from "./stepper-timeline";
@@ -30,19 +27,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { libre } from "@/components/fonts/font-def";
 import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
-import NumberFlow from "@number-flow/react";
 import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import Link from "next/link";
+import { Order } from "../page";
 
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -51,22 +42,15 @@ export const OrderDetails = ({ order }: { order: Order }) => {
 
   return (
     <Sheet>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <SheetTrigger asChild>
-            <Button
-              className="font-normal text-muted-foreground"
-              variant={"ghost"}
-              size={"icon"}
-            >
-              <PanelRightOpen className="!size-3.5" />
-            </Button>
-          </SheetTrigger>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Vista rápida</p>
-        </TooltipContent>
-      </Tooltip>
+      <SheetTrigger asChild>
+        <Button
+          className="font-normal text-muted-foreground"
+          variant={"ghost"}
+          size={"icon"}
+        >
+          <PanelRightOpen className="!size-3.5" />
+        </Button>
+      </SheetTrigger>
       <SheetContent
         side={isMobile ? "bottom" : "right"}
         className={cn(
@@ -113,7 +97,7 @@ export const OrderDetails = ({ order }: { order: Order }) => {
               ))}
             <div className="w-full h-fit items-start justify-start flex flex-col gap-y-4 p-3">
               {(order.status !== "canceled" && (
-                <Collapsible defaultOpen className="border group/collapsible">
+                <Collapsible defaultOpen className="border group/collapsible w-full">
                   <CollapsibleTrigger asChild>
                     <span className="w-full h-fit items-center justify-between flex gap-y-0 p-3 bg-sidebar cursor-pointer">
                       <span className="flex flex-col items-start justify-start gap-y-0">
@@ -243,6 +227,16 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                       </p>
                     </span>
                   )}
+                  <span className="w-full flex flex-col gap-y-1">
+                      <p className="text-sm font-semibold">
+                        Información de contacto:
+                      </p>
+                      <p
+                        className="text-sm line-clamp-2 font-medium text-muted-foreground"
+                      >
+                        {order.client.phone_number}
+                      </p>
+                    </span>
                 </div>
               </div>
               <div className="w-full flex flex-col gap-y-0 items-start justify-start">
@@ -284,7 +278,10 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                         </p>
                       </span>
                       <span className="w-full items-center justify-between flex">
-                        <p className="text-sm">{order.product.variant.name}</p>
+                        <p className="text-sm">
+                          {order.product.variant.variant_list.name}:{" "}
+                          {order.product.variant.name}
+                        </p>
                         <p className="text-sm font-semibold text-foreground">
                           MXN {formatPrice(order.product.variant.price!)}
                         </p>
