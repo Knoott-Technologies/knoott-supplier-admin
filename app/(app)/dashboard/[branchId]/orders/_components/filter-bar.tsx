@@ -233,6 +233,7 @@ export function FilterBar() {
               {statusFilter === "requires_confirmation" &&
                 "Requiere confirmación"}
               {statusFilter === "pending" && "Pendiente"}
+              {statusFilter === "paid" && "Listas para envío"}
               {statusFilter === "delivered" && "Entregado"}
               {statusFilter === "shipped" && "En tránsito"}
               {statusFilter === "canceled" && "Cancelado"}
