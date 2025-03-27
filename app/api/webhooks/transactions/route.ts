@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
 
     // Obtener usuarios del proveedor
     const { data: providerUsers, error: providerUsersError } = await supabase
-      .from("provider_branches_users")
+      .from("user_provider_branches")
       .select("user_id")
       .eq("provider_branch_id", record.provider_branch_id);
 
