@@ -199,7 +199,7 @@ export const OrderActions = ({
               <Button
                 className={cn(getStatusButtonClass(order.status), "w-full md:w-auto")}
                 variant={"ghost"}
-                size="default"
+                size="sm"
                 disabled={order.status === "pending" || isLoading}
                 onClick={handleAction}
               >
