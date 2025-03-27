@@ -79,7 +79,7 @@ export const OrderDetails = ({ order }: { order: Order }) => {
         side={isMobile ? "bottom" : "right"}
         className={cn(
           "[&>button]:hidden p-0 bg-sidebar sm:max-w-lg",
-          isMobile && "h-[100dvh] max-h-[100dvh]"
+          isMobile && "h-[100dvh] max-h-[100dvh] border-t-0"
         )}
       >
         <div className="flex h-full w-full flex-col bg-background">
