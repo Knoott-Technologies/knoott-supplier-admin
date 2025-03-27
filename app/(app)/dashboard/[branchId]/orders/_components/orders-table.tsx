@@ -295,7 +295,7 @@ export function OrdersTable({
                             statusOrders.map((order) => (
                               <TableRow
                                 key={order.id}
-                                className="whitespace-nowrap group"
+                                className="whitespace-nowrap group relative"
                               >
                                 {/* Actions column - Mantener fuera del Link */}
                                 <TableCell
@@ -312,6 +312,7 @@ export function OrdersTable({
                                 <Link
                                   href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
                                   className="contents hover:bg-muted/50 cursor-pointer"
+                                  title="Ver detalles de la orden"
                                 >
                                   {/* ID column */}
                                   <TableCell
