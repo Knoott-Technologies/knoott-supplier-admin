@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { columns } from "./_components/columns";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { ChevronRight, Plus, Webhook } from "lucide-react";
 import { DataTable } from "./_components/products-table";
 import { FilterBar } from "./_components/filter-bar";
 import { ProductCrawler } from "./_components/product-crawler";
@@ -117,10 +117,34 @@ const ProductsPage = async ({
 
   return (
     <>
+      <Link
+        href={`/dashboard/${params.branchId}/products/api-integration`}
+        className="bg-background sticky top-12 z-20 border-b w-full"
+      >
+        <div className="bg-contrast/10 p-3 md:px-0 sticky top-0 z-10 text-contrast w-full">
+          <div className="flex justify-between items-center gap-2 md:max-w-[95%] mx-auto">
+            <div className="flex grow gap-3">
+              <Webhook className="mt-0.5 shrink-0 size-4" aria-hidden="true" />
+              <div className="flex grow justify-between gap-2 items-center">
+                <span className="flex flex-col items-start justify-start gap-y-0">
+                  <h3 className="text-sm font-semibold">
+                    Sincroniza tu catálogo automáticamente
+                  </h3>
+                  <p className="text-xs">
+                    Conecta tu API y mantén tus productos siempre actualizados
+                    en Knoott sin esfuerzo manual.
+                  </p>
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="size-4" />
+          </div>
+        </div>
+      </Link>
       <main className="h-fit w-full md:max-w-[95%] px-3 md:px-0 py-5 pb-14 lg:py-7 mx-auto no-scrollbar">
         <PageHeader
           title="Productos"
-          description="Gestiona tus productos, agrega, edita y elimina los productos de tu negocio"
+          description="Administra todo tu catálogo desde un solo lugar. Agrega, edita o elimina productos según las necesidades de tu tienda."
         >
           <Button
             variant={"defaultBlack"}
@@ -131,7 +155,7 @@ const ProductsPage = async ({
             <Link
               href={`/dashboard/${params.branchId}/products/new/general-info`}
             >
-              Agregar Producto <Plus />
+              Agregar producto <Plus />
             </Link>
           </Button>
           <Button
@@ -147,15 +171,14 @@ const ProductsPage = async ({
             </Link>
           </Button>
         </PageHeader>
+
         <section className="w-full h-fit items-start justify-start flex flex-col gap-y-5 lg:gap-y-7">
           <div className="w-full h-fit items-start justify-start flex flex-col gap-y-4">
-            {/* Filter bar component */}
             <FilterBar
               brands={brands || []}
               subcategories={subcategories || []}
             />
 
-            {/* Data table component */}
             <DataTable
               columns={columns}
               data={products || []}

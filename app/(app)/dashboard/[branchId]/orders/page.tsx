@@ -117,7 +117,7 @@ const OrdersPage = async ({
       <main className="h-fit w-full md:max-w-[95%] px-3 md:px-0 py-5 pb-14 lg:py-7 mx-auto no-scrollbar z-0">
         <PageHeader
           title="Órdenes"
-          description="Visualiza y administra las órdenes de tus clientes."
+          description="Consulta, gestiona y da seguimiento a las órdenes generadas por tus clientes. Mantente al tanto del estado de cada pedido en tiempo real."
         />
 
         <section className="w-full h-fit items-start justify-start flex flex-col gap-y-5 lg:gap-y-7">

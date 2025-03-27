@@ -19,6 +19,7 @@ import {
   Circle,
   PanelBottomOpen,
   PanelRightOpen,
+  X,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, formatPrice } from "@/lib/utils";
@@ -76,18 +77,34 @@ export const OrderDetails = ({ order }: { order: Order }) => {
         side={isMobile ? "bottom" : "right"}
         className={cn(
           "[&>button]:hidden p-0 bg-sidebar sm:max-w-lg",
-          isMobile && "h-[90dvh] max-h-[90dvh]"
+          isMobile && "h-[100dvh] max-h-[100dvh]"
         )}
       >
         <div className="flex h-full w-full flex-col bg-background">
-          <SheetHeader className="p-3 bg-sidebar border-b text-start">
-            <SheetTitle>Detalles de la orden #{order.id}</SheetTitle>
-            <SheetDescription>
-              Visualiza los detalles de la orden, incluyendo la información de
-              envío, etc.
-            </SheetDescription>
+          <SheetHeader className="p-3 bg-sidebar border-b flex flex-row justify-between items-start text-start space-y-0 gap-5">
+            <div className="flex-1 items-start justify-start flex flex-col gap-y-1.5">
+              <SheetTitle>Detalles de la orden #{order.id}</SheetTitle>
+              <SheetDescription>
+                Visualiza los detalles de la orden, incluyendo la información de
+                envío, etc.
+              </SheetDescription>
+            </div>
+            <SheetClose asChild>
+              <Button
+                className="font-normal text-muted-foreground md:hidden"
+                variant={"outline"}
+                size={"icon"}
+              >
+                <X className="!size-3.5" />
+              </Button>
+            </SheetClose>
           </SheetHeader>
-          <div className={cn("flex min-h-0 flex-1 flex-col gap-4 overflow-auto bg-gradient-to-b relative from-0% to-15%", getGradientColor(order.status))}>
+          <div
+            className={cn(
+              "flex min-h-0 flex-1 flex-col gap-4 overflow-auto bg-gradient-to-b relative from-0% to-25% lg:to-15%",
+              getGradientColor(order.status)
+            )}
+          >
             {/* <div
               className={cn(
                 "absolute inset-x-0 h-[10%] z-0 ",

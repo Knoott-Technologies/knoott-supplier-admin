@@ -32,7 +32,7 @@ export function OrdersSummary({
   const paid = orders.filter((order) => order.status === "paid").length;
 
   // Calculate orders that need attention (requires_confirmation + pending)
-  const needsAttention = requiresConfirmation + pending;
+  const needsAttention = requiresConfirmation + paid;
 
   return (
     <div className="w-full h-fit grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -88,7 +88,7 @@ export function OrdersSummary({
                 {needsAttention}
               </div>
               <p className="text-sm text-muted-foreground">
-                {requiresConfirmation} por confirmar, {pending} pendientes de
+                {requiresConfirmation} por confirmar, {paid} pendientes de
                 envío
               </p>
             </div>

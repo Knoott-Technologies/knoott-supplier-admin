@@ -33,7 +33,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, Save, Webhook } from "lucide-react";
+import { Eye, EyeOff, Loader2, Webhook } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Magento,
@@ -78,6 +78,8 @@ export function ApiIntegrationForm({
 }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [showApiSecret, setShowApiSecret] = useState(false);
 
   const form = useForm<ApiIntegrationFormValues>({
     resolver: zodResolver(apiIntegrationSchema),
@@ -94,6 +96,24 @@ export function ApiIntegrationForm({
   });
 
   const selectedProvider = form.watch("provider");
+
+  // Función para mostrar temporalmente la clave API
+  const handleShowApiKey = () => {
+    setShowApiKey(true);
+    // Ocultar después de 6 segundos
+    setTimeout(() => {
+      setShowApiKey(false);
+    }, 6000);
+  };
+
+  // Función para mostrar temporalmente el secreto API
+  const handleShowApiSecret = () => {
+    setShowApiSecret(true);
+    // Ocultar después de 6 segundos
+    setTimeout(() => {
+      setShowApiSecret(false);
+    }, 6000);
+  };
 
   const onSubmit = async (data: ApiIntegrationFormValues) => {
     setIsSubmitting(true);
@@ -279,14 +299,32 @@ export function ApiIntegrationForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Clave API / Token de acceso</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      className="bg-background"
-                      placeholder="Ingresa tu clave o token de autenticación"
-                      {...field}
-                    />
-                  </FormControl>
+                  <div className="flex items-center gap-x-0">
+                    <FormControl>
+                      <Input
+                        type={showApiKey ? "text" : "password"}
+                        className="bg-background pr-10"
+                        placeholder="Ingresa tu clave o token de autenticación"
+                        {...field}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="shrink-0 border-l-0"
+                      onClick={handleShowApiKey}
+                    >
+                      {showApiKey ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                      <span className="sr-only">
+                        {showApiKey ? "Ocultar clave" : "Mostrar clave"}
+                      </span>
+                    </Button>
+                  </div>
                   <FormDescription>
                     Este valor es encriptado y almacenado bajo estándares de
                     seguridad. Asegúrate de copiarlo correctamente desde tu
@@ -307,14 +345,34 @@ export function ApiIntegrationForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Secreto API / Contraseña adicional</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        className="bg-background"
-                        placeholder="Ingresa el secreto o contraseña de la API"
-                        {...field}
-                      />
-                    </FormControl>
+                    <div className="flex items-center gap-x-0">
+                      <FormControl>
+                        <Input
+                          type={showApiSecret ? "text" : "password"}
+                          className="bg-background flex-1"
+                          placeholder="Ingresa el secreto o contraseña de la API"
+                          {...field}
+                        />
+                      </FormControl>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="border-l-0 shrink-0"
+                        onClick={handleShowApiSecret}
+                      >
+                        {showApiSecret ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                        <span className="sr-only">
+                          {showApiSecret
+                            ? "Ocultar secreto"
+                            : "Mostrar secreto"}
+                        </span>
+                      </Button>
+                    </div>
                     <FormDescription>
                       Campo adicional para autenticación. Este dato también será
                       protegido mediante encriptación.
