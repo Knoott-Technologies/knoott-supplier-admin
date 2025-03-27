@@ -79,9 +79,9 @@ export const columns: ColumnDef<Order>[] = [
         </Badge>
       );
     },
-    size: 90,
-    minSize: 90,
-    maxSize: 90,
+    size: 150,
+    minSize: 150,
+    maxSize: 150,
   },
   {
     header: "Fecha creación",
