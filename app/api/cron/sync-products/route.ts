@@ -61,7 +61,6 @@ interface MappedProduct {
 export async function GET(request: Request) {
   try {
     // Verificar clave secreta para seguridad
-    const { searchParams } = new URL(request.url);
     const authHeader = request.headers.get("authorization");
 
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
