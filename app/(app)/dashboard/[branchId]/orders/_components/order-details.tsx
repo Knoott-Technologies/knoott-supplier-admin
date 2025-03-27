@@ -28,6 +28,11 @@ import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import NumberFlow from "@number-flow/react";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -36,11 +41,22 @@ export const OrderDetails = ({ order }: { order: Order }) => {
 
   return (
     <Sheet>
-      <SheetTrigger asChild>
-        <Button className="font-normal text-muted-foreground" variant={"ghost"} size={"icon"}>
-          <PanelRightOpen className="!size-3.5" />
-        </Button>
-      </SheetTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <SheetTrigger asChild>
+            <Button
+              className="font-normal text-muted-foreground"
+              variant={"ghost"}
+              size={"icon"}
+            >
+              <PanelRightOpen className="!size-3.5" />
+            </Button>
+          </SheetTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Abrir en panel</p>
+        </TooltipContent>
+      </Tooltip>
       <SheetContent
         side={isMobile ? "bottom" : "right"}
         className={cn(
