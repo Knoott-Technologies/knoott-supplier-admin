@@ -11,7 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ArrowRight, ChevronDown, Circle } from "lucide-react";
+import { ArrowRight, ChevronDown, Circle, PanelRightOpen } from "lucide-react";
 import { Order } from "./columns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, formatPrice } from "@/lib/utils";
@@ -37,8 +37,8 @@ export const OrderDetails = ({ order }: { order: Order }) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button className="font-normal" variant={"ghost"} size={"sm"}>
-          Detalles <ArrowRight className="!size-3.5" />
+        <Button className="font-normal text-muted-foreground" variant={"ghost"} size={"icon"}>
+          <PanelRightOpen className="!size-3.5" />
         </Button>
       </SheetTrigger>
       <SheetContent

@@ -29,10 +29,23 @@ const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 // Definir las columnas con tamaños explícitos para evitar compresión
 export const columns: ColumnDef<Order>[] = [
   {
+    id: "actions",
+    header: () => <span className="sr-only">Acciones</span>,
+    cell: ({ row }) => {
+      return <OrderDetails order={row.original} />;
+    },
+    size: 42,
+    maxSize: 42, // Ancho fijo para evitar compresión
+    minSize: 42,
+    enableHiding: false,
+  },
+  {
     id: "id",
     accessorKey: "id",
     header: "ID",
-    size: 30, // Ancho fijo para evitar compresión
+    size: 42,
+    maxSize: 42, // Ancho fijo para evitar compresión
+    minSize: 42,
     enableSorting: false,
   },
   {
@@ -118,14 +131,5 @@ export const columns: ColumnDef<Order>[] = [
     size: 130,
     minSize: 80,
     maxSize: 150,
-  },
-  {
-    id: "actions",
-    header: () => <span className="sr-only">Acciones</span>,
-    cell: ({ row }) => {
-      return <OrderDetails order={row.original} />;
-    },
-    size: 60, // Ancho fijo para evitar compresión
-    enableHiding: false,
   },
 ];
