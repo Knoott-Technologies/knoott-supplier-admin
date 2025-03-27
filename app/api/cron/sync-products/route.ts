@@ -1,6 +1,18 @@
 import { NextResponse } from "next/server";
 import { decrypt } from "@/utils/encryption";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { z } from "zod";
+
+// Esquemas de validación para productos
+const dimensionItemSchema = z.object({
+  label: z.string().min(1),
+  value: z.string().min(1),
+});
+
+const specItemSchema = z.object({
+  label: z.string().min(1),
+  value: z.string().min(1),
+});
 
 // Definir tipos para mejorar la seguridad y legibilidad del código
 interface SyncStats {
@@ -41,18 +53,28 @@ interface MappedProduct {
   description: string;
   short_description: string;
   brand_id: number | null;
-  dimensions: Record<string, string>;
-  specs: Record<string, string>;
+  dimensions: { label: string; value: string }[];
+  specs: { label: string; value: string }[];
   keywords: string[];
   images_url: string[];
   subcategory_id: number;
-  price: number;
-  stock: number;
-  sku: string;
-  metadata: {
-    external_id: string;
-    source: string;
-    last_updated: string;
+  variant: {
+    name: string;
+    display_name: string;
+    options: {
+      name: string;
+      display_name: string;
+      price: number;
+      stock: number;
+      is_default: boolean;
+      sku: string;
+      metadata: {
+        external_id: string;
+        source: string;
+        last_updated: string;
+        [key: string]: any;
+      };
+    }[];
   };
 }
 
@@ -75,9 +97,7 @@ export async function GET(request: Request) {
     // Si se proporciona un branchId específico, solo sincronizar ese
     let query = supabase
       .from("api_integrations")
-      .select(
-        "id, provider_branch_id, provider, api_url, api_key, api_secret, additional_params, sync_frequency, last_sync_at"
-      )
+      .select("*")
       .eq("auto_sync", true);
 
     if (specificBranchId) {
@@ -566,7 +586,7 @@ async function processProducts(
           integration
         );
 
-        if (!mappedProduct || !mappedProduct.sku) {
+        if (!mappedProduct || !mappedProduct.variant.options[0].sku) {
           console.log(
             `Producto sin SKU, omitiendo: ${JSON.stringify(
               product.name || "Desconocido"
@@ -580,7 +600,7 @@ async function processProducts(
         const { data: existingVariantOption, error: findError } = await supabase
           .from("products_variant_options")
           .select("id, variant_id, product_id")
-          .eq("sku", mappedProduct.sku)
+          .eq("sku", mappedProduct.variant.options[0].sku)
           .single();
 
         if (findError && findError.code !== "PGSQL_ERROR_NO_ROWS") {
@@ -592,8 +612,25 @@ async function processProducts(
         if (existingVariantOption) {
           // Actualizar producto existente
           console.log(
-            `Actualizando producto existente: ${mappedProduct.name}, SKU: ${mappedProduct.sku}`
+            `Actualizando producto existente: ${mappedProduct.name}, SKU: ${mappedProduct.variant.options[0].sku}`
           );
+
+          // Convertir dimensiones y specs al formato de la base de datos
+          const dimensionsJson =
+            mappedProduct.dimensions.length > 0
+              ? mappedProduct.dimensions.reduce((acc, item) => {
+                  acc[item.label] = item.value;
+                  return acc;
+                }, {} as Record<string, string>)
+              : null;
+
+          const specsJson =
+            mappedProduct.specs.length > 0
+              ? mappedProduct.specs.reduce((acc, item) => {
+                  acc[item.label] = item.value;
+                  return acc;
+                }, {} as Record<string, string>)
+              : null;
 
           const { error: productError } = await supabase
             .from("products")
@@ -603,8 +640,8 @@ async function processProducts(
               description: mappedProduct.description,
               short_description: mappedProduct.short_description,
               brand_id: mappedProduct.brand_id,
-              dimensions: mappedProduct.dimensions,
-              specs: mappedProduct.specs,
+              dimensions: dimensionsJson,
+              specs: specsJson,
               keywords: mappedProduct.keywords,
               images_url: mappedProduct.images_url,
               subcategory_id: mappedProduct.subcategory_id,
@@ -622,9 +659,9 @@ async function processProducts(
           const { error: variantOptionError } = await supabase
             .from("products_variant_options")
             .update({
-              price: mappedProduct.price,
-              stock: mappedProduct.stock,
-              metadata: mappedProduct.metadata,
+              price: mappedProduct.variant.options[0].price,
+              stock: mappedProduct.variant.options[0].stock,
+              metadata: mappedProduct.variant.options[0].metadata,
               updated_at: new Date().toISOString(),
             })
             .eq("id", existingVariantOption.id);
@@ -642,8 +679,25 @@ async function processProducts(
         } else {
           // Crear nuevo producto
           console.log(
-            `Creando nuevo producto: ${mappedProduct.name}, SKU: ${mappedProduct.sku}`
+            `Creando nuevo producto: ${mappedProduct.name}, SKU: ${mappedProduct.variant.options[0].sku}`
           );
+
+          // Convertir dimensiones y specs al formato de la base de datos
+          const dimensionsJson =
+            mappedProduct.dimensions.length > 0
+              ? mappedProduct.dimensions.reduce((acc, item) => {
+                  acc[item.label] = item.value;
+                  return acc;
+                }, {} as Record<string, string>)
+              : null;
+
+          const specsJson =
+            mappedProduct.specs.length > 0
+              ? mappedProduct.specs.reduce((acc, item) => {
+                  acc[item.label] = item.value;
+                  return acc;
+                }, {} as Record<string, string>)
+              : null;
 
           const { data: newProduct, error: productError } = await supabase
             .from("products")
@@ -653,8 +707,8 @@ async function processProducts(
               description: mappedProduct.description,
               short_description: mappedProduct.short_description,
               brand_id: mappedProduct.brand_id,
-              dimensions: mappedProduct.dimensions,
-              specs: mappedProduct.specs,
+              dimensions: dimensionsJson,
+              specs: specsJson,
               keywords: mappedProduct.keywords,
               images_url: mappedProduct.images_url,
               subcategory_id: mappedProduct.subcategory_id,
@@ -670,13 +724,13 @@ async function processProducts(
             continue;
           }
 
-          // Crear variante predeterminada
+          // Crear variante
           const { data: newVariant, error: variantError } = await supabase
             .from("products_variants")
             .insert({
               product_id: newProduct.id,
-              name: "default",
-              display_name: "Default",
+              name: mappedProduct.variant.name,
+              display_name: mappedProduct.variant.display_name,
               position: 0,
             })
             .select()
@@ -689,18 +743,20 @@ async function processProducts(
           }
 
           // Crear opción de variante
+          const variantOption = mappedProduct.variant.options[0];
           const { error: variantOptionError } = await supabase
             .from("products_variant_options")
             .insert({
               variant_id: newVariant.id,
-              name: "default",
-              display_name: "Default",
-              price: mappedProduct.price,
-              stock: mappedProduct.stock,
+              name: variantOption.name,
+              display_name: variantOption.display_name,
+              price: variantOption.price,
+              stock: variantOption.stock,
               position: 0,
-              is_default: true,
-              sku: mappedProduct.sku,
-              metadata: mappedProduct.metadata,
+              is_default: variantOption.is_default,
+              sku: variantOption.sku,
+              metadata: variantOption.metadata,
+              images_url: mappedProduct.images_url, // Usar las mismas imágenes del producto
             });
 
           if (variantOptionError) {
@@ -783,27 +839,43 @@ function mapWondersignProduct(
   }
 
   // Extraer dimensiones si existen
-  const dimensions: Record<string, string> = {};
+  const dimensions: { label: string; value: string }[] = [];
   if (product.dimensions) {
     // Wondersign puede tener dimensiones en diferentes formatos
     if (typeof product.dimensions === "object") {
-      Object.assign(dimensions, product.dimensions);
+      Object.entries(product.dimensions).forEach(([key, value]) => {
+        dimensions.push({
+          label: key,
+          value: value as string,
+        });
+      });
     } else if (typeof product.dimensions === "string") {
-      dimensions["Dimensiones"] = product.dimensions;
+      dimensions.push({
+        label: "Dimensiones",
+        value: product.dimensions,
+      });
     }
   }
 
   // Extraer especificaciones si existen
-  const specs: Record<string, string> = {};
+  const specs: { label: string; value: string }[] = [];
   if (product.specifications) {
     if (Array.isArray(product.specifications)) {
       product.specifications.forEach((spec: any) => {
         if (spec.name && spec.value) {
-          specs[spec.name] = spec.value;
+          specs.push({
+            label: spec.name,
+            value: spec.value,
+          });
         }
       });
     } else if (typeof product.specifications === "object") {
-      Object.assign(specs, product.specifications);
+      Object.entries(product.specifications).forEach(([key, value]) => {
+        specs.push({
+          label: key,
+          value: value as string,
+        });
+      });
     }
   }
 
@@ -844,16 +916,27 @@ function mapWondersignProduct(
     keywords,
     images_url: images,
     subcategory_id: subcategoryId,
-    price: Number.parseFloat(product.price) || 0,
-    stock: Number.parseInt(
-      product.inventory_quantity || product.stock || "0",
-      10
-    ),
-    sku: product.sku || "",
-    metadata: {
-      external_id: product.id,
-      source: "wondersign",
-      last_updated: new Date().toISOString(),
+    variant: {
+      name: "default",
+      display_name: "Default",
+      options: [
+        {
+          name: "default",
+          display_name: "Default",
+          price: Number.parseFloat(product.price) || 0,
+          stock: Number.parseInt(
+            product.inventory_quantity || product.stock || "0",
+            10
+          ),
+          is_default: true,
+          sku: product.sku || "",
+          metadata: {
+            external_id: product.id,
+            source: "wondersign",
+            last_updated: new Date().toISOString(),
+          },
+        },
+      ],
     },
   };
 }
@@ -914,24 +997,56 @@ function mapShopifyProduct(
     shortDescription = textContent.substring(0, 147) + "...";
   }
 
+  // Extraer dimensiones y especificaciones
+  const dimensions: { label: string; value: string }[] = [];
+  const specs: { label: string; value: string }[] = [];
+
+  // Shopify puede tener metafields para dimensiones y specs
+  if (product.metafields) {
+    product.metafields.forEach((field: any) => {
+      if (field.namespace === "dimensions") {
+        dimensions.push({
+          label: field.key,
+          value: field.value,
+        });
+      } else if (field.namespace === "specifications") {
+        specs.push({
+          label: field.key,
+          value: field.value,
+        });
+      }
+    });
+  }
+
   return {
     name: product.title,
     short_name: product.title.substring(0, 50),
     description: product.body_html || "",
     short_description: shortDescription,
     brand_id: brandId!,
-    dimensions: {},
-    specs: {},
+    dimensions,
+    specs,
     keywords,
     images_url: images,
     subcategory_id: subcategoryId,
-    price: Number.parseFloat(variant.price) || 0,
-    stock: Number.parseInt(variant.inventory_quantity || "0", 10),
-    sku: variant.sku || "",
-    metadata: {
-      external_id: product.id,
-      source: "shopify",
-      last_updated: new Date().toISOString(),
+    variant: {
+      name: "default",
+      display_name: "Default",
+      options: [
+        {
+          name: "default",
+          display_name: "Default",
+          price: Number.parseFloat(variant.price) || 0,
+          stock: Number.parseInt(variant.inventory_quantity || "0", 10),
+          is_default: true,
+          sku: variant.sku || "",
+          metadata: {
+            external_id: product.id,
+            source: "shopify",
+            last_updated: new Date().toISOString(),
+          },
+        },
+      ],
     },
   };
 }
@@ -973,22 +1088,28 @@ function mapWooCommerceProduct(
   }
 
   // Extraer dimensiones
-  const dimensions: Record<string, string> = {};
+  const dimensions: { label: string; value: string }[] = [];
   if (product.dimensions) {
-    if (product.dimensions.length)
-      dimensions["Largo"] = product.dimensions.length;
-    if (product.dimensions.width)
-      dimensions["Ancho"] = product.dimensions.width;
-    if (product.dimensions.height)
-      dimensions["Alto"] = product.dimensions.height;
+    if (product.dimensions.length) {
+      dimensions.push({ label: "Largo", value: product.dimensions.length });
+    }
+    if (product.dimensions.width) {
+      dimensions.push({ label: "Ancho", value: product.dimensions.width });
+    }
+    if (product.dimensions.height) {
+      dimensions.push({ label: "Alto", value: product.dimensions.height });
+    }
   }
 
   // Extraer especificaciones de los atributos
-  const specs: Record<string, string> = {};
+  const specs: { label: string; value: string }[] = [];
   if (product.attributes) {
     product.attributes.forEach((attr: any) => {
       if (attr.name && attr.options && attr.options.length > 0) {
-        specs[attr.name] = attr.options.join(", ");
+        specs.push({
+          label: attr.name,
+          value: attr.options.join(", "),
+        });
       }
     });
   }
@@ -1015,13 +1136,24 @@ function mapWooCommerceProduct(
     keywords,
     images_url: images,
     subcategory_id: subcategoryId,
-    price: Number.parseFloat(product.price) || 0,
-    stock: Number.parseInt(product.stock_quantity || "0", 10),
-    sku: product.sku || "",
-    metadata: {
-      external_id: product.id,
-      source: "woocommerce",
-      last_updated: new Date().toISOString(),
+    variant: {
+      name: "default",
+      display_name: "Default",
+      options: [
+        {
+          name: "default",
+          display_name: "Default",
+          price: Number.parseFloat(product.price) || 0,
+          stock: Number.parseInt(product.stock_quantity || "0", 10),
+          is_default: true,
+          sku: product.sku || "",
+          metadata: {
+            external_id: product.id,
+            source: "woocommerce",
+            last_updated: new Date().toISOString(),
+          },
+        },
+      ],
     },
   };
 }
@@ -1074,17 +1206,17 @@ function mapMagentoProduct(
     description.substring(0, 147) + "...";
 
   // Extraer dimensiones
-  const dimensions: Record<string, string> = {};
+  const dimensions: { label: string; value: string }[] = [];
   const width = getCustomAttribute("width");
   const height = getCustomAttribute("height");
   const depth = getCustomAttribute("depth");
 
-  if (width) dimensions["Ancho"] = width;
-  if (height) dimensions["Alto"] = height;
-  if (depth) dimensions["Profundidad"] = depth;
+  if (width) dimensions.push({ label: "Ancho", value: width });
+  if (height) dimensions.push({ label: "Alto", value: height });
+  if (depth) dimensions.push({ label: "Profundidad", value: depth });
 
   // Extraer especificaciones
-  const specs: Record<string, string> = {};
+  const specs: { label: string; value: string }[] = [];
   if (product.custom_attributes) {
     product.custom_attributes.forEach((attr: any) => {
       // Excluir atributos ya procesados
@@ -1098,7 +1230,10 @@ function mapMagentoProduct(
           "depth",
         ].includes(attr.attribute_code)
       ) {
-        specs[attr.attribute_code] = attr.value;
+        specs.push({
+          label: attr.attribute_code,
+          value: attr.value,
+        });
       }
     });
   }
@@ -1128,13 +1263,24 @@ function mapMagentoProduct(
     keywords,
     images_url: images,
     subcategory_id: subcategoryId,
-    price: Number.parseFloat(product.price) || 0,
-    stock: 0, // Magento maneja el inventario por separado
-    sku: product.sku || "",
-    metadata: {
-      external_id: product.id,
-      source: "magento",
-      last_updated: new Date().toISOString(),
+    variant: {
+      name: "default",
+      display_name: "Default",
+      options: [
+        {
+          name: "default",
+          display_name: "Default",
+          price: Number.parseFloat(product.price) || 0,
+          stock: 0, // Magento maneja el inventario por separado
+          is_default: true,
+          sku: product.sku || "",
+          metadata: {
+            external_id: product.id,
+            source: "magento",
+            last_updated: new Date().toISOString(),
+          },
+        },
+      ],
     },
   };
 }
@@ -1199,12 +1345,28 @@ function mapCustomProduct(
     description.substring(0, 147) + "...";
 
   // Extraer dimensiones
+  const dimensions: { label: string; value: string }[] = [];
   const dimensionsValue = getValue(mappingConfig.dimensions_field);
-  const dimensions = typeof dimensionsValue === "object" ? dimensionsValue : {};
+  if (dimensionsValue && typeof dimensionsValue === "object") {
+    Object.entries(dimensionsValue).forEach(([key, value]) => {
+      dimensions.push({
+        label: key,
+        value: value as string,
+      });
+    });
+  }
 
   // Extraer especificaciones
+  const specs: { label: string; value: string }[] = [];
   const specsValue = getValue(mappingConfig.specs_field);
-  const specs = typeof specsValue === "object" ? specsValue : {};
+  if (specsValue && typeof specsValue === "object") {
+    Object.entries(specsValue).forEach(([key, value]) => {
+      specs.push({
+        label: key,
+        value: value as string,
+      });
+    });
+  }
 
   // Extraer imágenes
   let images: string[] = [];
@@ -1231,13 +1393,27 @@ function mapCustomProduct(
     keywords,
     images_url: images,
     subcategory_id: subcategoryId,
-    price: Number.parseFloat(getValue(mappingConfig.price_field) || "0"),
-    stock: Number.parseInt(getValue(mappingConfig.stock_field) || "0", 10),
-    sku: getValue(mappingConfig.sku_field) || "",
-    metadata: {
-      external_id: getValue(mappingConfig.id_field),
-      source: "custom",
-      last_updated: new Date().toISOString(),
+    variant: {
+      name: "default",
+      display_name: "Default",
+      options: [
+        {
+          name: "default",
+          display_name: "Default",
+          price: Number.parseFloat(getValue(mappingConfig.price_field) || "0"),
+          stock: Number.parseInt(
+            getValue(mappingConfig.stock_field) || "0",
+            10
+          ),
+          is_default: true,
+          sku: getValue(mappingConfig.sku_field) || "",
+          metadata: {
+            external_id: getValue(mappingConfig.id_field),
+            source: "custom",
+            last_updated: new Date().toISOString(),
+          },
+        },
+      ],
     },
   };
 }
@@ -1245,7 +1421,7 @@ function mapCustomProduct(
 function extractKeywords(text: string): string[] {
   if (!text) return [];
 
-  //liminar etiquetas HTML
+  // Eliminar etiquetas HTML
   const cleanText = text.replace(/<[^>]*>/g, "");
 
   // Dividir en palabras, eliminar puntuación y filtrar palabras cortas
