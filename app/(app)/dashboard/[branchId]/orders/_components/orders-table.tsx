@@ -319,7 +319,12 @@ export function OrdersTable({
                                     minWidth: 42,
                                   }}
                                 >
-                                  {order.id}
+                                  <Link
+                                    href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
+                                    className="flex-1"
+                                  >
+                                    {order.id}
+                                  </Link>
                                 </TableCell>
 
                                 {/* Status column */}
@@ -338,7 +343,8 @@ export function OrdersTable({
                                     {order.status === "requires_confirmation" &&
                                       "Requiere confirmación"}
                                     {order.status === "pending" && "Pendiente"}
-                                    {order.status === "paid" && "Lista para envío"}
+                                    {order.status === "paid" &&
+                                      "Lista para envío"}
                                     {order.status === "delivered" &&
                                       "Entregado"}
                                     {order.status === "shipped" &&

@@ -204,11 +204,11 @@ export const OrderActions = ({
                 onClick={handleAction}
               >
                 {(isLoading || order.status === "pending") && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className=" animate-spin" />
                 )}
                 {getStatusText(order.status)}
                 {!isLoading && order.status !== "pending" && (
-                  <ArrowRight className="ml-2" />
+                  <ArrowRight />
                 )}
               </Button>
             </div>
