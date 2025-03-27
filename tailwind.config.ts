@@ -62,6 +62,10 @@ const config: Config = {
           DEFAULT: "hsl(var(--contrast))",
           foreground: "hsl(var(--contrast-foreground))",
         },
+        contrast2: {
+          DEFAULT: "hsl(var(--contrast-2))",
+          foreground: "hsl(var(--contrast-2-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

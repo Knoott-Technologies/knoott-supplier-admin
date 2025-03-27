@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Card,
   CardContent,
@@ -7,18 +5,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ShoppingBag,
-  AlertCircle,
-  CheckCircle,
-  Truck,
-  Package,
-  XCircle,
-  Circle,
-} from "lucide-react";
+import { AlertCircle, Circle } from "lucide-react";
 import { Database } from "@/database.types";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export function OrdersSummary({
   orders,
@@ -29,23 +18,6 @@ export function OrdersSummary({
 }) {
   // Count total orders
   const totalOrders = orders.length;
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const createQueryString = (params: Record<string, string | null>) => {
-    const newSearchParams = new URLSearchParams(searchParams.toString());
-
-    Object.entries(params).forEach(([key, value]) => {
-      if (value === null) {
-        newSearchParams.delete(key);
-      } else {
-        newSearchParams.set(key, value);
-      }
-    });
-
-    return newSearchParams.toString();
-  };
 
   // Count orders by status
   const requiresConfirmation = orders.filter(
@@ -57,6 +29,7 @@ export function OrdersSummary({
     (order) => order.status === "delivered"
   ).length;
   const canceled = orders.filter((order) => order.status === "canceled").length;
+  const paid = orders.filter((order) => order.status === "paid").length;
 
   // Calculate orders that need attention (requires_confirmation + pending)
   const needsAttention = requiresConfirmation + pending;
@@ -147,6 +120,13 @@ export function OrdersSummary({
               <span className="text-sm">Pendientes</span>
             </div>
             <span className="text-sm font-semibold">{pending}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-x-2">
+              <Circle className="size-2 text-contrast2 fill-contrast2" />
+              <span className="text-sm">Listas para envío</span>
+            </div>
+            <span className="text-sm font-semibold">{paid}</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-x-2">

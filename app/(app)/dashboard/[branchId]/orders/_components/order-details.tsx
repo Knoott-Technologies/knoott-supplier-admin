@@ -67,47 +67,42 @@ export const OrderDetails = ({ order }: { order: Order }) => {
             </SheetDescription>
           </SheetHeader>
           <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto bg-background">
-            {order.status == "created" ||
-              (order.status == "requires_confirmation" && (
-                <Link
-                  href={`/dashboard/${order.provider_branch_id}/orders/${order.id}#confirmation`}
-                  className="bg-background sticky top-0 z-10 border-b"
-                >
-                  <div className="bg-contrast/10 p-3 sticky top-0 z-10 text-contrast">
-                    <div className="flex justify-between gap-2">
-                      <div className="flex grow gap-3">
-                        <AlertTriangle
-                          className="mt-0.5 shrink-0 size-4"
+            {order.status == "requires_confirmation" && (
+              <Link
+                href={`/dashboard/${order.provider_branch_id}/orders/${order.id}#confirmation`}
+                className="bg-background sticky top-0 z-10 border-b"
+              >
+                <div className="bg-contrast/10 p-3 sticky top-0 z-10 text-contrast">
+                  <div className="flex justify-between gap-2">
+                    <div className="flex grow gap-3">
+                      <AlertTriangle
+                        className="mt-0.5 shrink-0 size-4"
+                        aria-hidden="true"
+                      />
+                      <div className="flex grow justify-between gap-2 items-center">
+                        <p className="text-sm">
+                          Necesitamos confirmación de tu negocio para continuar
+                        </p>
+                        <ChevronRight
+                          className="ms-1 size-4 -mt-0.5 inline-flex transition-transform group-hover:translate-x-0.5"
                           aria-hidden="true"
                         />
-                        <div className="flex grow justify-between gap-2 items-center">
-                          <p className="text-sm">
-                            Necesitamos confirmación de tu negocio para
-                            continuar
-                          </p>
-                          <ChevronRight
-                            className="ms-1 size-4 -mt-0.5 inline-flex transition-transform group-hover:translate-x-0.5"
-                            aria-hidden="true"
-                          />
-                        </div>
                       </div>
                     </div>
                   </div>
-                </Link>
-              ))}
+                </div>
+              </Link>
+            )}
             <div className="w-full h-fit items-start justify-start flex flex-col gap-y-4 p-3">
               {(order.status !== "canceled" && (
-                <Collapsible defaultOpen className="border group/collapsible w-full">
+                <Collapsible
+                  defaultOpen
+                  className="border group/collapsible w-full"
+                >
                   <CollapsibleTrigger asChild>
                     <span className="w-full h-fit items-center justify-between flex gap-y-0 p-3 bg-sidebar cursor-pointer">
                       <span className="flex flex-col items-start justify-start gap-y-0">
                         <h3 className="text-sm font-semibold">
-                          {order.status === "created" && (
-                            <span className="flex items-center justify-start gap-x-1">
-                              <Circle className="!size-2 animate-pulse fill-contrast text-contrast" />
-                              Esperando confirmación del negocio
-                            </span>
-                          )}
                           {order.status === "requires_confirmation" && (
                             <span className="flex items-center justify-start gap-x-1">
                               <Circle className="!size-2 animate-pulse fill-contrast text-contrast" />
@@ -118,6 +113,12 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                             <span className="flex items-center justify-start gap-x-1">
                               <Circle className="!size-2 animate-pulse fill-primary text-primary" />
                               Procesando pago al comercio
+                            </span>
+                          )}
+                          {order.status === "paid" && (
+                            <span className="flex items-center justify-start gap-x-1">
+                              <Circle className="!size-2 animate-pulse fill-success text-success" />
+                              Hemos enviado el pago
                             </span>
                           )}
                           {order.status === "shipped" && (
@@ -228,15 +229,13 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                     </span>
                   )}
                   <span className="w-full flex flex-col gap-y-1">
-                      <p className="text-sm font-semibold">
-                        Información de contacto:
-                      </p>
-                      <p
-                        className="text-sm line-clamp-2 font-medium text-muted-foreground"
-                      >
-                        {order.client.phone_number}
-                      </p>
-                    </span>
+                    <p className="text-sm font-semibold">
+                      Información de contacto:
+                    </p>
+                    <p className="text-sm line-clamp-2 font-medium text-muted-foreground">
+                      {order.client.phone_number}
+                    </p>
+                  </span>
                 </div>
               </div>
               <div className="w-full flex flex-col gap-y-0 items-start justify-start">

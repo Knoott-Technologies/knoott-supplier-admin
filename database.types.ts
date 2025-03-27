@@ -1047,13 +1047,13 @@ export type Database = {
           address_id: string
           cancelation_reason: string | null
           canceled_at: string | null
-          confirmed_at: string | null
           confirmed_by: string | null
           created_at: string
           delivered_at: string | null
           id: number
           knoott_received_amount: number
           ordered_by: string
+          paid_at: string | null
           povider_received_amount: number
           product_id: number | null
           provider_branch_id: string
@@ -1069,13 +1069,13 @@ export type Database = {
           address_id: string
           cancelation_reason?: string | null
           canceled_at?: string | null
-          confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
           delivered_at?: string | null
           id?: number
           knoott_received_amount?: number
           ordered_by: string
+          paid_at?: string | null
           povider_received_amount?: number
           product_id?: number | null
           provider_branch_id: string
@@ -1091,13 +1091,13 @@ export type Database = {
           address_id?: string
           cancelation_reason?: string | null
           canceled_at?: string | null
-          confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
           delivered_at?: string | null
           id?: number
           knoott_received_amount?: number
           ordered_by?: string
+          paid_at?: string | null
           povider_received_amount?: number
           product_id?: number | null
           provider_branch_id?: string
@@ -1393,7 +1393,7 @@ export type Database = {
       banner_types: "brand" | "category" | "product"
       cart_status: "pending" | "completed" | "abandoned"
       order_status:
-        | "created"
+        | "paid"
         | "pending"
         | "shipped"
         | "delivered"

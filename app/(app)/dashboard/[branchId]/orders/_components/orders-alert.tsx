@@ -24,8 +24,8 @@ export function OrdersAlerts({
 
   // Find orders that are confirmed but not shipped after 2 days
   const unshippedOrders = orders.filter((order) => {
-    if (order.status === "pending" && order.confirmed_at) {
-      const confirmedDate = parseISO(order.confirmed_at);
+    if (order.status === "pending" && order.paid_at) {
+      const confirmedDate = parseISO(order.paid_at);
       const daysSinceConfirmation = differenceInDays(now, confirmedDate);
       return daysSinceConfirmation >= 2;
     }

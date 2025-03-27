@@ -97,11 +97,20 @@ export async function POST(req: NextRequest) {
           notificationUrl = `/dashboard/${record.provider_branch_id}/orders/${record.id}#confirmation`;
           break;
         case "pending":
-          // Confirmada
+          // Confirmada - esperando pago del administrador
           notificationTitle = "Orden confirmada ✅";
           notificationBody = `La orden #${record.id} de ${productName}${
             variantName ? ` (${variantName})` : ""
-          } ha sido confirmada y está siendo procesada.`;
+          } ha sido confirmada. El pago está siendo procesado por el administrador.`;
+          break;
+        case "paid":
+          // Pagada - lista para enviar
+          notificationTitle = "Pago recibido 💰";
+          notificationBody = `El pago de la orden #${
+            record.id
+          } de ${productName}${
+            variantName ? ` (${variantName})` : ""
+          } ha sido procesado. Ya puedes preparar y enviar el pedido.`;
           break;
         case "shipped":
           // Enviada

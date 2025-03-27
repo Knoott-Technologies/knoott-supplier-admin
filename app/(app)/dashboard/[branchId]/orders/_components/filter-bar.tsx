@@ -143,6 +143,12 @@ export function FilterBar() {
                   En proceso
                 </span>
               </SelectItem>
+              <SelectItem value="paid">
+                <span className="flex items-center justify-start gap-x-2">
+                  <Circle className="!size-2 fill-contrast2 text-contrast2" />
+                  Listas para enviar
+                </span>
+              </SelectItem>
               <SelectItem value="shipped">
                 <span className="flex items-center justify-start gap-x-2">
                   <Circle className="!size-2 fill-tertiary text-tertiary" />

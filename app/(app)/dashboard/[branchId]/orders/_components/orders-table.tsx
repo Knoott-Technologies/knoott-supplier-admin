@@ -116,6 +116,8 @@ export function OrdersTable({
         return <Circle className="size-2 text-contrast fill-contrast" />;
       case "pending":
         return <Circle className="size-2 text-primary fill-primary" />;
+      case "paid":
+        return <Circle className="size-2 text-contrast2 fill-contrast2" />;
       case "shipped":
         return <Circle className="size-2 text-tertiary fill-tertiary" />;
       case "delivered":
@@ -134,6 +136,8 @@ export function OrdersTable({
         return "Requieren confirmación";
       case "pending":
         return "Pendientes";
+      case "payed":
+        return "Pagadas";
       case "shipped":
         return "En tránsito";
       case "delivered":
@@ -152,6 +156,8 @@ export function OrdersTable({
         return "Fecha creación";
       case "pending":
         return "Fecha confirmación";
+      case "paid":
+        return "Fecha de pago";
       case "shipped":
         return "Fecha envío";
       case "delivered":
@@ -169,7 +175,9 @@ export function OrdersTable({
       case "requires_confirmation":
         return order.created_at;
       case "pending":
-        return order.confirmed_at || order.created_at;
+        return order.verified_at || order.created_at;
+      case "paid":
+        return order.paid_at || order.created_at;
       case "shipped":
         return order.shipped_at || order.created_at;
       case "delivered":
@@ -188,8 +196,8 @@ export function OrdersTable({
         return "bg-contrast/20 text-contrast hover:bg-contrast/10";
       case "pending":
         return "bg-primary/20 text-amber-800 hover:bg-primary/10";
-      case "payed":
-        return "bg-success/20 text-success hover:bg-success/10";
+      case "paid":
+        return "bg-contrast2/20 text-contrast2 hover:bg-contrast2/10";
       case "shipped":
         return "bg-tertiary/20 text-tertiary border hover:bg-tertiary/10 hover:text-tertiary";
       case "delivered":
@@ -332,11 +340,10 @@ export function OrdersTable({
                                       getStatusBadgeClass(order.status)
                                     )}
                                   >
-                                    {order.status === "created" &&
-                                      "Orden creada"}
                                     {order.status === "requires_confirmation" &&
                                       "Requiere confirmación"}
                                     {order.status === "pending" && "Pendiente"}
+                                    {order.status === "paid" && "Orden pagada"}
                                     {order.status === "delivered" &&
                                       "Entregado"}
                                     {order.status === "shipped" &&

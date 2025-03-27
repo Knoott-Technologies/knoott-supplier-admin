@@ -15,6 +15,7 @@ import {
   PackagePlus,
   FilePenLineIcon as Signature,
   Truck,
+  CreditCard,
 } from "lucide-react";
 import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
@@ -26,16 +27,16 @@ export const StepperTimeline = ({ order }: { order: Order }) => {
     status: Database["public"]["Enums"]["order_status"]
   ) => {
     switch (status) {
-      case "created":
-        return 2;
       case "requires_confirmation":
         return 2;
       case "pending":
         return 3;
-      case "shipped":
+      case "paid":
         return 4;
-      case "delivered":
+      case "shipped":
         return 5;
+      case "delivered":
+        return 6;
       default:
         return 1;
     }
@@ -81,13 +82,19 @@ export const StepperTimeline = ({ order }: { order: Order }) => {
     },
     {
       step: 4,
+      title: "Pago recibido",
+      description: "El pago ha sido procesado y está listo para envío",
+      icon: <CreditCard className="size-3.5" />,
+    },
+    {
+      step: 5,
       title: "Preparando envío",
       description:
         "El pedido está siendo preparado para su entrega a domicilio",
       icon: <Truck className="size-3.5" />,
     },
     {
-      step: 5,
+      step: 6,
       title: "Pedido entregado",
       description: "El cliente ha recibido correctamente su pedido",
       icon: <PackageCheck className="size-3.5" />,
@@ -100,18 +107,20 @@ export const StepperTimeline = ({ order }: { order: Order }) => {
       case 1: // Pedido registrado - siempre completado
         return true;
       case 2: // Confirmación del negocio
-        return (
-          order.status !== "requires_confirmation" && order.status !== "created"
-        );
+        return order.status !== "requires_confirmation";
       case 3: // Procesando pago
         return (
-          order.status !== "requires_confirmation" &&
-          order.status !== "created" &&
-          order.status !== "pending"
+          order.status !== "requires_confirmation" && order.status !== "pending"
         );
-      case 4: // Preparando envío - solo completado cuando la orden está entregada
+      case 4: // Pago recibido
+        return (
+          order.status !== "requires_confirmation" &&
+          order.status !== "pending" &&
+          order.status !== "paid"
+        );
+      case 5: // Preparando envío - solo completado cuando la orden está entregada
         return order.status === "delivered";
-      case 5: // Pedido entregado
+      case 6: // Pedido entregado
         return order.status === "delivered";
       default:
         return false;
@@ -120,12 +129,12 @@ export const StepperTimeline = ({ order }: { order: Order }) => {
 
   // Determinar si un paso debe mostrar el estado de carga
   const isStepLoading = (step: number) => {
-    if (step === 1 || step === 5) return false; // Estos pasos nunca tienen estado de carga
+    if (step === 1 || step === 6) return false; // Estos pasos nunca tienen estado de carga
 
     const currentStep = getDefaultValue(order.status);
 
-    // Caso especial para el paso 4 (Preparando envío)
-    if (step === 4 && order.status === "shipped") {
+    // Caso especial para el paso 5 (Preparando envío)
+    if (step === 5 && order.status === "shipped") {
       return true; // Siempre mostrar cargando cuando está en tránsito
     }
 
@@ -138,20 +147,25 @@ export const StepperTimeline = ({ order }: { order: Order }) => {
       case 2: // Confirmación del negocio
         return (
           order.status !== "requires_confirmation" &&
-          order.status !== "created" &&
           order.verified_at &&
           order.provider_user
         );
       case 3: // Procesando pago
         return (
           order.status !== "requires_confirmation" &&
-          order.status !== "created" &&
           order.status !== "pending" &&
-          order.confirmed_at
+          order.verified_at
         );
-      case 4: // Preparando envío - mostrar info detallada si hay datos de envío, aunque esté en carga
+      case 4: // Pago recibido
+        return (
+          (order.status === "paid" ||
+            order.status === "shipped" ||
+            order.status === "delivered") &&
+          order.paid_at
+        );
+      case 5: // Preparando envío - mostrar info detallada si hay datos de envío, aunque esté en carga
         return order.status === "shipped" || order.status === "delivered";
-      case 5: // Pedido entregado
+      case 6: // Pedido entregado
         return order.status === "delivered" && order.delivered_at;
       default:
         return false;
@@ -211,7 +225,7 @@ export const StepperTimeline = ({ order }: { order: Order }) => {
                       a la cuenta bancaria del negocio el{" "}
                       <span className="text-foreground font-medium">
                         {formatInTimeZone(
-                          order.confirmed_at!,
+                          order.paid_at!,
                           timeZone,
                           "PPP 'a las' h:mm aa",
                           {
@@ -221,7 +235,23 @@ export const StepperTimeline = ({ order }: { order: Order }) => {
                       </span>
                     </StepperDescription>
                   </div>
-                ) : step === 4 &&
+                ) : step === 4 && shouldShowDetailedInfo(step) ? (
+                  <div className="pl-4 px-2 text-left flex flex-col gap-y-0.5">
+                    <StepperTitle>Pago recibido y confirmado</StepperTitle>
+                    <StepperDescription>
+                      El pago ha sido procesado el{" "}
+                      <span className="text-foreground font-medium">
+                        {formatInTimeZone(
+                          new Date(order.paid_at!),
+                          timeZone,
+                          "PPP 'a las' h:mm aa",
+                          { locale: es }
+                        )}
+                      </span>
+                      . El pedido está listo para ser enviado.
+                    </StepperDescription>
+                  </div>
+                ) : step === 5 &&
                   shouldShowDetailedInfo(step) &&
                   order.shipped_at &&
                   order.provider_shipped_user ? (
@@ -244,7 +274,7 @@ export const StepperTimeline = ({ order }: { order: Order }) => {
                       </span>
                     </StepperDescription>
                   </div>
-                ) : step === 5 && shouldShowDetailedInfo(step) ? (
+                ) : step === 6 && shouldShowDetailedInfo(step) ? (
                   <div className="pl-4 px-2 text-left flex flex-col gap-y-0.5">
                     <StepperTitle>Entrega completada</StepperTitle>
                     <StepperDescription>

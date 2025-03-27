@@ -52,6 +52,8 @@ body {
     --Success-foreground: 43 0% 95%;
     --contrast: 227 100% 64%;
     --contrast-foreground: 43 0% 95%;
+    --contrast-2: 346 91% 65%;
+    --contrast-2-foreground: 43 0% 95%;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
