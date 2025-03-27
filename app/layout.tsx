@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { source } from "@/components/fonts/font-def";
@@ -21,6 +21,10 @@ export const metadata: Metadata = {
   },
   description:
     "Ingresa a la plataforma de Knoott Supplier Admin, para gestionar tus productos, pedidos y más.",
+};
+
+export const viewport: Viewport = {
+  userScalable: false,
 };
 
 export default function RootLayout({

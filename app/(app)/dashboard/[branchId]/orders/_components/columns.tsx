@@ -49,6 +49,41 @@ export const columns: ColumnDef<Order>[] = [
     enableSorting: false,
   },
   {
+    header: "Estado",
+    accessorKey: "status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      return (
+        <Badge
+          className={cn(
+            status === "created" &&
+              "bg-background text-muted-foreground hover:bg-background border-border",
+            status === "requires_confirmation" &&
+              "bg-contrast/20 text-contrast hover:bg-contrast/10",
+            status === "pending" &&
+              "bg-primary/20 text-amber-800 hover:bg-primary/10",
+            status === "delivered" &&
+              "bg-success/20 text-success hover:bg-success/10",
+            status === "shipped" &&
+              "bg-tertiary/20 text-tertiary border hover:bg-tertiary/10 hover:text-tertiary",
+            status === "canceled" &&
+              "bg-destructive/20 text-destructive hover:bg-destructive/10"
+          )}
+        >
+          {status === "created" && "Orden creada"}
+          {status === "requires_confirmation" && "Requiere confirmación"}
+          {status === "pending" && "Pendiente"}
+          {status === "delivered" && "Entregado"}
+          {status === "shipped" && "En tránsito"}
+          {status === "canceled" && "Cancelado"}
+        </Badge>
+      );
+    },
+    size: 90,
+    minSize: 90,
+    maxSize: 90,
+  },
+  {
     header: "Fecha creación",
     accessorKey: "created_at",
     cell: ({ row }) => {
@@ -96,40 +131,5 @@ export const columns: ColumnDef<Order>[] = [
       );
     },
     enableHiding: false,
-  },
-  {
-    header: "Estado",
-    accessorKey: "status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      return (
-        <Badge
-          className={cn(
-            status === "created" &&
-              "bg-background text-muted-foreground hover:bg-background border-border",
-            status === "requires_confirmation" &&
-              "bg-contrast/20 text-contrast hover:bg-contrast/10",
-            status === "pending" &&
-              "bg-primary/20 text-amber-800 hover:bg-primary/10",
-            status === "delivered" &&
-              "bg-success/20 text-success hover:bg-success/10",
-            status === "shipped" &&
-              "bg-tertiary/20 text-tertiary border hover:bg-tertiary/10 hover:text-tertiary",
-            status === "canceled" &&
-              "bg-destructive/20 text-destructive hover:bg-destructive/10"
-          )}
-        >
-          {status === "created" && "Orden creada"}
-          {status === "requires_confirmation" && "Requiere confirmación"}
-          {status === "pending" && "Pendiente"}
-          {status === "delivered" && "Entregado"}
-          {status === "shipped" && "En tránsito"}
-          {status === "canceled" && "Cancelado"}
-        </Badge>
-      );
-    },
-    size: 130,
-    minSize: 80,
-    maxSize: 150,
   },
 ];
