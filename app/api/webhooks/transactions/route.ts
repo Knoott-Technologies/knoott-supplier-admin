@@ -65,9 +65,6 @@ export async function POST(req: NextRequest) {
     const brandName = orderDetails?.product?.product_info?.brand?.name || "";
     const variantName =
       orderDetails?.product?.variant?.variant_list?.name || "";
-    const clientName = orderDetails?.client
-      ? `${orderDetails.client.first_name} ${orderDetails.client.last_name}`
-      : "Un cliente";
     const formattedAmount = formatPrice(orderDetails?.total_amount || 0);
 
     // Variables para la notificación
@@ -101,7 +98,7 @@ export async function POST(req: NextRequest) {
           notificationTitle = "Orden confirmada ✅";
           notificationBody = `La orden #${record.id} de ${productName}${
             variantName ? ` (${variantName})` : ""
-          } ha sido confirmada. El pago está siendo procesado por el administrador.`;
+          } ha sido confirmada. Comenzaremos a procesar el pago.`;
           break;
         case "paid":
           // Pagada - lista para enviar
