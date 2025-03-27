@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     if (isNewRecord) {
       // Nueva orden - notificar al proveedor
       notificationTitle = "¡Nueva orden recibida! 🛍️";
-      notificationBody = `${clientName} ha realizado un pedido de ${productName}${
+      notificationBody = `Has recibido un pedido de ${productName}${
         variantName ? ` (${variantName})` : ""
       }${brandName ? ` de ${brandName}` : ""} por MXN ${formattedAmount}.`;
     } else if (statusChanged) {
