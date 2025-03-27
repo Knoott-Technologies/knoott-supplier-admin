@@ -76,40 +76,11 @@ export const OrderDetails = ({ order }: { order: Order }) => {
       >
         <div className="flex h-full w-full flex-col bg-background">
           <SheetHeader className="p-3 bg-sidebar border-b text-start">
-            <div className="w-full h-fit items-start justify-between flex">
-              <span className="flex-1 items-start justify-start flex flex-col">
-                <SheetTitle>Detalles de la orden #{order.id}</SheetTitle>
-                <SheetDescription>
-                  Visualiza los detalles de la orden, incluyendo la información
-                  de envío, etc.
-                </SheetDescription>
-              </span>
-              <Badge
-                className={cn(
-                  "shrink-0",
-                  order.status === "created" &&
-                    "bg-contrast/20 text-contrast hover:bg-contrast/10",
-                  order.status === "requires_confirmation" &&
-                    "bg-contrast/20 text-contrast hover:bg-contrast/10",
-                  order.status === "pending" &&
-                    "bg-primary/20 text-amber-800 hover:bg-primary/10",
-                  order.status === "delivered" &&
-                    "bg-success/20 text-success hover:bg-success/10",
-                  order.status === "shipped" &&
-                    "bg-tertiary/20 text-tertiary border hover:bg-tertiary/10 hover:text-tertiary",
-                  order.status === "canceled" &&
-                    "bg-destructive/20 text-destructive hover:bg-destructive/10"
-                )}
-              >
-                {order.status === "created" && "Requiere confirmación"}
-                {order.status === "requires_confirmation" &&
-                  "Requiere confirmación"}
-                {order.status === "pending" && "Pendiente"}
-                {order.status === "delivered" && "Entregado"}
-                {order.status === "shipped" && "En tránsito"}
-                {order.status === "canceled" && "Cancelado"}
-              </Badge>
-            </div>
+            <SheetTitle>Detalles de la orden #{order.id}</SheetTitle>
+            <SheetDescription>
+              Visualiza los detalles de la orden, incluyendo la información de
+              envío, etc.
+            </SheetDescription>
           </SheetHeader>
           <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto bg-background">
             {order.status == "created" ||
