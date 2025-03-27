@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
     const { data: providerUsers, error: providerUsersError } = await supabase
       .from("user_provider_branches")
       .select("user_id")
-      .eq("provider_branch_id", record.provider_branch_id);
+      .eq("provider_id", record.provider_branch_id);
 
     if (providerUsersError) {
       console.error(
