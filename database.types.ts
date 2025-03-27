@@ -1112,6 +1112,8 @@ export type Database = {
           confirmed_by: string | null
           created_at: string
           delivered_at: string | null
+          "eta-first": string | null
+          "eta-second": string | null
           id: number
           knoott_received_amount: number
           ordered_by: string
@@ -1134,6 +1136,8 @@ export type Database = {
           confirmed_by?: string | null
           created_at?: string
           delivered_at?: string | null
+          "eta-first"?: string | null
+          "eta-second"?: string | null
           id?: number
           knoott_received_amount?: number
           ordered_by: string
@@ -1156,6 +1160,8 @@ export type Database = {
           confirmed_by?: string | null
           created_at?: string
           delivered_at?: string | null
+          "eta-first"?: string | null
+          "eta-second"?: string | null
           id?: number
           knoott_received_amount?: number
           ordered_by?: string

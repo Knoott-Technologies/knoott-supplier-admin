@@ -3,12 +3,20 @@
 import { Button } from "@/components/ui/button";
 import type { Order } from "../../page";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Check, Loader2, Upload } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShippingGuideUpload } from "./shipping-guide-upload";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const getStatusText = (status: string): string => {
   switch (status) {
@@ -86,12 +94,6 @@ export const OrderActions = ({
   }
 
   const handleAction = async () => {
-    // Si el estado es "paid", mostrar el modal de carga de archivos
-    if (order.status === "paid") {
-      setIsUploadModalOpen(true);
-      return;
-    }
-
     setIsLoading(true);
     try {
       let endpoint = "";
@@ -146,7 +148,11 @@ export const OrderActions = ({
     }
   };
 
-  const handleShippingGuideUploaded = async (fileUrl: string) => {
+  const handleShippingGuideUploaded = async (
+    fileUrl: string,
+    etaFirst: Date | null,
+    etaSecond: Date | null
+  ) => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/orders/${order.id}/ship`, {
@@ -158,6 +164,8 @@ export const OrderActions = ({
           userId: user.id,
           branchId: branchId,
           shippingGuideUrl: fileUrl,
+          etaFirst: etaFirst ? etaFirst.toISOString() : null,
+          etaSecond: etaSecond ? etaSecond.toISOString() : null,
         }),
       });
 
@@ -185,6 +193,81 @@ export const OrderActions = ({
     }
   };
 
+  // Renderizar un botón simple para el estado "pending"
+  if (order.status === "pending") {
+    return (
+      <div className="bg-background z-50 border-t sticky bottom-0 w-full mt-auto">
+        <div
+          className={cn(
+            "w-full h-fit p-3 py-2 pb-8 md:pb-2",
+            getStatusActionBannerClass(order.status)
+          )}
+        >
+          <div className="flex justify-end w-full">
+            <div className="flex gap-2 w-full justify-end">
+              <Button
+                className={cn(
+                  getStatusButtonClass(order.status),
+                  "w-full md:w-auto min-w-[250px] justify-between"
+                )}
+                variant={"ghost"}
+                size="sm"
+                disabled={true}
+              >
+                <Loader2 className="animate-spin mr-2" />
+                {getStatusText(order.status)}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Renderizar un botón simple para el estado "paid" que abre directamente el sheet
+  if (order.status === "paid") {
+    return (
+      <>
+        <div className="bg-background z-50 border-t sticky bottom-0 w-full mt-auto">
+          <div
+            className={cn(
+              "w-full h-fit p-3 py-2 pb-8 md:pb-2",
+              getStatusActionBannerClass(order.status)
+            )}
+          >
+            <div className="flex justify-end w-full">
+              <div className="flex gap-2 w-full justify-end">
+                <Button
+                  className={cn(
+                    getStatusButtonClass(order.status),
+                    "w-full md:w-auto min-w-[250px] justify-between"
+                  )}
+                  variant={"ghost"}
+                  size="sm"
+                  disabled={isLoading}
+                  onClick={() => setIsUploadModalOpen(true)}
+                >
+                  {isLoading && <Loader2 className="animate-spin" />}
+                  {getStatusText(order.status)}
+                  {!isLoading && <ArrowRight />}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal de carga de guía de envío */}
+        <ShippingGuideUpload
+          orderId={order.id}
+          isOpen={isUploadModalOpen}
+          onClose={() => setIsUploadModalOpen(false)}
+          onSuccess={handleShippingGuideUploaded}
+        />
+      </>
+    );
+  }
+
+  // Renderizar el dropdown para los demás estados
   return (
     <>
       <div className="bg-background z-50 border-t sticky bottom-0 w-full mt-auto">
@@ -196,21 +279,45 @@ export const OrderActions = ({
         >
           <div className="flex justify-end w-full">
             <div className="flex gap-2 w-full justify-end">
-              <Button
-                className={cn(getStatusButtonClass(order.status), "w-full md:w-auto")}
-                variant={"ghost"}
-                size="sm"
-                disabled={order.status === "pending" || isLoading}
-                onClick={handleAction}
-              >
-                {(isLoading || order.status === "pending") && (
-                  <Loader2 className=" animate-spin" />
-                )}
-                {getStatusText(order.status)}
-                {!isLoading && order.status !== "pending" && (
-                  <ArrowRight />
-                )}
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    className={cn(
+                      getStatusButtonClass(order.status),
+                      "w-full md:w-auto min-w-[250px] justify-between"
+                    )}
+                    variant={"ghost"}
+                    size="sm"
+                    disabled={isLoading}
+                  >
+                    {isLoading && <Loader2 className="animate-spin" />}
+                    {getStatusText(order.status)}
+                    {!isLoading && <ArrowRight />}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="center"
+                  side="top"
+                  sideOffset={5}
+                  className="w-[--radix-dropdown-menu-trigger-width] bg-background"
+                >
+                  <DropdownMenuLabel>
+                    ¿Deseas confirmar la acción?
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleAction}
+                    disabled={isLoading}
+                    className="w-full justify-between cursor-pointer text-success focus:bg-success/10 focus:text-success"
+                  >
+                    {isLoading && <Loader2 className="animate-spin" />}
+                    Confirmar
+                    {!isLoading && <Check />}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Cancelar</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>

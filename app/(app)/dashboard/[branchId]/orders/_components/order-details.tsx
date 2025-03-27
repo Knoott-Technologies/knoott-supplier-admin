@@ -14,9 +14,11 @@ import {
 import {
   AlertTriangle,
   ArrowRight,
+  Ban,
   ChevronDown,
   ChevronRight,
   Circle,
+  ExternalLink,
   PanelBottomOpen,
   PanelRightOpen,
   X,
@@ -137,8 +139,44 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                 </div>
               </Link>
             )}
+            {order.status === "canceled" && order.canceled_at && (
+              <div className="bg-background sticky top-0 border-b border-b-destructive z-10">
+                <div className="bg-destructive/20 p-3 sticky top-0 z-10 text-destructive">
+                  <div className="flex justify-between gap-2">
+                    <div className="flex grow gap-3">
+                      <Ban
+                        className="mt-0.5 shrink-0 size-4"
+                        aria-hidden="true"
+                      />
+                      <div className="flex grow justify-between gap-2 items-center">
+                        <div className="flex flex-col grow justify-start items-start">
+                          <p className="text-sm">
+                            Esta orden ha sido cancelada el día{" "}
+                            {formatInTimeZone(
+                              order.canceled_at,
+                              timeZone,
+                              "PPP 'a las' hh:mm aa",
+                              { locale: es }
+                            )}
+                          </p>
+                          {order.cancelation_reason && (
+                            <p className="text-xs">
+                              Motivo de cancelación: {order.cancelation_reason}
+                            </p>
+                          )}
+                        </div>
+                        <ChevronRight
+                          className="ms-1 size-4 shrink-0 -mt-0.5 inline-flex transition-transform group-hover:translate-x-0.5"
+                          aria-hidden="true"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="w-full h-fit items-start justify-start flex flex-col gap-y-4 p-3 z-[1]">
-              {(order.status !== "canceled" && (
+              {order.status !== "canceled" && (
                 <Collapsible
                   defaultOpen
                   className="border group/collapsible w-full"
@@ -189,34 +227,6 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                     <StepperTimeline order={order} />
                   </CollapsibleContent>
                 </Collapsible>
-              )) || (
-                <div className="w-full flex flex-col gap-y-2 items-start justify-start p-3 bg-destructive/10 text-destructive border border-destructive">
-                  {(order.canceled_at && (
-                    <h3 className="text-sm font-semibold">
-                      Orden cancelada el día{" "}
-                      {formatInTimeZone(
-                        order.canceled_at,
-                        timeZone,
-                        "PPP 'a las' hh:mm aa",
-                        { locale: es }
-                      )}
-                    </h3>
-                  )) || (
-                    <h3 className="text-sm font-semibold">
-                      Esta orden ha sido cancelada
-                    </h3>
-                  )}
-                  {order.cancelation_reason && (
-                    <span>
-                      <p className="text-sm font-medium text-foreground">
-                        Motivo de cancelación:
-                      </p>
-                      <p className="text-sm text-destructive/80">
-                        {order.cancelation_reason}
-                      </p>
-                    </span>
-                  )}
-                </div>
               )}
               <div className="w-full flex flex-col gap-y-0 items-start justify-start">
                 <span className="w-full h-fit items-center justify-between flex gap-y-0 p-3 bg-sidebar border">
@@ -260,7 +270,7 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                     </p>
                   </span>
                   <span className="w-full flex flex-col gap-y-1">
-                    <p className="text-sm font-semibold">Remitente:</p>
+                    <p className="text-sm font-semibold">Destinatario:</p>
                     <p
                       title={
                         order.client.first_name + " " + order.client.last_name
@@ -270,6 +280,38 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                       {order.client.first_name + " " + order.client.last_name}
                     </p>
                   </span>
+                  {order.shipping_guide_url && (
+                    <span className="w-full flex flex-col gap-y-1">
+                      <p className="text-sm font-semibold">Guía de envío:</p>
+                      <Link
+                        href={order.shipping_guide_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm line-clamp-2 font-medium text-tertiary hover:underline hover:text-tertiary/80 flex items-center gap-x-1.5"
+                      >
+                        Ver guía <ExternalLink className="size-3.5" />
+                      </Link>
+                    </span>
+                  )}
+                  {order["eta-first"] && order["eta-second"] && (
+                    <span className="w-full flex flex-col gap-y-1">
+                      <p className="text-sm font-semibold">
+                        Fecha aproximada de entrega:
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatInTimeZone(order["eta-first"], timeZone, "PPP", {
+                          locale: es,
+                        })}{" "}
+                        -{" "}
+                        {formatInTimeZone(
+                          order["eta-second"],
+                          timeZone,
+                          "PPP",
+                          { locale: es }
+                        )}
+                      </p>
+                    </span>
+                  )}
                   {order.address.additional_notes && (
                     <span className="w-full flex flex-col gap-y-1">
                       <p className="text-sm font-semibold">

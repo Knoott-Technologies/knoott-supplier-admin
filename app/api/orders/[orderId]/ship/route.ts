@@ -6,7 +6,8 @@ export async function POST(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const { userId, branchId, shippingGuideUrl } = await req.json();
+    const { userId, branchId, shippingGuideUrl, etaFirst, etaSecond } =
+      await req.json();
 
     if (!userId || !branchId) {
       return NextResponse.json(
@@ -18,6 +19,14 @@ export async function POST(
     if (!shippingGuideUrl) {
       return NextResponse.json(
         { error: "Se requiere la URL de la guía de envío" },
+        { status: 400 }
+      );
+    }
+
+    // Validar que se proporcionaron las fechas ETA
+    if (!etaFirst || !etaSecond) {
+      return NextResponse.json(
+        { error: "Se requiere el rango de tiempo estimado de entrega" },
         { status: 400 }
       );
     }
@@ -64,6 +73,8 @@ export async function POST(
         shipped_ordered_by: userId,
         shipped_at: now,
         shipping_guide_url: shippingGuideUrl,
+        "eta-first": etaFirst,
+        "eta-second": etaSecond,
       })
       .eq("id", params.orderId);
 

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -12,6 +14,10 @@ import { libre } from "@/components/fonts/font-def";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { Download, ExternalLink } from "lucide-react";
+import { formatInTimeZone } from "date-fns-tz";
+import { es } from "date-fns/locale";
+
+const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export const OrderInfo = ({ order }: { order: Order }) => {
   return (
@@ -73,7 +79,7 @@ export const OrderInfo = ({ order }: { order: Order }) => {
                   </p>
                 </span>
                 <span className="w-full flex flex-col gap-y-1">
-                  <p className="text-sm font-semibold">Remitente:</p>
+                  <p className="text-sm font-semibold">Destinatario:</p>
                   <p
                     title={
                       order.client.first_name + " " + order.client.last_name
@@ -84,6 +90,37 @@ export const OrderInfo = ({ order }: { order: Order }) => {
                   </p>
                 </span>
               </div>
+              <div className="w-full h-fit items-start grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {order.shipping_guide_url && (
+                  <span className="w-full flex flex-col gap-y-1">
+                    <p className="text-sm font-semibold">Guía de envío:</p>
+                    <Link
+                      href={order.shipping_guide_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm line-clamp-2 font-medium text-tertiary hover:underline hover:text-tertiary/80 flex items-center gap-x-1.5"
+                    >
+                      Ver guía <ExternalLink className="size-3.5" />
+                    </Link>
+                  </span>
+                )}
+                {order["eta-first"] && order["eta-second"] && (
+                  <span className="w-full flex flex-col gap-y-1">
+                    <p className="text-sm font-semibold">
+                      Fecha aproximada de entrega:
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatInTimeZone(order["eta-first"], timeZone, "PPP", {
+                        locale: es,
+                      })}{" "}
+                      -{" "}
+                      {formatInTimeZone(order["eta-second"], timeZone, "PPP", {
+                        locale: es,
+                      })}
+                    </p>
+                  </span>
+                )}
+              </div>
               {order.address.additional_notes && (
                 <span className="w-full flex flex-col gap-y-1">
                   <p className="text-sm font-semibold">Notas adicionales:</p>
@@ -93,19 +130,6 @@ export const OrderInfo = ({ order }: { order: Order }) => {
                   >
                     {order.address.additional_notes}
                   </p>
-                </span>
-              )}
-              {order.shipping_guide_url && (
-                <span className="w-full flex flex-col gap-y-1">
-                  <p className="text-sm font-semibold">Guía de envío:</p>
-                  <Link
-                    href={order.shipping_guide_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm line-clamp-2 font-medium text-tertiary hover:underline hover:text-tertiary/80 flex items-center gap-x-1.5"
-                  >
-                    Ver guía <ExternalLink className="size-3.5" />
-                  </Link>
                 </span>
               )}
             </CardContent>
@@ -120,8 +144,8 @@ export const OrderInfo = ({ order }: { order: Order }) => {
               </span>
             </CardHeader>
             <CardContent className="w-full bg-sidebar flex flex-col gap-y-4 flex-1 h-full">
-              <span className="w-full flex gap-4 h-full">
-                <div className="w-full max-w-[120px] aspect-[3/4] h-auto relative overflow-hidden bg-background rounded-md">
+              <span className="w-full flex gap-4 h-fit">
+                <div className="w-full max-w-[120px] aspect-[3/4] relative overflow-hidden bg-background">
                   {order.product.product_info.images_url[0] && (
                     <Image
                       src={
