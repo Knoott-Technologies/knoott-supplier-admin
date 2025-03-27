@@ -1047,12 +1047,15 @@ export type Database = {
           address_id: string
           cancelation_reason: string | null
           canceled_at: string | null
+          confirmed_at: string | null
+          confirmed_by: string | null
           created_at: string
           delivered_at: string | null
           id: number
           knoott_received_amount: number
           ordered_by: string
           povider_received_amount: number
+          product_id: number | null
           provider_branch_id: string
           shipped_at: string | null
           shipped_ordered_by: string | null
@@ -1065,12 +1068,15 @@ export type Database = {
           address_id: string
           cancelation_reason?: string | null
           canceled_at?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
           delivered_at?: string | null
           id?: number
           knoott_received_amount?: number
           ordered_by: string
           povider_received_amount?: number
+          product_id?: number | null
           provider_branch_id: string
           shipped_at?: string | null
           shipped_ordered_by?: string | null
@@ -1083,12 +1089,15 @@ export type Database = {
           address_id?: string
           cancelation_reason?: string | null
           canceled_at?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
           delivered_at?: string | null
           id?: number
           knoott_received_amount?: number
           ordered_by?: string
           povider_received_amount?: number
+          product_id?: number | null
           provider_branch_id?: string
           shipped_at?: string | null
           shipped_ordered_by?: string | null
@@ -1106,10 +1115,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "wedding_product_orders_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "wedding_product_orders_ordered_by_fkey"
             columns: ["ordered_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wedding_product_orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "wedding_products"
             referencedColumns: ["id"]
           },
           {
@@ -1366,7 +1389,12 @@ export type Database = {
       banner_styles: "main" | "secondary" | "tertiary" | "quaternary"
       banner_types: "brand" | "category" | "product"
       cart_status: "pending" | "completed" | "abandoned"
-      order_status: "pending" | "shipped" | "delivered" | "canceled"
+      order_status:
+        | "pending"
+        | "shipped"
+        | "delivered"
+        | "canceled"
+        | "requires_confirmation"
       product_status:
         | "active"
         | "archived"

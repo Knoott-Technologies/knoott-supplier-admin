@@ -114,14 +114,16 @@ export const columns: ColumnDef<Product>[] = [
       const status = row.getValue("status") as string;
       return (
         <Badge
+          variant={"secondary"}
           className={cn(
             status === "draft" &&
               "bg-primary/20 text-amber-800 hover:bg-primary/10",
             status === "active" &&
               "bg-success/20 text-success hover:bg-success/10",
-            status === "archived" && "bg-muted text-foreground border hover:bg-muted/90 hover:text-foreground",
+            status === "archived" &&
+              "bg-muted text-foreground border hover:bg-muted/90 hover:text-foreground",
             status === "requires_verification" &&
-              "bg-background text-muted-foreground border-border hover:bg-background/90 hover:text-muted-foreground",
+              "bg-contrast/20 text-contrast border-border hover:bg-contrast/10 hover:text-contrast",
             status === "deleted" &&
               "bg-destructive/20 text-destructive hover:bg-destructive/10"
           )}
@@ -176,11 +178,7 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       const product = row.original;
 
-      return (
-        <ProductActions
-          product={product}
-        />
-      );
+      return <ProductActions product={product} />;
     },
     size: 60, // Ancho fijo para evitar compresión
     enableHiding: false,

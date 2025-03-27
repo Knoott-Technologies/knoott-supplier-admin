@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Search, CalendarIcon, X, Tag, ListTree } from "lucide-react";
+import { Search, CalendarIcon, X, Tag, ListTree, Circle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -238,10 +239,26 @@ export function FilterBar({ brands, subcategories }: FilterBarProps) {
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Estatus</SelectItem>
-              <SelectItem value="draft">Borrador</SelectItem>
-              <SelectItem value="active">Activo</SelectItem>
-              <SelectItem value="requires_verification">En revisión</SelectItem>
+              <SelectItem value="draft">
+                <span className="flex items-center justify-start gap-x-2">
+                  <Circle className="!size-2 fill-primary text-primary" />
+                  Borrador
+                </span>
+              </SelectItem>
+              <SelectItem value="active">
+                <span className="flex items-center justify-start gap-x-2">
+                  <Circle className="!size-2 fill-success text-success" />
+                  Activo
+                </span>
+              </SelectItem>
+              <SelectItem value="requires_verification">
+                <span className="flex items-center justify-start gap-x-2">
+                  <Circle className="!size-2 fill-contrast text-contrast" />
+                  En revisión
+                </span>
+              </SelectItem>
+              <SelectSeparator />
+              <SelectItem value="all">Todos</SelectItem>
             </SelectContent>
           </Select>
 
@@ -399,112 +416,92 @@ export function FilterBar({ brands, subcategories }: FilterBarProps) {
           )}
 
           {statusFilter && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              Estatus:{" "}
-              {statusFilter === "draft"
-                ? "Borrador"
-                : statusFilter === "active"
-                ? "Activo"
-                : "Archivado"}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-4 w-4 p-0 ml-1"
-                onClick={() => {
-                  setStatusFilter("");
-                  router.push(
-                    `${pathname}?${createQueryString({
-                      status: null,
-                      page: "1",
-                    })}`
-                  );
-                }}
-              >
-                <X className="h-3 w-3" />
-                <span className="sr-only">Eliminar filtro</span>
-              </Button>
+            <Badge
+              onClick={() => {
+                setStatusFilter("");
+                router.push(
+                  `${pathname}?${createQueryString({
+                    status: null,
+                    page: "1",
+                  })}`
+                );
+              }}
+              variant="secondary"
+              className="flex items-center gap-1 pl-1 cursor-pointer"
+            >
+              <X className="h-3 w-3" />
+              {statusFilter === "draft" && "Borrador"}
+              {statusFilter === "active" && "Activo"}
+              {statusFilter === "archived" && "Archivado"}
+              {statusFilter === "requires_verification" && "En revisión"}
+              {statusFilter === "deleted" && "Eliminado"}
             </Badge>
           )}
 
           {brandFilter && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              Marca:{" "}
+            <Badge
+              onClick={() => {
+                setBrandFilter("");
+                router.push(
+                  `${pathname}?${createQueryString({
+                    brandId: null,
+                    page: "1",
+                  })}`
+                );
+              }}
+              variant="secondary"
+              className="flex items-center gap-1 pl-1 cursor-pointer"
+            >
+              <X className="h-3 w-3" />
               {
                 brands.find((brand) => brand.id.toString() === brandFilter)
                   ?.name
               }
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-4 w-4 p-0 ml-1"
-                onClick={() => {
-                  setBrandFilter("");
-                  router.push(
-                    `${pathname}?${createQueryString({
-                      brandId: null,
-                      page: "1",
-                    })}`
-                  );
-                }}
-              >
-                <X className="h-3 w-3" />
-                <span className="sr-only">Eliminar filtro</span>
-              </Button>
             </Badge>
           )}
 
           {subcategoryFilter && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              Subcategoría:{" "}
+            <Badge
+              onClick={() => {
+                setSubcategoryFilter("");
+                router.push(
+                  `${pathname}?${createQueryString({
+                    subcategoryId: null,
+                    page: "1",
+                  })}`
+                );
+              }}
+              variant="secondary"
+              className="flex items-center gap-1 pl-1 cursor-pointer"
+            >
+              <X className="h-3 w-3" />
               {
                 subcategories.find(
                   (sub) => sub.id.toString() === subcategoryFilter
                 )?.name
               }
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-4 w-4 p-0 ml-1"
-                onClick={() => {
-                  setSubcategoryFilter("");
-                  router.push(
-                    `${pathname}?${createQueryString({
-                      subcategoryId: null,
-                      page: "1",
-                    })}`
-                  );
-                }}
-              >
-                <X className="h-3 w-3" />
-                <span className="sr-only">Eliminar filtro</span>
-              </Button>
             </Badge>
           )}
 
           {(startDate || endDate) && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              Fecha:{" "}
+            <Badge
+              onClick={() => {
+                setStartDate(undefined);
+                setEndDate(undefined);
+                router.push(
+                  `${pathname}?${createQueryString({
+                    startDate: null,
+                    endDate: null,
+                    page: "1",
+                  })}`
+                );
+              }}
+              variant="secondary"
+              className="flex items-center gap-1 pl-1 cursor-pointer"
+            >
+              <X className="h-3 w-3" />
               {startDate && format(startDate, "dd/MM/yyyy", { locale: es })}
               {endDate && ` - ${format(endDate, "dd/MM/yyyy", { locale: es })}`}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-4 w-4 p-0 ml-1"
-                onClick={() => {
-                  setStartDate(undefined);
-                  setEndDate(undefined);
-                  router.push(
-                    `${pathname}?${createQueryString({
-                      startDate: null,
-                      endDate: null,
-                      page: "1",
-                    })}`
-                  );
-                }}
-              >
-                <X className="h-3 w-3" />
-                <span className="sr-only">Eliminar filtro</span>
-              </Button>
             </Badge>
           )}
 

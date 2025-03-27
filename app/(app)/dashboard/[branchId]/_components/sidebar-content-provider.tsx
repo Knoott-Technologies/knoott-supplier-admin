@@ -30,6 +30,7 @@ import {
   Tag,
   ArrowLeftRight,
   LayoutDashboard,
+  Package,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -104,6 +105,11 @@ export const SidebarContentProvider = ({
           title: "Productos",
           icon: Tag,
           href: `${startUrl}/products`,
+        },
+        {
+          title: "Órdenes",
+          icon: Package,
+          href: `${startUrl}/orders`,
         },
       ],
     },
