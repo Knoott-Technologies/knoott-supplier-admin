@@ -3,7 +3,7 @@ import { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Knoott - Supplier Admin",
-    short_name: "Knoott Suppliers",
+    short_name: "Suppliers",
     description: "Administra tu negocio dentro de Knoott",
     lang: "es-419",
     display: "standalone",

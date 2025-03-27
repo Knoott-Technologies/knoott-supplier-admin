@@ -30,7 +30,7 @@ const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 export const columns: ColumnDef<Order>[] = [
   {
     id: "actions",
-    header: () => <span className="sr-only">Acciones</span>,
+    header: () => <span className="text-center w-full">Ver</span>,
     cell: ({ row }) => {
       return <OrderDetails order={row.original} />;
     },
@@ -64,7 +64,7 @@ export const columns: ColumnDef<Order>[] = [
               "bg-primary/20 text-amber-800 hover:bg-primary/10",
             status === "delivered" &&
               "bg-success/20 text-success hover:bg-success/10",
-            status === "shipped" &&
+            status === "shipped" && 
               "bg-tertiary/20 text-tertiary border hover:bg-tertiary/10 hover:text-tertiary",
             status === "canceled" &&
               "bg-destructive/20 text-destructive hover:bg-destructive/10"
