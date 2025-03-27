@@ -6,6 +6,10 @@ import { OrdersTable } from "./_components/orders-table";
 import { OrdersAlerts } from "./_components/orders-alert";
 import { Database } from "@/database.types";
 
+export const dynamic = "force-dynamic";
+
+export const revalidate = 0;
+
 export type Order =
   Database["public"]["Tables"]["wedding_product_orders"]["Row"] & {
     address: Database["public"]["Tables"]["wedding_addresses"]["Row"];
