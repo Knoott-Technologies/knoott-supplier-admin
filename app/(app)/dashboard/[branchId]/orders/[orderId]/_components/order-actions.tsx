@@ -195,7 +195,7 @@ export const OrderActions = ({
           )}
         >
           <div className="flex justify-end w-full">
-            <div className="flex gap-2 w-full">
+            <div className="flex gap-2 w-full justify-end">
               <Button
                 className={cn(getStatusButtonClass(order.status), "w-full md:w-auto")}
                 variant={"ghost"}

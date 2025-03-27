@@ -7,7 +7,6 @@ import { OrdersAlerts } from "./_components/orders-alert";
 import { Database } from "@/database.types";
 
 export const dynamic = "force-dynamic";
-
 export const revalidate = 0;
 
 export type Order =
