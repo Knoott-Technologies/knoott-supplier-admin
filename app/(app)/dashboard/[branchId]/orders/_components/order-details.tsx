@@ -210,7 +210,7 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                     </p>
                   </span>
                 </span>
-                <div className="w-full flex flex-col gap-4 p-3 border-t-0 border">
+                <div className="w-full flex flex-col gap-4 p-3 border-t-0 border bg-background">
                   <span className="w-full flex flex-col gap-y-1">
                     <p className="text-sm font-semibold">
                       {order.address.tag || "Destino"}:
@@ -272,7 +272,7 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                     </p>
                   </span>
                 </span>
-                <div className="w-full flex flex-col gap-4 p-3 border-t-0 border">
+                <div className="w-full flex flex-col gap-4 p-3 border-t-0 border bg-background">
                   <span className="w-full grid grid-cols-[1fr_4fr] gap-4">
                     <div className="w-full flex-1 aspect-[3/4] relative overflow-hidden bg-background">
                       {order.product.product_info.images_url[0] && (
@@ -323,7 +323,7 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                     </p>
                   </span>
                 </span>
-                <div className="w-full flex flex-col gap-2 p-3 border-t-0 border">
+                <div className="w-full flex flex-col gap-2 p-3 border-t-0 border bg-background">
                   <span className="w-full flex justify-between items-center gap-y-1">
                     <p className="text-sm text-muted-foreground font-semibold">
                       Subtotal
