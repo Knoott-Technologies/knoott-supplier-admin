@@ -34,42 +34,53 @@ export const OrderInfo = ({ order }: { order: Order }) => {
               </span>
             </CardHeader>
             <CardContent className="w-full bg-sidebar flex flex-col gap-y-4 flex-1 h-full">
+              <span className="w-full flex flex-col gap-y-1">
+                <p className="text-sm font-semibold">
+                  {order.address.tag || "Destino"}:
+                </p>
+                <p
+                  title={
+                    order.address.street_address +
+                    ", " +
+                    order.address.city +
+                    ", " +
+                    order.address.postal_code +
+                    ", " +
+                    order.address.state +
+                    ", " +
+                    order.address.country
+                  }
+                  className="text-sm line-clamp-2 font-medium text-muted-foreground"
+                >
+                  {order.address.street_address +
+                    ", " +
+                    order.address.city +
+                    ", " +
+                    order.address.postal_code +
+                    ", " +
+                    order.address.state +
+                    ", " +
+                    order.address.country}
+                </p>
+              </span>
               <div className="w-full h-fit items-start grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <span className="w-full flex flex-col gap-y-1">
-                  <p className="text-sm font-semibold">
-                    {order.address.tag || "Destino"}:
-                  </p>
-                  <p
-                    title={
-                      order.address.street_address +
-                      ", " +
-                      order.address.city +
-                      ", " +
-                      order.address.postal_code +
-                      ", " +
-                      order.address.state +
-                      ", " +
-                      order.address.country
-                    }
-                    className="text-sm line-clamp-2 font-medium text-muted-foreground"
-                  >
-                    {order.address.street_address +
-                      ", " +
-                      order.address.city +
-                      ", " +
-                      order.address.postal_code +
-                      ", " +
-                      order.address.state +
-                      ", " +
-                      order.address.country}
-                  </p>
-                </span>
                 <span className="w-full flex flex-col gap-y-1">
                   <p className="text-sm font-semibold">
                     Información de contacto:
                   </p>
                   <p className="text-sm line-clamp-2 font-medium text-muted-foreground">
                     {order.client.phone_number}
+                  </p>
+                </span>
+                <span className="w-full flex flex-col gap-y-1">
+                  <p className="text-sm font-semibold">Remitente:</p>
+                  <p
+                    title={
+                      order.client.first_name + " " + order.client.last_name
+                    }
+                    className="text-sm truncate font-medium text-muted-foreground"
+                  >
+                    {order.client.first_name + " " + order.client.last_name}
                   </p>
                 </span>
               </div>
@@ -93,7 +104,7 @@ export const OrderInfo = ({ order }: { order: Order }) => {
                     rel="noopener noreferrer"
                     className="text-sm line-clamp-2 font-medium text-tertiary hover:underline hover:text-tertiary/80 flex items-center gap-x-1.5"
                   >
-                    Ver guía <ExternalLink className="size-3.5"/>
+                    Ver guía <ExternalLink className="size-3.5" />
                   </Link>
                 </span>
               )}

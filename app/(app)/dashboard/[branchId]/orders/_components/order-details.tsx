@@ -259,6 +259,17 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                         order.address.country}
                     </p>
                   </span>
+                  <span className="w-full flex flex-col gap-y-1">
+                    <p className="text-sm font-semibold">Remitente:</p>
+                    <p
+                      title={
+                        order.client.first_name + " " + order.client.last_name
+                      }
+                      className="text-sm truncate font-medium text-muted-foreground"
+                    >
+                      {order.client.first_name + " " + order.client.last_name}
+                    </p>
+                  </span>
                   {order.address.additional_notes && (
                     <span className="w-full flex flex-col gap-y-1">
                       <p className="text-sm font-semibold">
