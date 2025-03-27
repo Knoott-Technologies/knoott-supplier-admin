@@ -112,15 +112,7 @@ export function FilterBar() {
 
   return (
     <div className="w-full gap-y-4 flex flex-col">
-      <div className="flex flex-col sm:flex-row gap-2 items-start justify-between">
-        <Button
-          variant={"outline"}
-          size={"icon"}
-          className="bg-sidebar"
-          onClick={() => router.refresh()}
-        >
-          <RefreshCcw />
-        </Button>
+      <div className="flex flex-col sm:flex-row gap-2 items-start justify-end">
         <div className="flex flex-wrap gap-2 w-full sm:w-fit">
           {/* Status filter */}
           <Select
