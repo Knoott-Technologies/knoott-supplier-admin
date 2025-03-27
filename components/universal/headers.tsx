@@ -7,7 +7,7 @@ import React from "react";
 import { libre } from "../fonts/font-def";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 interface PageHeaderProps {
-  title: string;
+  title: string | React.ReactNode;
   description?: string | React.ReactNode;
   children?: React.ReactNode;
   id?: string;
@@ -238,7 +238,7 @@ export const PageHeaderWithLogo = ({
         {(logo && (
           <span className="flex gap-x-2 items-center">
             <Avatar className="size-6 xl:size-[30px] rounded-none">
-              <AvatarImage src={logo} alt={title} />
+              <AvatarImage src={logo} alt={"imagen logo"} />
             </Avatar>
             <h1
               className={cn(

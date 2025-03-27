@@ -1,19 +1,10 @@
-import { Button } from "@/components/ui/button";
-import {
-  PageHeader,
-  PageHeaderBackButton,
-} from "@/components/universal/headers";
+import { PageHeaderBackButton } from "@/components/universal/headers";
 import { createClient } from "@/utils/supabase/server";
-import { Pen } from "lucide-react";
 import { cookies } from "next/headers";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ProductActions } from "./_components/product-actions";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { ProductImageCarousel } from "./_components/product-image-carousel";
 import { ProductInfo } from "./_components/product-info";
-import { formatInTimeZone } from "date-fns-tz";
 import { ProductStats } from "./_components/product-stats";
 
 const ProductPage = async ({

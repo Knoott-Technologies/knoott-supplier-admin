@@ -26,13 +26,15 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { ChevronDown, Circle } from "lucide-react";
+import { ArrowRight, ChevronDown, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import { OrderDetails } from "./order-details";
 import { source } from "@/components/fonts/font-def";
 import { Order } from "../page";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 // Usar el tipo Order definido en columns.ts
 interface OrdersTableProps {
@@ -53,15 +55,6 @@ export function OrdersTable({
   const searchParams = useSearchParams();
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-  // State for collapsible sections
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    requires_confirmation: true,
-    pending: true,
-    shipped: true,
-    delivered: false,
-    canceled: false,
-  });
-
   // Group orders by status
   const groupedOrders = orders.reduce((acc: Record<string, Order[]>, order) => {
     const status = order.status;
@@ -76,6 +69,7 @@ export function OrdersTable({
   const statusOrder = [
     "requires_confirmation",
     "pending",
+    "paid",
     "shipped",
     "delivered",
     "canceled",
@@ -136,8 +130,8 @@ export function OrdersTable({
         return "Requieren confirmación";
       case "pending":
         return "Pendientes";
-      case "payed":
-        return "Pagadas";
+      case "paid":
+        return "Listas para envío";
       case "shipped":
         return "En tránsito";
       case "delivered":
@@ -248,12 +242,13 @@ export function OrdersTable({
             maxSize: 250,
             minSize: 150,
           },
+          { id: "actions", label: "", size: 42, maxSize: 42, minSize: 42 },
         ];
 
         return (
           <Card key={status} className="w-full border-0">
             <Collapsible
-              defaultOpen
+              defaultOpen={status !== "delivered" && status !== "canceled"}
               className="group/collapsible data-[state=closed]:mb-2 data-[state=closed]:lg:mb-2 mb-5 lg:mb-7"
             >
               <CollapsibleTrigger asChild>
@@ -343,7 +338,7 @@ export function OrdersTable({
                                     {order.status === "requires_confirmation" &&
                                       "Requiere confirmación"}
                                     {order.status === "pending" && "Pendiente"}
-                                    {order.status === "paid" && "Orden pagada"}
+                                    {order.status === "paid" && "Lista para envío"}
                                     {order.status === "delivered" &&
                                       "Entregado"}
                                     {order.status === "shipped" &&
@@ -398,6 +393,27 @@ export function OrdersTable({
                                     {order.address.postal_code},{" "}
                                     {order.address.state}
                                   </p>
+                                </TableCell>
+                                <TableCell
+                                  style={{
+                                    width: 80,
+                                    maxWidth: 80,
+                                    minWidth: 80,
+                                  }}
+                                  className="text-right"
+                                >
+                                  <Button
+                                    variant={"ghost"}
+                                    asChild
+                                    size={"sm"}
+                                    className="font-normal text-muted-foreground"
+                                  >
+                                    <Link
+                                      href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
+                                    >
+                                      Ver <ArrowRight className="!size-3.5" />
+                                    </Link>
+                                  </Button>
                                 </TableCell>
                               </TableRow>
                             ))

@@ -37,6 +37,25 @@ import { Order } from "../page";
 
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+const getGradientColor = (status: string) => {
+  switch (status) {
+    case "requires_confirmation":
+      return "from-contrast/25 to-background";
+    case "pending":
+      return "from-primary/25 to-background";
+    case "paid":
+      return "from-contrast2/25 to-background";
+    case "shipped":
+      return "from-tertiary/25 to-background";
+    case "delivered":
+      return "from-success/25 to-background";
+    case "canceled":
+      return "from-destructive/25 to-background";
+    default:
+      return "from-background to-background";
+  }
+};
+
 export const OrderDetails = ({ order }: { order: Order }) => {
   const isMobile = useIsMobile();
 
@@ -66,7 +85,13 @@ export const OrderDetails = ({ order }: { order: Order }) => {
               envío, etc.
             </SheetDescription>
           </SheetHeader>
-          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto bg-background">
+          <div className={cn("flex min-h-0 flex-1 flex-col gap-4 overflow-auto bg-gradient-to-b relative from-0% to-15%", getGradientColor(order.status))}>
+            {/* <div
+              className={cn(
+                "absolute inset-x-0 h-[10%] z-0 ",
+                
+              )}
+            /> */}
             {order.status == "requires_confirmation" && (
               <Link
                 href={`/dashboard/${order.provider_branch_id}/orders/${order.id}#confirmation`}
@@ -93,7 +118,7 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                 </div>
               </Link>
             )}
-            <div className="w-full h-fit items-start justify-start flex flex-col gap-y-4 p-3">
+            <div className="w-full h-fit items-start justify-start flex flex-col gap-y-4 p-3 z-[1]">
               {(order.status !== "canceled" && (
                 <Collapsible
                   defaultOpen
@@ -117,7 +142,7 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                           )}
                           {order.status === "paid" && (
                             <span className="flex items-center justify-start gap-x-1">
-                              <Circle className="!size-2 animate-pulse fill-success text-success" />
+                              <Circle className="!size-2 animate-pulse fill-contrast2 text-contrast2" />
                               Hemos enviado el pago
                             </span>
                           )}
@@ -322,7 +347,9 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                         order.status
                       )
                         ? "Total a recibir"
-                        : ["delivered", "shipped"].includes(order.status)
+                        : ["delivered", "shipped", "paid"].includes(
+                            order.status
+                          )
                         ? "Total recibido"
                         : "Total devuelto"}
                     </p>
@@ -340,8 +367,12 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                 Cerrar
               </Button>
             </SheetClose>
-            <Button variant={"defaultBlack"} className="w-full">
-              Ver página de orden <ArrowRight />
+            <Button asChild variant={"defaultBlack"} className="w-full">
+              <Link
+                href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
+              >
+                Ver orden
+              </Link>
             </Button>
           </SheetFooter>
         </div>

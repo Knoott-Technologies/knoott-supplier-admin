@@ -146,7 +146,7 @@ export function FilterBar() {
               <SelectItem value="paid">
                 <span className="flex items-center justify-start gap-x-2">
                   <Circle className="!size-2 fill-contrast2 text-contrast2" />
-                  Listas para enviar
+                  Listas para envío
                 </span>
               </SelectItem>
               <SelectItem value="shipped">

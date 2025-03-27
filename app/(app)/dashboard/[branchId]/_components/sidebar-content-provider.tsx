@@ -89,13 +89,8 @@ export const SidebarContentProvider = ({
 
   const menuItems: MenuGroup[] = [
     {
-      label: "Mi negocio",
+      label: "Mi tienda",
       items: [
-        {
-          title: "Personalización",
-          icon: PencilRuler,
-          href: `${startUrl}/customization`,
-        },
         {
           title: "Transacciones",
           icon: ArrowLeftRight,

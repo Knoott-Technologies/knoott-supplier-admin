@@ -64,7 +64,9 @@ export async function POST(req: NextRequest) {
       orderDetails?.product?.product_info?.name || "un producto";
     const brandName = orderDetails?.product?.product_info?.brand?.name || "";
     const variantName =
-      orderDetails?.product?.variant?.variant_list?.name || "";
+      orderDetails?.product?.variant?.variant_list?.name +
+        ": " +
+        orderDetails?.product?.variant?.name || "";
     const formattedAmount = formatPrice(orderDetails?.total_amount || 0);
 
     // Variables para la notificación

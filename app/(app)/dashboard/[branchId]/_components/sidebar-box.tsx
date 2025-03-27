@@ -9,7 +9,7 @@ export const SidebarBox = ({ children }: { children: React.ReactNode }) => {
   return (
     <main
       className={cn(
-        "flex-1 items-start justify-start flex flex-col w-full no-scrollbar relative",
+        "flex-1 items-start justify-start flex flex-col w-full no-scrollbar relative min-h-dvh",
         isMobile && "max-w-full",
         state === "collapsed" &&
           "md:max-w-[calc(100%_-_var(--sidebar-width-icon))]",

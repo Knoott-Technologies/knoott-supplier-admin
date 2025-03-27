@@ -53,7 +53,6 @@ export const ProductStats = ({
             })}
           </Badge>
         </span>
-        <Separator className="h-full" orientation="vertical" />
         <span className="flex flex-col gap-y-1 items-start justify-start flex-1 px-2.5 border-x py-1">
           <p className="text-sm font-semibold">Última edición:</p>
           <Badge
@@ -67,7 +66,6 @@ export const ProductStats = ({
             })}
           </Badge>
         </span>
-        <Separator className="h-full" orientation="vertical" />
         <span className="flex flex-col gap-y-1 items-start justify-start flex-1 pl-2.5 py-1">
           <p className="text-sm font-semibold">Estado:</p>
           <Badge
