@@ -443,7 +443,7 @@ export const OrderDetails = ({ order }: { order: Order }) => {
               <Link
                 href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
               >
-                Ver orden
+                Ver página de orden <ArrowRight />
               </Link>
             </Button>
           </SheetFooter>
