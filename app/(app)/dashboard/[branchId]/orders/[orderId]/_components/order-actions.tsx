@@ -194,12 +194,12 @@ export const OrderActions = ({
             getStatusActionBannerClass(order.status)
           )}
         >
-          <div className="flex justify-end">
-            <div className="flex gap-2">
+          <div className="flex justify-end w-full">
+            <div className="flex gap-2 w-full">
               <Button
-                className={getStatusButtonClass(order.status)}
+                className={cn(getStatusButtonClass(order.status), "w-full md:w-auto")}
                 variant={"ghost"}
-                size="sm"
+                size="default"
                 disabled={order.status === "pending" || isLoading}
                 onClick={handleAction}
               >
