@@ -175,7 +175,8 @@ export async function POST(req: NextRequest) {
     const { data: subscriptions, error: subscriptionsError } = await supabase
       .from("push_subscriptions")
       .select("*")
-      .in("user_id", userIds);
+      .in("user_id", userIds)
+      .eq("app_reference", "suppliers");
 
     if (subscriptionsError) {
       console.error("Error al obtener suscripciones:", subscriptionsError);

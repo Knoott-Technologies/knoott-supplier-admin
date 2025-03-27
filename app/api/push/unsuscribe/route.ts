@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     const { error } = await admin
       .from("push_subscriptions")
       .delete()
-      .match({ user_id: user.id, endpoint });
+      .match({ user_id: user.id, endpoint, app_reference: "suppliers" });
 
     if (error) {
       console.error("Error al eliminar suscripción:", error);
