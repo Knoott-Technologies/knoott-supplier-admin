@@ -41,7 +41,7 @@ import { WizardProgress } from "../_components/wizard-progress";
 import { AmountInput } from "@/components/universal/amount-input";
 import { ImageUploadDropzone } from "@/components/universal/image-upload-dropzone";
 import { cn } from "@/lib/utils";
-import { libre, source } from "@/components/fonts/font-def";
+import { source } from "@/components/fonts/font-def";
 
 export default function VariantsPage({
   params,
@@ -233,6 +233,30 @@ export default function VariantsPage({
     setVariantOptionIds(newVariantOptionIds);
   }, [variantFields, form]);
 
+  // Watch for changes in variant names to update display_name automatically
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      // Only run this when a variant name changes
+      if (name && name.includes(".name") && !name.includes(".options.")) {
+        const match = name.match(/variants\.(\d+)\.name/);
+        if (match && match[1]) {
+          const variantIndex = Number.parseInt(match[1]);
+          const variantName = value.variants?.[variantIndex]?.name;
+
+          if (variantName) {
+            // Set the display_name to "Selecciona [name]"
+            form.setValue(
+              `variants.${variantIndex}.display_name`,
+              `Selecciona ${variantName}`
+            );
+          }
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form]);
+
   return (
     <div>
       <WizardProgress
@@ -328,6 +352,7 @@ export default function VariantsPage({
                                       placeholder="Ej. Selecciona un color"
                                       className="bg-background"
                                       {...field}
+                                      disabled
                                     />
                                   </FormControl>
                                   <FormMessage />

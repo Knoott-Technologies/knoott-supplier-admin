@@ -24,14 +24,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { ArrowRight, ChevronDown, Circle } from "lucide-react";
+import { ChevronDown, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import { OrderDetails } from "./order-details";
 import { source } from "@/components/fonts/font-def";
 import type { Order } from "../page";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 // Usar el tipo Order definido en columns.ts
@@ -308,32 +307,37 @@ export function OrdersTable({
                                   <OrderDetails order={order} />
                                 </TableCell>
 
-                                {/* Columnas clickables dentro del Link */}
-                                <Link
-                                  href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
-                                  className="contents hover:bg-muted/50 cursor-pointer"
-                                  title="Ver detalles de la orden"
+                                {/* ID column */}
+                                <TableCell
+                                  style={{
+                                    width: 42,
+                                    maxWidth: 42,
+                                    minWidth: 42,
+                                  }}
+                                  className="group-hover:bg-muted/50"
                                 >
-                                  {/* ID column */}
-                                  <TableCell
-                                    style={{
-                                      width: 42,
-                                      maxWidth: 42,
-                                      minWidth: 42,
-                                    }}
-                                    className="group-hover:bg-muted/50"
+                                  <Link
+                                    href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
+                                    className="block w-full h-full"
+                                    title="Ver detalles de la orden"
                                   >
                                     {order.id}
-                                  </TableCell>
+                                  </Link>
+                                </TableCell>
 
-                                  {/* Status column */}
-                                  <TableCell
-                                    style={{
-                                      width: 150,
-                                      maxWidth: 150,
-                                      minWidth: 150,
-                                    }}
-                                    className="group-hover:bg-muted/50"
+                                {/* Status column */}
+                                <TableCell
+                                  style={{
+                                    width: 150,
+                                    maxWidth: 150,
+                                    minWidth: 150,
+                                  }}
+                                  className="group-hover:bg-muted/50"
+                                >
+                                  <Link
+                                    href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
+                                    className="block w-full h-full"
+                                    title="Ver detalles de la orden"
                                   >
                                     <Badge
                                       className={cn(
@@ -354,16 +358,22 @@ export function OrdersTable({
                                       {order.status === "canceled" &&
                                         "Cancelado"}
                                     </Badge>
-                                  </TableCell>
+                                  </Link>
+                                </TableCell>
 
-                                  {/* Dynamic date column based on status */}
-                                  <TableCell
-                                    style={{
-                                      width: 140,
-                                      maxWidth: 140,
-                                      minWidth: 140,
-                                    }}
-                                    className="group-hover:bg-muted/50"
+                                {/* Dynamic date column based on status */}
+                                <TableCell
+                                  style={{
+                                    width: 140,
+                                    maxWidth: 140,
+                                    minWidth: 140,
+                                  }}
+                                  className="group-hover:bg-muted/50"
+                                >
+                                  <Link
+                                    href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
+                                    className="block w-full h-full"
+                                    title="Ver detalles de la orden"
                                   >
                                     {getStatusDate(order)
                                       ? formatInTimeZone(
@@ -373,31 +383,43 @@ export function OrdersTable({
                                           { locale: es }
                                         )
                                       : "No disponible"}
-                                  </TableCell>
+                                  </Link>
+                                </TableCell>
 
-                                  {/* Client column */}
-                                  <TableCell
-                                    style={{
-                                      width: 150,
-                                      maxWidth: 200,
-                                      minWidth: 100,
-                                    }}
-                                    className="group-hover:bg-muted/50"
+                                {/* Client column */}
+                                <TableCell
+                                  style={{
+                                    width: 150,
+                                    maxWidth: 200,
+                                    minWidth: 100,
+                                  }}
+                                  className="group-hover:bg-muted/50"
+                                >
+                                  <Link
+                                    href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
+                                    className="block w-full h-full"
+                                    title="Ver detalles de la orden"
                                   >
                                     <p className="truncate">
                                       {order.client.first_name}{" "}
                                       {order.client.last_name}
                                     </p>
-                                  </TableCell>
+                                  </Link>
+                                </TableCell>
 
-                                  {/* Address column */}
-                                  <TableCell
-                                    style={{
-                                      width: 200,
-                                      maxWidth: 250,
-                                      minWidth: 150,
-                                    }}
-                                    className="group-hover:bg-muted/50"
+                                {/* Address column */}
+                                <TableCell
+                                  style={{
+                                    width: 200,
+                                    maxWidth: 250,
+                                    minWidth: 150,
+                                  }}
+                                  className="group-hover:bg-muted/50"
+                                >
+                                  <Link
+                                    href={`/dashboard/${order.provider_branch_id}/orders/${order.id}`}
+                                    className="block w-full h-full"
+                                    title="Ver detalles de la orden"
                                   >
                                     <p className="truncate">
                                       {order.address.street_address},{" "}
@@ -405,9 +427,8 @@ export function OrdersTable({
                                       {order.address.postal_code},{" "}
                                       {order.address.state}
                                     </p>
-                                  </TableCell>
-                                </Link>
-
+                                  </Link>
+                                </TableCell>
                               </TableRow>
                             ))
                           ) : (

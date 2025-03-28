@@ -2,7 +2,14 @@
 
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { ChevronDown, X, ZoomIn, ZoomOut } from "lucide-react";
+import {
+  ChevronDown,
+  X,
+  ZoomIn,
+  ZoomOut,
+  SkipForward,
+  AlertCircle,
+} from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +17,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
 import Cropper from "react-easy-crop";
@@ -20,10 +29,16 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "../ui/carousel";
-import { Collapsible } from "@radix-ui/react-collapsible";
-import { CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
+} from "@/components/ui/carousel";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 
 // Add custom styles for the cropper
 const cropperStyles = {
@@ -36,7 +51,7 @@ const cropperStyles = {
     border: "1px solid #ffffff",
   },
   mediaStyle: {
-    backgroundColor: "white", // Asegura que el fondo de la imagen sea blanco
+    backgroundColor: "white", // Ensure the image background is white
   },
 };
 
@@ -51,12 +66,14 @@ interface ImageUploadDropzoneProps {
 interface ImageToProcess {
   file: File;
   preview: string;
+  status: "pending" | "processing" | "complete" | "error";
+  error?: string;
 }
 
 export function ImageUploadDropzone({
   value = [],
   onChange,
-  maxFiles = 10,
+  maxFiles = 20,
   productId,
   variantOptionId,
 }: ImageUploadDropzoneProps) {
@@ -67,14 +84,34 @@ export function ImageUploadDropzone({
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   const currentImage = imagesToProcess[currentImageIndex];
+  const remainingSlots = maxFiles - value.length;
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
+      setError(null);
+
       if (value.length + acceptedFiles.length > maxFiles) {
-        alert(`Solo puedes subir un máximo de ${maxFiles} imágenes.`);
+        setError(
+          `Solo puedes subir un máximo de ${maxFiles} imágenes. Tienes ${remainingSlots} espacios disponibles.`
+        );
+        return;
+      }
+
+      // Check file sizes (limit to 5MB per file)
+      const oversizedFiles = acceptedFiles.filter(
+        (file) => file.size > 5 * 1024 * 1024
+      );
+      if (oversizedFiles.length > 0) {
+        setError(
+          `${oversizedFiles.length} ${
+            oversizedFiles.length === 1 ? "archivo excede" : "archivos exceden"
+          } el tamaño máximo de 5MB.`
+        );
         return;
       }
 
@@ -82,6 +119,7 @@ export function ImageUploadDropzone({
       const newImagesToProcess = acceptedFiles.map((file) => ({
         file,
         preview: URL.createObjectURL(file),
+        status: "pending" as const,
       }));
 
       if (newImagesToProcess.length > 0) {
@@ -92,7 +130,7 @@ export function ImageUploadDropzone({
         setCropDialogOpen(true);
       }
     },
-    [maxFiles, value.length]
+    [maxFiles, value.length, remainingSlots]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -100,7 +138,8 @@ export function ImageUploadDropzone({
     accept: {
       "image/*": [".jpeg", ".jpg", ".png", ".webp"],
     },
-    maxFiles: maxFiles - value.length,
+    maxFiles: remainingSlots,
+    disabled: remainingSlots <= 0,
   });
 
   const onCropComplete = useCallback((_: Area, croppedAreaPixels: Area) => {
@@ -112,6 +151,7 @@ export function ImageUploadDropzone({
     pixelCrop: Area
   ): Promise<Blob> => {
     const image = new window.Image();
+    image.crossOrigin = "anonymous";
     image.src = imageSrc;
 
     return new Promise((resolve, reject) => {
@@ -166,6 +206,7 @@ export function ImageUploadDropzone({
 
   const uploadImage = async (file: File | Blob): Promise<string> => {
     setIsUploading(true);
+    setUploadProgress(0);
 
     try {
       // Create a FormData instance
@@ -181,14 +222,26 @@ export function ImageUploadDropzone({
         formData.append("variantOptionId", variantOptionId);
       }
 
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          const newProgress = prev + Math.random() * 15;
+          return newProgress >= 90 ? 90 : newProgress;
+        });
+      }, 300);
+
       // Upload to your API
       const response = await fetch("/api/upload-product-image", {
         method: "POST",
         body: formData,
       });
 
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
       if (!response.ok) {
-        throw new Error("Error uploading image");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Error uploading image");
       }
 
       const data = await response.json();
@@ -198,6 +251,8 @@ export function ImageUploadDropzone({
       throw error;
     } finally {
       setIsUploading(false);
+      // Reset progress after a short delay to show 100%
+      setTimeout(() => setUploadProgress(0), 500);
     }
   };
 
@@ -206,6 +261,13 @@ export function ImageUploadDropzone({
 
     try {
       setIsUploading(true);
+
+      // Update status of current image
+      setImagesToProcess((prev) => {
+        const updated = [...prev];
+        updated[currentImageIndex].status = "processing";
+        return updated;
+      });
 
       // Get the cropped image as a blob
       const croppedImageBlob = await getCroppedImage(
@@ -226,6 +288,13 @@ export function ImageUploadDropzone({
       // Update the form value
       onChange([...value, uploadedUrl]);
 
+      // Update status of current image
+      setImagesToProcess((prev) => {
+        const updated = [...prev];
+        updated[currentImageIndex].status = "complete";
+        return updated;
+      });
+
       // Clean up current image
       URL.revokeObjectURL(currentImage.preview);
 
@@ -236,12 +305,35 @@ export function ImageUploadDropzone({
         setZoom(1);
       } else {
         // All images processed
+        toast.success("Imágenes subidas correctamente", {
+          description: `Se ${
+            imagesToProcess.length === 1
+              ? "ha subido 1 imagen"
+              : `han subido ${imagesToProcess.length} imágenes`
+          } correctamente.`,
+        });
         setImagesToProcess([]);
         setCurrentImageIndex(0);
         setCropDialogOpen(false);
       }
     } catch (error) {
       console.error("Error processing cropped image:", error);
+
+      // Update status of current image
+      setImagesToProcess((prev) => {
+        const updated = [...prev];
+        updated[currentImageIndex].status = "error";
+        updated[currentImageIndex].error =
+          error instanceof Error ? error.message : "Error desconocido";
+        return updated;
+      });
+
+      toast.error("Error al subir la imagen", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Ocurrió un error al procesar la imagen",
+      });
     } finally {
       setIsUploading(false);
     }
@@ -251,6 +343,7 @@ export function ImageUploadDropzone({
     const newImages = [...value];
     newImages.splice(index, 1);
     onChange(newImages);
+    toast("Imagen eliminada correctamente");
   };
 
   const handleZoomIn = () => {
@@ -269,11 +362,43 @@ export function ImageUploadDropzone({
     setCropDialogOpen(false);
   };
 
+  const handleSkipImage = () => {
+    // Clean up current image
+    URL.revokeObjectURL(currentImage.preview);
+
+    // Remove the current image from the queue
+    setImagesToProcess((prev) => {
+      const updated = [...prev];
+      updated.splice(currentImageIndex, 1);
+      return updated;
+    });
+
+    // If we removed the last image, close the dialog
+    if (imagesToProcess.length <= 1) {
+      setCropDialogOpen(false);
+      setImagesToProcess([]);
+      setCurrentImageIndex(0);
+    } else {
+      // If we removed the last image in the array, go to the previous one
+      if (currentImageIndex >= imagesToProcess.length - 1) {
+        setCurrentImageIndex(imagesToProcess.length - 2);
+      }
+      // Otherwise, the index stays the same but points to the next image
+    }
+  };
+
   return (
     <div className="space-y-4">
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
       <Collapsible
         defaultOpen={value.length <= 0}
-        className="group/collapsible border"
+        className="group/collapsible border rounded-md overflow-hidden"
       >
         <CollapsibleTrigger asChild>
           <Button
@@ -281,7 +406,9 @@ export function ImageUploadDropzone({
             className="w-full px-3 items-center justify-between bg-background"
           >
             <div className="flex flex-col gap-y-2">
-              <h3>Agrega imágenes</h3>
+              <h3>
+                Agrega imágenes ({value.length}/{maxFiles})
+              </h3>
             </div>
             <ChevronDown className="shrink-0 transition-transform duration-300 ease-in-out group-data-[state=open]/collapsible:-rotate-180 size-4" />
           </Button>
@@ -293,16 +420,29 @@ export function ImageUploadDropzone({
               isDragActive
                 ? "border-primary bg-primary/10"
                 : "border-muted-foreground/20"
-            }`}
+            } ${remainingSlots <= 0 ? "opacity-50 cursor-not-allowed" : ""}`}
           >
-            <input {...getInputProps()} />
+            <input {...getInputProps()} disabled={remainingSlots <= 0} />
             <div className="flex flex-col items-center justify-center gap-2">
-              <p className="text-sm text-muted-foreground">
-                Arrastra y suelta imágenes aquí, o haz clic para seleccionar
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Las imágenes deben tener una relación de aspecto 3:4
-              </p>
+              {remainingSlots <= 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Has alcanzado el límite máximo de {maxFiles} imágenes
+                </p>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    Arrastra y suelta imágenes aquí, o haz clic para seleccionar
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Las imágenes deben tener una relación de aspecto 3:4
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Puedes subir hasta {remainingSlots}{" "}
+                    {remainingSlots === 1 ? "imagen más" : "imágenes más"} (máx.
+                    5MB por imagen)
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </CollapsibleContent>
@@ -310,15 +450,37 @@ export function ImageUploadDropzone({
 
       {value.length > 0 && (
         <div className="w-full h-fit flex flex-col gap-y-4">
-          <p>Imágenes seleccionadas</p>
-          <Carousel>
+          <div className="flex items-center justify-between">
+            <p className="font-medium">
+              Imágenes seleccionadas ({value.length})
+            </p>
+            {value.length > 1 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (
+                    confirm(
+                      "¿Estás seguro de que deseas eliminar todas las imágenes?"
+                    )
+                  ) {
+                    onChange([]);
+                    toast("Todas las imágenes han sido eliminadas");
+                  }
+                }}
+              >
+                Eliminar todas
+              </Button>
+            )}
+          </div>
+          <Carousel className="w-full">
             <CarouselContent className="-ml-2">
               {value.map((url, index) => (
                 <CarouselItem
                   key={index}
                   className="basis-1/2 md:basis-1/3 lg:basis-1/4 pl-2"
                 >
-                  <div className="relative group aspect-[3/4] bg-background overflow-hidden">
+                  <div className="relative group aspect-[3/4] bg-background overflow-hidden rounded-md border">
                     <Image
                       src={url || "/placeholder.svg"}
                       alt={`Imagen del producto ${index + 1}`}
@@ -326,10 +488,11 @@ export function ImageUploadDropzone({
                       sizes="(max-width: 768px) 50vw, 25vw"
                       className="object-cover"
                     />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200"></div>
                     <Button
                       variant="destructive"
                       size="icon"
-                      className="absolute top-0 right-0 size-7"
+                      className="absolute top-2 right-2 size-7 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                       onClick={() => handleRemoveImage(index)}
                     >
                       <X className="h-4 w-4" />
@@ -338,30 +501,65 @@ export function ImageUploadDropzone({
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="w-full h-fit items-center justify-center flex gap-x-1 mt-4">
-              <CarouselPrevious
-                type="button"
-                variant={"defaultBlack"}
-                className="translate-y-0 static"
-              />
-              <CarouselNext
-                type="button"
-                variant={"defaultBlack"}
-                className="translate-y-0 static"
-              />
-            </div>
+            {value.length > 4 && (
+              <div className="w-full h-fit items-center justify-center flex gap-x-1 mt-4">
+                <CarouselPrevious
+                  type="button"
+                  variant={"defaultBlack"}
+                  className="translate-y-0 static"
+                />
+                <CarouselNext
+                  type="button"
+                  variant={"defaultBlack"}
+                  className="translate-y-0 static"
+                />
+              </div>
+            )}
           </Carousel>
         </div>
       )}
 
-      <Dialog open={cropDialogOpen} onOpenChange={setCropDialogOpen}>
-        <DialogContent className="p-0">
-          <DialogHeader className="p-3 bg-background border-b">
-            <DialogTitle>
-              Ajustar imagen {currentImageIndex + 1} de {imagesToProcess.length}
-            </DialogTitle>
+      <Dialog
+        open={cropDialogOpen}
+        onOpenChange={(open) => {
+          if (!open && imagesToProcess.length > 0) {
+            // Confirm before closing if there are images to process
+            if (
+              confirm(
+                "¿Estás seguro de que deseas cancelar la subida de imágenes?"
+              )
+            ) {
+              handleCancelAll();
+            }
+            return;
+          }
+          setCropDialogOpen(open);
+        }}
+      >
+        <DialogContent className="p-0 max-w-xl [&>button]:hidden">
+          <DialogHeader className="p-3 bg-background border-b flex flex-row justify-between items-start space-y-0">
+            <div className="flex flex-col gap-0">
+              <DialogTitle className="flex items-center justify-between">
+                Ajustar imagen {currentImageIndex + 1} de{" "}
+                {imagesToProcess.length}
+              </DialogTitle>
+              <DialogDescription>
+                Ajusta la imagen para que tenga una relación de aspecto 3:4
+              </DialogDescription>
+            </div>
+            {imagesToProcess.length > 1 && (
+              <div className="flex items-center text-xs text-muted-foreground">
+                <span>
+                  {Math.round(
+                    (currentImageIndex / imagesToProcess.length) * 100
+                  )}
+                  % completado
+                </span>
+              </div>
+            )}
           </DialogHeader>
-          <div className="w-full h-fit bg-white">
+
+          <div className="w-full h-fit bg-sidebar">
             <div className="relative h-auto aspect-video w-full bg-white p-3">
               {currentImage && (
                 <Cropper
@@ -386,6 +584,7 @@ export function ImageUploadDropzone({
                 />
               )}
             </div>
+
             <div className="w-full flex flex-col gap-y-2 items-start justify-start p-3">
               <p className="text-sm font-semibold">Ajustes de zoom:</p>
               <div className="flex items-center justify-center gap-2 w-full">
@@ -393,18 +592,20 @@ export function ImageUploadDropzone({
                   variant="outline"
                   size="icon"
                   onClick={handleZoomOut}
-                  disabled={zoom <= 0.5}
+                  disabled={zoom <= 0.5 || isUploading}
                 >
                   <ZoomOut className="h-4 w-4" />
                 </Button>
 
                 <div className="w-full flex-1">
                   <Slider
+                    className="bg-foreground"
                     value={[zoom]}
                     min={0.5}
                     max={3}
                     step={0.1}
                     onValueChange={(values) => setZoom(values[0])}
+                    disabled={isUploading}
                   />
                 </div>
 
@@ -412,29 +613,48 @@ export function ImageUploadDropzone({
                   variant="outline"
                   size="icon"
                   onClick={handleZoomIn}
-                  disabled={zoom >= 3}
+                  disabled={zoom >= 3 || isUploading}
                 >
                   <ZoomIn className="h-4 w-4" />
                 </Button>
               </div>
             </div>
+
+            {uploadProgress > 0 && (
+              <div className="w-full px-3 pb-3">
+                <p className="text-sm mb-1">Subiendo imagen...</p>
+                <Progress value={uploadProgress} className="h-2" />
+              </div>
+            )}
           </div>
-          <div className="flex justify-between gap-2 p-3 border-t">
-            <div>
-              <Button variant="outline" onClick={handleCancelAll}>
-                Cancelar todo
-              </Button>
-            </div>
+
+          <DialogFooter className="flex flex-row sm:justify-between bg-background gap-2 p-3 border-t">
             <div className="flex gap-2">
               <Button
-                variant={"defaultBlack"}
-                onClick={handleCropSave}
+                variant="outline"
+                onClick={handleCancelAll}
                 disabled={isUploading}
               >
-                {isUploading ? "Guardando..." : "Guardar"}
+                Cancelar todo
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleSkipImage}
+                disabled={isUploading}
+                title="Omitir esta imagen"
+              >
+                Omitir
+                <SkipForward className="h-4 w-4" />
               </Button>
             </div>
-          </div>
+            <Button
+              variant={"defaultBlack"}
+              onClick={handleCropSave}
+              disabled={isUploading}
+            >
+              {isUploading ? "Guardando..." : "Guardar"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

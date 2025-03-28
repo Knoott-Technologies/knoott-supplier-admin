@@ -5,35 +5,8 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  ChevronsUpDown,
-  Loader2,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Form } from "@/components/ui/form";
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import {
   type CategorizationFormValues,
   categorizationSchema,
@@ -68,9 +41,6 @@ export default function CategorizationPage({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [openBrand, setOpenBrand] = useState(false);
-  const [openCategory, setOpenCategory] = useState(false);
 
   const form = useForm<CategorizationFormValues>({
     resolver: zodResolver(categorizationSchema),
@@ -106,8 +76,6 @@ export default function CategorizationPage({
         setCategories(categoriesData);
       } catch (error) {
         console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
       }
     };
 

@@ -101,7 +101,7 @@ export default function ImagesPage({
                       <ImageUploadDropzone
                         value={field.value}
                         onChange={field.onChange}
-                        maxFiles={8}
+                        maxFiles={20}
                       />
                     </FormControl>
                     <FormMessage />
