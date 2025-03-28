@@ -27,7 +27,7 @@ export const ProductVariantInfor = ({
       </CardHeader>
       <CardContent className="bg-sidebar w-full flex flex-col gap-y-4">
         {variants.map((variant) => (
-          <Card className="w-full flex flex-col">
+          <Card key={variant.variant.id} className="w-full flex flex-col">
             <CardHeader className="bg-sidebar">
               <span className="gap-y-0">
                 <p className="text-base font-semibold">
