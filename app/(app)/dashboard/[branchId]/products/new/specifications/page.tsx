@@ -210,7 +210,7 @@ export default function SpecificationsPage({
             </form>
           </Form>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="border-t">
           <div className="flex justify-between w-full">
             <Button type="button" variant="ghost" onClick={goBack}>
               <ArrowLeft />

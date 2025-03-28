@@ -611,7 +611,7 @@ export default function VariantsPage({
           </Form>
         </CardContent>
 
-        <CardFooter className="flex justify-between">
+        <CardFooter className="flex justify-between border-t">
           <Button
             type="button"
             variant="outline"

@@ -153,7 +153,7 @@ export default function GeneralInfoPage({
             </form>
           </Form>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="border-t">
           <div className="flex justify-end w-full">
             <Button
               variant={"defaultBlack"}
