@@ -38,6 +38,27 @@ export const ProductStats = ({
     <div className="w-full h-fit items-start justify-start overflow-auto no-scrollbar">
       <div className="w-fit h-fit items-stretch flex">
         <span className="flex flex-col gap-y-1 items-start justify-start flex-1 pr-2.5 py-1">
+          <p className="text-sm font-semibold">Estado:</p>
+          <Badge
+            variant={"secondary"}
+            className={cn(
+              "cursor-default",
+              product.status === "draft" &&
+                "bg-primary/20 text-amber-800 hover:bg-primary/20",
+              product.status === "active" &&
+                "bg-success/20 text-success hover:bg-success/20",
+              product.status === "archived" &&
+                "bg-muted text-foreground border hover:bg-muted hover:text-foreground",
+              product.status === "requires_verification" &&
+                "bg-contrast/20 text-contrast border-border hover:bg-contrast/20 hover:text-contrast",
+              product.status === "deleted" &&
+                "bg-destructive/20 text-destructive hover:bg-destructive/20"
+            )}
+          >
+            {getStatusLabel(product.status)}
+          </Badge>
+        </span>
+        <span className="flex flex-col gap-y-1 items-start justify-start flex-1 px-2.5 border-x py-1">
           <p className="text-sm font-semibold">Creado el:</p>
           <Badge
             variant={"outline"}
@@ -53,7 +74,7 @@ export const ProductStats = ({
             })}
           </Badge>
         </span>
-        <span className="flex flex-col gap-y-1 items-start justify-start flex-1 px-2.5 border-x py-1">
+        <span className="flex flex-col gap-y-1 items-start justify-start flex-1 pl-2.5 py-1">
           <p className="text-sm font-semibold">Última edición:</p>
           <Badge
             variant={"outline"}
@@ -64,26 +85,6 @@ export const ProductStats = ({
             {formatInTimeZone(product.updated_at, timeZone, "PPP hh:mm aa", {
               locale: es,
             })}
-          </Badge>
-        </span>
-        <span className="flex flex-col gap-y-1 items-start justify-start flex-1 pl-2.5 py-1">
-          <p className="text-sm font-semibold">Estado:</p>
-          <Badge
-            variant={"secondary"}
-            className={cn("cursor-default",
-              product.status === "draft" &&
-                "bg-primary/20 text-amber-800 hover:bg-primary/20",
-              product.status === "active" &&
-                "bg-success/20 text-success hover:bg-success/20",
-              product.status === "archived" &&
-                "bg-muted text-foreground border hover:bg-muted hover:text-foreground",
-              product.status === "requires_verification" &&
-                "bg-background text-muted-foreground border-border hover:bg-background hover:text-muted-foreground",
-              product.status === "deleted" &&
-                "bg-destructive/20 text-destructive hover:bg-destructive/20"
-            )}
-          >
-            {getStatusLabel(product.status)}
           </Badge>
         </span>
       </div>

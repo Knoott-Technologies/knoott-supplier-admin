@@ -143,7 +143,11 @@ export default function SpecificationsPage({
 
         <CardContent className="bg-sidebar">
           <Form {...form}>
-            <form id="specifications-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form
+              id="specifications-form"
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4"
+            >
               <FormField
                 control={form.control}
                 name="dimensions"
@@ -229,7 +233,7 @@ export default function SpecificationsPage({
                 </>
               ) : (
                 <>
-                  Finalizar y crear producto
+                  Siguiente
                   <ArrowRight />
                 </>
               )}

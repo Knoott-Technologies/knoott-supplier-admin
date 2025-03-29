@@ -60,6 +60,10 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
+      pagination: {
+        pageIndex: currentPage - 1,
+        pageSize,
+      },
     },
     manualPagination: true,
     pageCount: totalPages,
@@ -168,7 +172,7 @@ export function DataTable<TData, TValue>({
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
           <div className="text-sm text-muted-foreground order-2 sm:order-1">
-            Mostrando {Math.min(totalCount, (currentPage - 1) * pageSize + 1)} a{" "}
+            Mostrando {data.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} a{" "}
             {Math.min(currentPage * pageSize, totalCount)} de {totalCount}{" "}
             registros
           </div>
@@ -210,18 +214,20 @@ export function DataTable<TData, TValue>({
               )}
 
               {/* Pages around current page */}
-              {[...Array(totalPages)].map((_, i) => {
+              {Array.from({ length: totalPages }).map((_, i) => {
                 const pageNumber = i + 1;
 
-                // Show only pages near the current one
+                // Skip first and last pages as they're handled separately
+                if (pageNumber === 1 || pageNumber === totalPages) {
+                  return null;
+                }
+
+                // Show pages near current page
                 if (
-                  pageNumber !== 1 &&
-                  pageNumber !== totalPages &&
-                  ((pageNumber >= currentPage - 1 &&
+                  (pageNumber >= currentPage - 1 &&
                     pageNumber <= currentPage + 1) ||
-                    (currentPage === 1 && pageNumber <= 3) ||
-                    (currentPage === totalPages &&
-                      pageNumber >= totalPages - 2))
+                  (currentPage === 1 && pageNumber <= 3) ||
+                  (currentPage === totalPages && pageNumber >= totalPages - 2)
                 ) {
                   return (
                     <PaginationItem key={pageNumber}>
@@ -248,7 +254,7 @@ export function DataTable<TData, TValue>({
                 </PaginationItem>
               )}
 
-              {/* Last page always visible (if there's more than one page) */}
+              {/* Last page always visible (if there's more than one page and not already shown) */}
               {totalPages > 1 && (
                 <PaginationItem>
                   <PaginationLink

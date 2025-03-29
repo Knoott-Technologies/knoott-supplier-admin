@@ -56,92 +56,71 @@ export function JsonFieldArray({
   ) => {
     const pasteText = e.clipboardData.getData("text");
 
-    // Verificar si el texto pegado tiene formato de múltiples líneas con etiquetas
-    if (pasteText.includes("\n")) {
-      e.preventDefault(); // Prevenir el pegado normal
+    // Check if the pasted text contains key-value pairs with colons
+    if (pasteText.includes(":")) {
+      e.preventDefault(); // Prevent normal paste
 
       try {
-        // Dividir el texto en líneas
-        const lines = pasteText
-          .split("\n")
-          .map((line) => line.trim())
-          .filter((line) => line);
+        // Regular expression to match key-value pairs in the format "key: value"
+        const regex = /([^:]+):\s*([^:]+?)(?=\s+\S+:|$)/g;
 
-        // Verificar si parece tener el formato esperado (al menos 2 líneas)
-        if (lines.length >= 2) {
-          // Extraer pares clave-valor
-          const newFields: JsonField[] = [];
-          let currentLabel = "";
-          let isLabel = true; // Alternar entre etiqueta y valor
+        // Use exec in a loop instead of matchAll for better compatibility
+        const newFields: JsonField[] = [];
+        let match: RegExpExecArray | null;
 
-          for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
+        while ((match = regex.exec(pasteText)) !== null) {
+          newFields.push({
+            label: match[1].trim(),
+            value: match[2].trim(),
+          });
+        }
 
-            if (isLabel) {
-              // Si es una línea de etiqueta
-              currentLabel = line.endsWith(":")
-                ? line.slice(0, -1).trim()
-                : line.trim();
-              isLabel = false;
+        if (newFields.length > 0) {
+          // If we're editing an existing field, update that and add the rest
+          const updatedFields = [...value];
+
+          if (fieldType === "label") {
+            // If pasted in the label field, update that field and add the rest
+            updatedFields[index] = {
+              ...updatedFields[index],
+              label: newFields[0].label,
+              value: newFields[0].value,
+            };
+
+            // Add additional fields
+            if (newFields.length > 1) {
+              onChange([...updatedFields, ...newFields.slice(1)]);
+              toast(`Se han agregado ${newFields.length} campos`);
             } else {
-              // Si es una línea de valor
-              newFields.push({ label: currentLabel, value: line });
-              isLabel = true;
+              onChange(updatedFields);
             }
+          } else {
+            // If pasted in the value field, only update the value of that field
+            updatedFields[index] = {
+              ...updatedFields[index],
+              value: newFields[0].value,
+            };
 
-            // Si es la última línea y quedó una etiqueta sin valor
-            if (i === lines.length - 1 && !isLabel) {
-              newFields.push({ label: currentLabel, value: "" });
+            // Add additional fields as new
+            if (newFields.length > 1) {
+              onChange([...updatedFields, ...newFields.slice(1)]);
+              toast(
+                `Se han agregado ${newFields.length - 1} campos adicionales`
+              );
+            } else {
+              onChange(updatedFields);
             }
           }
 
-          if (newFields.length > 0) {
-            // Si estamos editando un campo existente, actualizamos ese y agregamos el resto
-            const updatedFields = [...value];
-
-            if (fieldType === "label") {
-              // Si pegamos en el campo de etiqueta, actualizamos ese campo y agregamos el resto
-              updatedFields[index] = {
-                ...updatedFields[index],
-                label: newFields[0].label,
-                value: newFields[0].value,
-              };
-
-              // Agregar los campos adicionales
-              if (newFields.length > 1) {
-                onChange([...updatedFields, ...newFields.slice(1)]);
-                toast(`Se han agregado ${newFields.length} campos`);
-              } else {
-                onChange(updatedFields);
-              }
-            } else {
-              // Si pegamos en el campo de valor, solo actualizamos el valor de ese campo
-              updatedFields[index] = {
-                ...updatedFields[index],
-                value: newFields[0].value,
-              };
-
-              // Agregar los campos adicionales como nuevos
-              if (newFields.length > 1) {
-                onChange([...updatedFields, ...newFields.slice(1)]);
-                toast(
-                  `Se han agregado ${newFields.length - 1} campos adicionales`
-                );
-              } else {
-                onChange(updatedFields);
-              }
-            }
-
-            return;
-          }
+          return;
         }
       } catch (error) {
         console.error("Error al procesar el texto pegado:", error);
-        // Si hay un error, permitir el comportamiento normal de pegado
+        // If there's an error, allow normal paste behavior
       }
     }
 
-    // Si no se detectó formato especial o hubo un error, permitir el comportamiento normal de pegado
+    // If no special format detected or there was an error, allow normal paste behavior
   };
 
   return (

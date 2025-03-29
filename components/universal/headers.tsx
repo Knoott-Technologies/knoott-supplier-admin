@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import React from "react";
 import { libre } from "../fonts/font-def";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import Link from "next/link";
 interface PageHeaderProps {
   title: string | React.ReactNode;
   description?: string | React.ReactNode;
@@ -14,6 +15,7 @@ interface PageHeaderProps {
   className?: string;
   back?: boolean;
   logo?: string;
+  href?: string;
 }
 
 export const PageHeader = ({
@@ -107,6 +109,43 @@ export const PageHeaderBackButton = ({
             {title}
           </h1>
         </div>
+        <p className="text-muted-foreground text-sm lg:text-base">
+          {description}
+        </p>
+      </div>
+      <div className="flex gap-x-1 items-center justify-end">{children}</div>
+    </section>
+  );
+};
+
+export const PageHeaderLinkButton = ({
+  title,
+  description,
+  children,
+  id,
+  className,
+  href = "#",
+}: PageHeaderProps) => {
+  return (
+    <section
+      id={id}
+      className={cn(
+        "w-full h-fit items-start justify-between flex mb-5 lg:mb-7 gap-5 shrink-0",
+        className
+      )}
+    >
+      <div className="flex flex-col gap-y-1 items-start justify-start max-w-3xl">
+        <Link href={href} className="flex gap-x-2 items-center cursor-pointer">
+          <ArrowLeft className="size-4 xl:size-6" />
+          <h1
+            className={cn(
+              "text-2xl xl:text-3xl tracking-tight font-semibold",
+              libre.className
+            )}
+          >
+            {title}
+          </h1>
+        </Link>
         <p className="text-muted-foreground text-sm lg:text-base">
           {description}
         </p>

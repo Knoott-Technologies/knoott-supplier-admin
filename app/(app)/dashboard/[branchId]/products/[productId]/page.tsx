@@ -1,4 +1,4 @@
-import { PageHeaderBackButton } from "@/components/universal/headers";
+import { PageHeaderLinkButton } from "@/components/universal/headers";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -7,7 +7,7 @@ import { ProductImageCarousel } from "./_components/product-image-carousel";
 import { ProductInfo } from "./_components/product-info";
 import { ProductStats } from "./_components/product-stats";
 import { Database } from "@/database.types";
-import { ProductVariantInfor } from "./_components/product-variants-info";
+import { ProductVariantInfo } from "./_components/product-variants-info";
 
 // Define types for better type safety
 type Variant = Database["public"]["Tables"]["products_variants"]["Row"];
@@ -93,21 +93,25 @@ const ProductPage = async ({
 
   return (
     <main className="h-fit w-full md:max-w-[95%] px-3 md:px-0 py-5 pb-14 lg:py-7 mx-auto no-scrollbar">
-      <PageHeaderBackButton
+      <PageHeaderLinkButton
         title={product.short_name}
         description={product.short_description}
+        href={`/dashboard/${params.branchId}/products`}
       >
         <div className="flex gap-x-1 items-center justify-end">
           <ProductActions branchId={params.branchId} product={product} />
         </div>
-      </PageHeaderBackButton>
+      </PageHeaderLinkButton>
       <section className="w-full flex flex-col items-start justify-start gap-y-5 lg:gap-y-7">
         <ProductStats product={product} />
         <div className="w-full h-fit grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-5 lg:gap-7">
           <ProductImageCarousel images={product.images_url} />
           <div className="w-full h-fit items-start justify-start flex flex-col gap-y-5 lg:gap-y-7">
             <ProductInfo product={product} />
-            <ProductVariantInfor variants={groupedVariants} />
+            <ProductVariantInfo
+              branchId={params.branchId}
+              variants={groupedVariants}
+            />
           </div>
         </div>
       </section>

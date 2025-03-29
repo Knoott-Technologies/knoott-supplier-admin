@@ -30,7 +30,7 @@ const ProductsPage = async ({
 
   // Get URL parameters with default values
   const page = parseInt(searchParams.page || "1", 10);
-  const pageSize = parseInt(searchParams.pageSize || "100", 10); // 100 products per page as requested
+  const pageSize = parseInt(searchParams.pageSize || "20", 10); // 
   const search = searchParams.search || "";
   const status = searchParams.status || "";
   const brandId = searchParams.brandId || "";
