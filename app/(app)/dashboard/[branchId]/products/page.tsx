@@ -153,7 +153,7 @@ const ProductsPage = async ({
             asChild
           >
             <Link
-              href={`/dashboard/${params.branchId}/products/new/general-info`}
+              href={`/dashboard/${params.branchId}/products/new`}
             >
               Agregar producto <Plus />
             </Link>
@@ -165,7 +165,7 @@ const ProductsPage = async ({
             asChild
           >
             <Link
-              href={`/dashboard/${params.branchId}/products/new/general-info`}
+              href={`/dashboard/${params.branchId}/products/new`}
             >
               <Plus />
             </Link>

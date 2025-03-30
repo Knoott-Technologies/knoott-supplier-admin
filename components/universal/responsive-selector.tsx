@@ -100,7 +100,7 @@ export default function ResponsiveSelector({
               )}
             >
               {selectedItem?.name || placeholder}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <ChevronsUpDown className="h-4 w-4 shrink-0" />
             </Button>
           </FormControl>
         </SheetTrigger>
@@ -114,22 +114,21 @@ export default function ResponsiveSelector({
                 <SheetTitle>{sheetTitle}</SheetTitle>
                 <SheetDescription>{sheetDescription}</SheetDescription>
               </span>
-              <div>
-                <div className="relative">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder={searchPlaceholder}
-                    className="pl-8 bg-background"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  autoFocus
+                  placeholder={searchPlaceholder}
+                  className="pl-8 bg-background"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <X
+                    className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground cursor-pointer"
+                    onClick={() => setSearchTerm("")}
                   />
-                  {searchTerm && (
-                    <X
-                      className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground cursor-pointer"
-                      onClick={() => setSearchTerm("")}
-                    />
-                  )}
-                </div>
+                )}
               </div>
             </SheetHeader>
             <div className="p-3 bg-background flex min-h-0 flex-1 flex-col gap-2 overflow-auto gap-y-1">
