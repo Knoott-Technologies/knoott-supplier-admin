@@ -205,7 +205,7 @@ export default function ProductForm({
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-y-5 lg:gap-y-7 max-w-5xl mx-auto px-3 md:px-0"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 lg:gap-y-7">
+          <div className="grid grid-cols-1 lg:grid-cols-[2fr_1.2fr] gap-5 lg:gap-y-7">
             <section className="w-full flex flex-col gap-y-5 lg:gap-y-7">
               <GeneralInfoSection form={form} />
               <ImagesSection form={form} />
