@@ -269,8 +269,8 @@ export default function ResponsiveSelector({
                         </Button>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        La marca será agregada con estado "en revisión" y estará
-                        disponible una vez aprobada.
+                        La marca será agregada con estado &quot;en
+                        revisión&quot; y estará disponible una vez aprobada.
                       </p>
                     </div>
                   )}
