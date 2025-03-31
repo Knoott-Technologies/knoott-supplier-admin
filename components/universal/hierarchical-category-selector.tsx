@@ -18,6 +18,8 @@ import {
   Folder,
   FolderOpen,
   ChevronDown,
+  Plus,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -37,6 +39,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "../ui/breadcrumb";
+import { toast } from "sonner";
 
 type Category = Database["public"]["Tables"]["catalog_collections"]["Row"];
 
@@ -77,6 +80,9 @@ export default function HierarchicalCategorySelector({
   const [navigationPath, setNavigationPath] = useState<Category[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
+  const [isAddingNew, setIsAddingNew] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Build a complete category tree
   const categoryTree = useMemo(() => {
@@ -206,6 +212,8 @@ export default function HierarchicalCategorySelector({
       setSearchTerm("");
       setIsSearching(false);
       setExpandedNodes(new Set());
+      setIsAddingNew(false);
+      setNewCategoryName("");
     }
   }, [openSheet]);
 
@@ -247,6 +255,7 @@ export default function HierarchicalCategorySelector({
     } else {
       setIsSearching(false);
       setExpandedNodes(new Set());
+      setIsAddingNew(false);
     }
   }, [searchTerm, filteredCategoryTree]);
 
@@ -289,8 +298,8 @@ export default function HierarchicalCategorySelector({
 
   // Select a category
   const selectCategory = (category: Category) => {
-    // Only allow selection of level 2 categories
-    if (category.level === 2) {
+    // Allow selection of any category that doesn't have children
+    if (isSelectable(category)) {
       onChange(category.id);
       setOpenSheet(false);
     } else if (hasChildren(category.id)) {
@@ -330,7 +339,59 @@ export default function HierarchicalCategorySelector({
 
   // Check if a category is selectable (level 2)
   const isSelectable = (category: Category) => {
-    return category.level === 2;
+    return !hasChildren(category.id);
+  };
+
+  // Handle adding a new category
+  const handleAddNewCategory = async () => {
+    if (!newCategoryName.trim()) {
+      toast.error("Error", { description: "El nombre no puede estar vacío" });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/categories/new", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newCategoryName,
+          parent_id: currentParentId,
+          status: "on_revision",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al crear la categoría");
+      }
+
+      const newCategory = await response.json();
+
+      // Add the new category to the local categories list
+      const updatedCategories = [...categories, newCategory];
+
+      // Select the newly created category if it's selectable
+      if (isSelectable(newCategory)) {
+        onChange(newCategory.id);
+        setOpenSheet(false);
+      }
+
+      // Reset form
+      setIsAddingNew(false);
+      setNewCategoryName("");
+
+      toast.success("Categoría creada", {
+        description: "La categoría ha sido creada y está en revisión",
+      });
+    } catch (error) {
+      console.error("Error creating category:", error);
+      toast.error("Error", { description: "No se pudo crear la categoría" });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Render a category node in the search results
@@ -555,7 +616,7 @@ export default function HierarchicalCategorySelector({
               )}
 
               {/* Hierarchical search results */}
-              {isSearching && (
+              {isSearching && !isAddingNew && (
                 <>
                   {filteredCategoryTree.length === 0 ? (
                     <div className="text-center py-4 text-muted-foreground">
@@ -569,6 +630,69 @@ export default function HierarchicalCategorySelector({
                     </div>
                   )}
                 </>
+              )}
+
+              {/* Add new category option - only shows when searching */}
+              {isSearching && !isAddingNew && (
+                <Button
+                  variant="secondary"
+                  className="w-full flex items-center justify-between text-muted-foreground"
+                  onClick={() => {
+                    setNewCategoryName(searchTerm);
+                    setIsAddingNew(true);
+                  }}
+                >
+                  <span>
+                    Solicitar &quot;{searchTerm}&quot; como nueva categoría
+                  </span>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              )}
+
+              {/* New category input field */}
+              {isAddingNew && (
+                <div className="p-3 bg-sidebar border flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      autoFocus
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      placeholder="Nombre de la categoría"
+                      className="flex-1 bg-background"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => setIsAddingNew(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="defaultBlack"
+                      className="flex-1"
+                      onClick={handleAddNewCategory}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Cargando...
+                        </>
+                      ) : (
+                        "Solicitar"
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {currentParentId
+                      ? "La categoría será agregada como subcategoría y estará en revisión hasta ser aprobada."
+                      : "La categoría será agregada como categoría principal y estará en revisión hasta ser aprobada."}
+                  </p>
+                </div>
               )}
             </div>
           </div>

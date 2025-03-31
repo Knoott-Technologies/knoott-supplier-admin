@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import {
   Card,
@@ -10,7 +11,8 @@ import {
 } from "@/components/ui/card";
 import ResponsiveSelector from "@/components/universal/responsive-selector";
 import HierarchicalCategorySelector from "@/components/universal/hierarchical-category-selector";
-import { Database } from "@/database.types";
+import type { Database } from "@/database.types";
+import { toast } from "sonner";
 
 interface Brand {
   id: number;
@@ -30,10 +32,61 @@ export default function CategorizationSection({
   brands,
   categories,
 }: CategorizationSectionProps) {
+  const [localBrands, setLocalBrands] = useState<Brand[]>(brands);
+  const [localCategories, setLocalCategories] =
+    useState<Category[]>(categories);
+
+  // Function to fetch data
+  const fetchData = useCallback(async () => {
+    try {
+      // Fetch brands
+      const brandsResponse = await fetch("/api/brands");
+      if (brandsResponse.ok) {
+        const brandsData = await brandsResponse.json();
+        setLocalBrands(brandsData);
+      }
+
+      // Fetch categories
+      const categoriesResponse = await fetch("/api/categories");
+      if (categoriesResponse.ok) {
+        const categoriesData = await categoriesResponse.json();
+        setLocalCategories(categoriesData);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Error", {
+        description: "No se pudieron cargar las marcas o categorías",
+      });
+    }
+  }, []);
+
+  // Refresh brands and categories when the component mounts
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Handle brand change
+  const handleBrandChange = (brandId: number) => {
+    form.setValue("brand_id", brandId);
+    // If this is a new brand, refresh the data to get the latest list
+    if (!localBrands.some((brand) => brand.id === brandId)) {
+      fetchData();
+    }
+  };
+
+  // Handle category change
+  const handleCategoryChange = (categoryId: number) => {
+    form.setValue("subcategory_id", categoryId);
+    // If this is a new category, refresh the data to get the latest list
+    if (!localCategories.some((category) => category.id === categoryId)) {
+      fetchData();
+    }
+  };
+
   // Use real data if available, otherwise use mock data
   const brandsData =
-    brands.length > 0
-      ? brands
+    localBrands.length > 0
+      ? localBrands
       : [
           { id: 1, name: "Nike" },
           { id: 2, name: "Adidas" },
@@ -54,7 +107,7 @@ export default function CategorizationSection({
           label="Marca"
           items={brandsData}
           value={form.watch("brand_id")}
-          onChange={(value) => form.setValue("brand_id", value)}
+          onChange={handleBrandChange}
           placeholder="Selecciona una marca"
           searchPlaceholder="Buscar marca..."
           emptyMessage="No se encontraron marcas."
@@ -64,9 +117,9 @@ export default function CategorizationSection({
 
         <HierarchicalCategorySelector
           label="Categoría"
-          categories={categories}
+          categories={localCategories}
           value={form.watch("subcategory_id")}
-          onChange={(value) => form.setValue("subcategory_id", value)}
+          onChange={handleCategoryChange}
           placeholder="Selecciona una categoría"
           searchPlaceholder="Buscar categoría..."
           emptyMessage="No se encontraron categorías."

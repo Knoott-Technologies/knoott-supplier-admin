@@ -89,10 +89,10 @@ export const ProductInfo = ({
             <span className="w-full flex flex-col gap-y-1">
               <p className="text-sm font-semibold">Marca:</p>
               <p
-                title={product.brand.name}
+                title={product.brand?.name || "Sin marca"}
                 className="text-sm line-clamp-2 font-medium text-muted-foreground"
               >
-                {product.brand.name}
+                {product.brand?.name || "Sin marca"}
               </p>
             </span>
             <span className="w-full flex flex-col gap-y-1">

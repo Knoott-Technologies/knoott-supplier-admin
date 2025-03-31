@@ -207,6 +207,7 @@ export type Database = {
           image_url: string | null
           logo_url: string | null
           name: string
+          status: Database["public"]["Enums"]["brand_status"]
         }
         Insert: {
           created_at?: string
@@ -214,6 +215,7 @@ export type Database = {
           image_url?: string | null
           logo_url?: string | null
           name: string
+          status?: Database["public"]["Enums"]["brand_status"]
         }
         Update: {
           created_at?: string
@@ -221,6 +223,7 @@ export type Database = {
           image_url?: string | null
           logo_url?: string | null
           name?: string
+          status?: Database["public"]["Enums"]["brand_status"]
         }
         Relationships: []
       }
@@ -230,9 +233,9 @@ export type Database = {
           description: string | null
           id: number
           image_url: string | null
-          level: number
           name: string
           parent_id: number | null
+          status: Database["public"]["Enums"]["collection_status"]
           updated_at: string
         }
         Insert: {
@@ -240,9 +243,9 @@ export type Database = {
           description?: string | null
           id?: number
           image_url?: string | null
-          level: number
           name: string
           parent_id?: number | null
+          status?: Database["public"]["Enums"]["collection_status"]
           updated_at?: string
         }
         Update: {
@@ -250,9 +253,9 @@ export type Database = {
           description?: string | null
           id?: number
           image_url?: string | null
-          level?: number
           name?: string
           parent_id?: number | null
+          status?: Database["public"]["Enums"]["collection_status"]
           updated_at?: string
         }
         Relationships: [
@@ -1459,7 +1462,9 @@ export type Database = {
       banner_status: "active" | "inactive"
       banner_styles: "main" | "secondary" | "tertiary" | "quaternary"
       banner_types: "brand" | "category" | "product"
+      brand_status: "on_revision" | "active"
       cart_status: "pending" | "completed" | "abandoned"
+      collection_status: "on_revision" | "active"
       order_status:
         | "paid"
         | "pending"

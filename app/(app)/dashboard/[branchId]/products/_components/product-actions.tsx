@@ -389,7 +389,7 @@ export function ProductActions({ product }: ProductActionsProps) {
                 return;
               }
               router.push(
-                `/dashboard/${branchId}/products/edit/${product.id}/general-info`
+                `/dashboard/${branchId}/products/${product.id}/edit`
               );
             }}
             disabled={isInReview}
