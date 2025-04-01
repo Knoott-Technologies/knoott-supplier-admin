@@ -631,6 +631,7 @@ export type Database = {
       }
       provider_branches: {
         Row: {
+          bank_account_number: number | null
           branch_name: string
           branch_reference: string
           contact_phone_number: string
@@ -640,6 +641,7 @@ export type Database = {
           provider_business_id: string
         }
         Insert: {
+          bank_account_number?: number | null
           branch_name: string
           branch_reference?: string
           contact_phone_number: string
@@ -649,6 +651,7 @@ export type Database = {
           provider_business_id: string
         }
         Update: {
+          bank_account_number?: number | null
           branch_name?: string
           branch_reference?: string
           contact_phone_number?: string
@@ -719,32 +722,41 @@ export type Database = {
         Row: {
           business_logo_url: string
           business_name: string
+          business_sector: string | null
           created_at: string
           id: string
           is_verified: boolean
           main_email: string | null
           main_phone_number: string | null
           reference: string
+          social_media: Json | null
+          website_url: string | null
         }
         Insert: {
           business_logo_url: string
           business_name: string
+          business_sector?: string | null
           created_at?: string
           id?: string
           is_verified?: boolean
           main_email?: string | null
           main_phone_number?: string | null
           reference?: string
+          social_media?: Json | null
+          website_url?: string | null
         }
         Update: {
           business_logo_url?: string
           business_name?: string
+          business_sector?: string | null
           created_at?: string
           id?: string
           is_verified?: boolean
           main_email?: string | null
           main_phone_number?: string | null
           reference?: string
+          social_media?: Json | null
+          website_url?: string | null
         }
         Relationships: []
       }

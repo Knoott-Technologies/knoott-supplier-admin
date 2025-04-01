@@ -146,7 +146,7 @@ export const NavigationMenuMobile = ({
                     </span>
                     <span>
                       <h3 className="text-background font-semibold">
-                        Knoott Suppliers
+                        Knoott Partners
                       </h3>
                       <p className="text-sm text-background/90">
                         Comienza ahora con nosotros, aumenta tus ventas y

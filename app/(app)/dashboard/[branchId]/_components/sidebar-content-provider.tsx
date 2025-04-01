@@ -108,16 +108,6 @@ export const SidebarContentProvider = ({
         },
       ],
     },
-    {
-      label: "Administración",
-      items: [
-        {
-          title: "Usuarios",
-          icon: Users,
-          href: `${startUrl}/users`,
-        },
-      ],
-    },
   ];
 
 

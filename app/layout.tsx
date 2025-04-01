@@ -16,11 +16,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Knoott Supplier Admin",
-    default: "Knoott Supplier Admin",
+    template: "%s | Knoott Partners Admin",
+    default: "Knoott Partners Admin",
   },
   description:
-    "Ingresa a la plataforma de Knoott Supplier Admin, para gestionar tus productos, pedidos y más.",
+    "Ingresa a la plataforma de Knoott Partners, para gestionar tu negocio, productos, pedidos y más.",
 };
 
 export const viewport: Viewport = {

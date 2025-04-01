@@ -1,0 +1,558 @@
+"use client";
+
+import { useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { X, ZoomIn, ZoomOut, SkipForward, AlertCircle } from "lucide-react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
+import Cropper from "react-easy-crop";
+import type { Point, Area } from "react-easy-crop";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
+
+// Add custom styles for the cropper
+const cropperStyles = {
+  containerStyle: {
+    backgroundColor: "white",
+    width: "100%",
+    height: "100%",
+  },
+  cropAreaStyle: {
+    border: "1px solid #ffffff",
+  },
+  mediaStyle: {
+    backgroundColor: "white", // Ensure the image background is white
+  },
+};
+
+interface ImageUploadProps {
+  value: string[];
+  onChange: (urls: string[]) => void;
+  maxFiles?: number;
+}
+
+interface ImageToProcess {
+  file: File;
+  preview: string;
+  status: "pending" | "processing" | "complete" | "error";
+  error?: string;
+}
+
+export function ImageUpload({
+  value = [],
+  onChange,
+  maxFiles = 1,
+}: ImageUploadProps) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [imagesToProcess, setImagesToProcess] = useState<ImageToProcess[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const isMobile = useIsMobile();
+
+  const currentImage = imagesToProcess[currentImageIndex];
+  const remainingSlots = maxFiles - value.length;
+
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      setError(null);
+
+      if (value.length + acceptedFiles.length > maxFiles) {
+        setError(
+          `Solo puedes subir un máximo de ${maxFiles} imágenes. Tienes ${remainingSlots} espacios disponibles.`
+        );
+        return;
+      }
+
+      // Check file sizes (limit to 5MB per file)
+      const oversizedFiles = acceptedFiles.filter(
+        (file) => file.size > 5 * 1024 * 1024
+      );
+      if (oversizedFiles.length > 0) {
+        setError(
+          `${oversizedFiles.length} ${
+            oversizedFiles.length === 1 ? "archivo excede" : "archivos exceden"
+          } el tamaño máximo de 5MB.`
+        );
+        return;
+      }
+
+      // Prepare all files for processing
+      const newImagesToProcess = acceptedFiles.map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+        status: "pending" as const,
+      }));
+
+      if (newImagesToProcess.length > 0) {
+        setImagesToProcess(newImagesToProcess);
+        setCurrentImageIndex(0);
+        setCrop({ x: 0, y: 0 });
+        setZoom(1);
+        setCropDialogOpen(true);
+      }
+    },
+    [maxFiles, value.length, remainingSlots]
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "image/*": [".jpeg", ".jpg", ".png", ".webp"],
+    },
+    maxFiles: remainingSlots,
+    disabled: remainingSlots <= 0,
+  });
+
+  const onCropComplete = useCallback((_: Area, croppedAreaPixels: Area) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const getCroppedImage = async (
+    imageSrc: string,
+    pixelCrop: Area
+  ): Promise<Blob> => {
+    const image = new window.Image();
+    image.crossOrigin = "anonymous";
+    image.src = imageSrc;
+
+    return new Promise((resolve, reject) => {
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+          reject(new Error("No 2d context"));
+          return;
+        }
+
+        // Set canvas dimensions to match the cropped image
+        canvas.width = pixelCrop.width;
+        canvas.height = pixelCrop.height;
+
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the cropped image onto the canvas
+        ctx.drawImage(
+          image,
+          pixelCrop.x,
+          pixelCrop.y,
+          pixelCrop.width,
+          pixelCrop.height,
+          0,
+          0,
+          pixelCrop.width,
+          pixelCrop.height
+        );
+
+        // Convert canvas to blob
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Canvas is empty"));
+              return;
+            }
+            resolve(blob);
+          },
+          "image/jpeg",
+          0.95
+        );
+      };
+
+      image.onerror = () => {
+        reject(new Error("Error loading image"));
+      };
+    });
+  };
+
+  const uploadImage = async (file: File | Blob): Promise<string> => {
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      // Create a FormData instance
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          const newProgress = prev + Math.random() * 15;
+          return newProgress >= 90 ? 90 : newProgress;
+        });
+      }, 300);
+
+      // Upload to your API
+      const response = await fetch("/api/upload-business-logo", {
+        method: "POST",
+        body: formData,
+      });
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Error uploading image");
+      }
+
+      const data = await response.json();
+      return data.url;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    } finally {
+      setIsUploading(false);
+      // Reset progress after a short delay to show 100%
+      setTimeout(() => setUploadProgress(0), 500);
+    }
+  };
+
+  const handleCropSave = async () => {
+    if (!currentImage || !croppedAreaPixels) return;
+
+    try {
+      setIsUploading(true);
+
+      // Update status of current image
+      setImagesToProcess((prev) => {
+        const updated = [...prev];
+        updated[currentImageIndex].status = "processing";
+        return updated;
+      });
+
+      // Get the cropped image as a blob
+      const croppedImageBlob = await getCroppedImage(
+        currentImage.preview,
+        croppedAreaPixels
+      );
+
+      // Create a File from the Blob to preserve the filename
+      const fileName = currentImage.file.name;
+      const fileType = currentImage.file.type;
+      const croppedFile = new File([croppedImageBlob], fileName, {
+        type: fileType,
+      });
+
+      // Upload the cropped image
+      const uploadedUrl = await uploadImage(croppedFile);
+
+      // Update the form value
+      onChange([...value, uploadedUrl]);
+
+      // Update status of current image
+      setImagesToProcess((prev) => {
+        const updated = [...prev];
+        updated[currentImageIndex].status = "complete";
+        return updated;
+      });
+
+      // Clean up current image
+      URL.revokeObjectURL(currentImage.preview);
+
+      // Move to next image or close dialog
+      if (currentImageIndex < imagesToProcess.length - 1) {
+        setCurrentImageIndex(currentImageIndex + 1);
+        setCrop({ x: 0, y: 0 });
+        setZoom(1);
+      } else {
+        // All images processed
+        toast.success("Imagen subida correctamente");
+        setImagesToProcess([]);
+        setCurrentImageIndex(0);
+        setCropDialogOpen(false);
+      }
+    } catch (error) {
+      console.error("Error processing cropped image:", error);
+
+      // Update status of current image
+      setImagesToProcess((prev) => {
+        const updated = [...prev];
+        updated[currentImageIndex].status = "error";
+        updated[currentImageIndex].error =
+          error instanceof Error ? error.message : "Error desconocido";
+        return updated;
+      });
+
+      toast.error("Error al subir la imagen", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Ocurrió un error al procesar la imagen",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const newImages = [...value];
+    newImages.splice(index, 1);
+    onChange(newImages);
+    toast("Imagen eliminada correctamente");
+  };
+
+  const handleZoomIn = () => {
+    setZoom((prev) => Math.min(prev + 0.1, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoom((prev) => Math.max(prev - 0.1, 0.5));
+  };
+
+  const handleCancelAll = () => {
+    // Clean up all previews
+    imagesToProcess.forEach((img) => URL.revokeObjectURL(img.preview));
+    setImagesToProcess([]);
+    setCurrentImageIndex(0);
+    setCropDialogOpen(false);
+  };
+
+  const handleSkipImage = () => {
+    // Clean up current image
+    URL.revokeObjectURL(currentImage.preview);
+
+    // Remove the current image from the queue
+    setImagesToProcess((prev) => {
+      const updated = [...prev];
+      updated.splice(currentImageIndex, 1);
+      return updated;
+    });
+
+    // If we removed the last image, close the dialog
+    if (imagesToProcess.length <= 1) {
+      setCropDialogOpen(false);
+      setImagesToProcess([]);
+      setCurrentImageIndex(0);
+    } else {
+      // If we removed the last image in the array, go to the previous one
+      if (currentImageIndex >= imagesToProcess.length - 1) {
+        setCurrentImageIndex(imagesToProcess.length - 2);
+      }
+      // Otherwise, the index stays the same but points to the next image
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="border rounded-md overflow-hidden">
+        <div
+          {...getRootProps()}
+          className={`px-5 py-7 hover:bg-background/50 text-center bg-background cursor-pointer transition-colors ${
+            isDragActive
+              ? "border-primary bg-primary/10"
+              : "border-muted-foreground/20"
+          } ${remainingSlots <= 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+        >
+          <input {...getInputProps()} disabled={remainingSlots <= 0} />
+          <div className="flex flex-col items-center justify-center gap-2">
+            {remainingSlots <= 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Ya has subido una imagen
+              </p>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Arrastra y suelta una imagen aquí, o haz clic para seleccionar
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  La imagen debe ser cuadrada
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Tamaño máximo: 5MB
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {value.length > 0 && (
+        <div className="w-full h-fit flex flex-col gap-y-4">
+          <div className="flex items-center justify-between">
+            <p className="font-medium">Logo del negocio</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                onChange([]);
+                toast("Logo eliminado");
+              }}
+            >
+              Eliminar
+            </Button>
+          </div>
+          <div className="relative group aspect-square w-full max-w-[200px] bg-background overflow-hidden rounded-md border">
+            <Image
+              src={value[0] || "/placeholder.svg"}
+              alt="Logo del negocio"
+              fill
+              sizes="200px"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200"></div>
+            <Button
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2 size-7 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              onClick={() => handleRemoveImage(0)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <Dialog
+        open={cropDialogOpen}
+        onOpenChange={(open) => {
+          if (!open && imagesToProcess.length > 0) {
+            // Confirm before closing if there are images to process
+            if (
+              confirm(
+                "¿Estás seguro de que deseas cancelar la subida de imágenes?"
+              )
+            ) {
+              handleCancelAll();
+            }
+            return;
+          }
+          setCropDialogOpen(open);
+        }}
+      >
+        <DialogContent className="p-0 max-w-xl [&>button]:hidden">
+          <DialogHeader className="p-3 bg-background border-b flex flex-row justify-between items-start space-y-0">
+            <div className="flex flex-col gap-0">
+              <DialogTitle className="flex items-center justify-between">
+                Ajustar imagen
+              </DialogTitle>
+              <DialogDescription>
+                Ajusta la imagen para que tenga un formato cuadrado
+              </DialogDescription>
+            </div>
+          </DialogHeader>
+
+          <div className="w-full h-fit bg-sidebar">
+            <div className="relative h-auto aspect-video w-full bg-white p-3">
+              {currentImage && (
+                <Cropper
+                  image={currentImage.preview}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={1}
+                  minZoom={0.5}
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={onCropComplete}
+                  showGrid
+                  zoomWithScroll={isMobile ? true : false}
+                  restrictPosition={false}
+                  maxZoom={3}
+                  objectFit="contain"
+                  style={{
+                    cropAreaStyle: cropperStyles.cropAreaStyle,
+                    containerStyle: cropperStyles.containerStyle,
+                    mediaStyle: cropperStyles.mediaStyle,
+                  }}
+                />
+              )}
+            </div>
+
+            <div className="w-full flex flex-col gap-y-2 items-start justify-start p-3">
+              <p className="text-sm font-semibold">Ajustes de zoom:</p>
+              <div className="flex items-center justify-center gap-2 w-full">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleZoomOut}
+                  disabled={zoom <= 0.5 || isUploading}
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+
+                <div className="w-full flex-1">
+                  <Slider
+                    className="bg-foreground"
+                    value={[zoom]}
+                    min={0.5}
+                    max={3}
+                    step={0.1}
+                    onValueChange={(values) => setZoom(values[0])}
+                    disabled={isUploading}
+                  />
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleZoomIn}
+                  disabled={zoom >= 3 || isUploading}
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {uploadProgress > 0 && (
+              <div className="w-full px-3 pb-3">
+                <p className="text-sm mb-1">Subiendo imagen...</p>
+                <Progress value={uploadProgress} className="h-2" />
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex flex-row sm:justify-between bg-background gap-2 p-3 border-t">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleCancelAll}
+                disabled={isUploading}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleSkipImage}
+                disabled={isUploading}
+                title="Omitir esta imagen"
+              >
+                Omitir
+                <SkipForward className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button
+              variant={"defaultBlack"}
+              onClick={handleCropSave}
+              disabled={isUploading}
+            >
+              {isUploading ? "Guardando..." : "Guardar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

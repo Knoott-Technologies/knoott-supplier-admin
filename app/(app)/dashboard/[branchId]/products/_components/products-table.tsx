@@ -177,7 +177,7 @@ export function DataTable<TData, TValue>({
             registros
           </div>
 
-          <Pagination className="order-1 sm:order-2">
+          <Pagination className="order-1 sm:order-2 w-fit">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious

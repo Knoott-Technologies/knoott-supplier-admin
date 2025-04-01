@@ -104,7 +104,7 @@ export const LoginTypesRenderer = () => {
         asChild
       >
         <Link href={"/register"}>
-          Regístrate en Knoott Suppliers
+          Regístrate en Knoott Partners
           <ArrowRight className="size-4" />
         </Link>
       </Button>

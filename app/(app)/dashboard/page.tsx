@@ -17,7 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Database } from "@/database.types";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +33,7 @@ type BusinessWithBranches = {
   id: string;
   name: string;
   logo_url: string;
+  is_verified: boolean;
   branches: {
     id: string;
     name: string;
@@ -75,6 +76,7 @@ const DashboardPage = async () => {
         id: business.id,
         name: business.business_name,
         logo_url: business.business_logo_url,
+        is_verified: business.is_verified,
         branches: [],
       });
     }
@@ -119,18 +121,31 @@ const DashboardPage = async () => {
               {businesses.map((business) => (
                 <Card key={business.id} className="w-full">
                   <CardHeader className="">
-                    <CardTitle className="flex items-center gap-2">
-                      <Avatar className="size-6 rounded-none border">
-                        <AvatarImage
-                          src={business.logo_url}
-                          alt={business.name}
-                        />
-                        <AvatarFallback className="rounded-none">
-                          {business.name.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      {business.name}
-                    </CardTitle>
+                    <div className="flex justify-between items-center w-full">
+                      <CardTitle className="flex items-center gap-2">
+                        <Avatar className="size-6 rounded-none border">
+                          <AvatarImage
+                            src={business.logo_url}
+                            alt={business.name}
+                          />
+                          <AvatarFallback className="rounded-none">
+                            {business.name.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        {business.name}
+                      </CardTitle>
+                      <Badge
+                        variant={"outline"}
+                        className="gap-x-1.5 pl-1.5 flex font-medium bg-sidebar"
+                      >
+                        {(business.is_verified && (
+                          <span className="w-2 h-2 rounded-full bg-success" />
+                        )) || (
+                          <span className="w-2 h-2 rounded-full bg-contrast" />
+                        )}
+                        {business.is_verified ? "Verificado" : "En revisión"}
+                      </Badge>
+                    </div>
                     <CardDescription>
                       {business.branches.length}{" "}
                       {business.branches.length === 1
@@ -152,7 +167,7 @@ const DashboardPage = async () => {
                           asChild
                           variant={"outline"}
                           size={"default"}
-                          className="w-full h-fit py-2 whitespace-normal"
+                          className="w-full whitespace-normal"
                         >
                           <Link
                             href={`/dashboard/${branch.id}`}
@@ -185,6 +200,26 @@ const DashboardPage = async () => {
                       ))}
                     </div>
                   </CardContent>
+                  <CardFooter className="bg-background border-t p-0">
+                    <Button
+                      asChild
+                      variant={"ghost"}
+                      size={"sm"}
+                      className="w-full whitespace-normal text-muted-foreground"
+                    >
+                      <Link
+                        href={`/dashboard/${business.id}/new-branch`}
+                        className="flex items-center justify-between w-full"
+                      >
+                        <span className="flex flex-col gap-y-1 flex-1 w-full">
+                          <div className="flex gap-x-2 w-full">
+                            <p>Nueva sucursal</p>
+                          </div>
+                        </span>
+                        <Plus className="shrink-0" />
+                      </Link>
+                    </Button>
+                  </CardFooter>
                 </Card>
               ))}
             </div>

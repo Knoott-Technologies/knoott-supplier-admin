@@ -20,18 +20,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { AmountInput } from "@/components/universal/amount-input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, X, ImageIcon } from "lucide-react";
-import { ImageUploadDropzone } from "@/components/universal/image-upload-dropzone";
+import { Plus, Trash2, X } from "lucide-react";
+import { SingleImageUpload } from "@/components/universal/single-image-upload";
+import { source } from "@/components/fonts/font-def";
+import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 // Define types for variant options and combinations
 interface VariantOption {
@@ -41,8 +36,9 @@ interface VariantOption {
   stock: number | null;
   is_default: boolean;
   sku?: string;
-  images_url: string[];
+  image_url: string; // Changed from images_url array to single image_url
   metadata: any | null;
+  accorded_commission: number; // Fixed commission rate
 }
 
 interface Variant {
@@ -95,8 +91,9 @@ export default function VariantsSection({
           stock: null,
           is_default: true,
           sku: "",
-          images_url: [],
+          image_url: "", // Changed from images_url array to single image_url
           metadata: null,
+          accorded_commission: 0.085, // Fixed commission rate of 8.5%
         },
       ],
     });
@@ -131,8 +128,9 @@ export default function VariantsSection({
         stock: null,
         is_default: false,
         sku: newSku,
-        images_url: [],
+        image_url: "", // Changed from images_url array to single image_url
         metadata: null,
+        accorded_commission: 0.085, // Fixed commission rate of 8.5%
       },
     ];
 
@@ -154,7 +152,7 @@ export default function VariantsSection({
     removeVariant(variantIndex);
   };
 
-  // Generate all possible combinations of variants for the table
+  // Generate all possible combinations of variants for the display
   const generateVariantCombinations = (): VariantOptionItem[][] => {
     const variants = form.getValues("variants") || [];
     if (!variants.length) return [];
@@ -244,9 +242,6 @@ export default function VariantsSection({
     const newVariantOptionIds: Record<string, string> = {};
 
     variantFields.forEach((variant, variantIndex) => {
-      // Type assertion to access the name property
-      const typedVariant = variant as unknown as { id: string; name?: string };
-
       const options = form.watch(`variants.${variantIndex}.options`);
       options.forEach((_: any, optionIndex: number) => {
         const key = `${variantIndex}-${optionIndex}`;
@@ -286,17 +281,8 @@ export default function VariantsSection({
     });
   };
 
-  // Get all variant combinations for the table
+  // Get all variant combinations for display
   const variantCombinations = generateVariantCombinations();
-
-  // Function to toggle expanded variant for image management
-  const toggleExpandedVariant = (key: string) => {
-    if (expandedVariant === key) {
-      setExpandedVariant(null);
-    } else {
-      setExpandedVariant(key);
-    }
-  };
 
   return (
     <Card>
@@ -306,11 +292,11 @@ export default function VariantsSection({
           Agrega variantes de tu producto, como tallas, colores, etc.
         </CardDescription>
       </CardHeader>
-      <CardContent className="bg-sidebar space-y-6">
+      <CardContent className="bg-sidebar flex flex-col gap-y-4">
         {/* Variant Options Section */}
         {variantFields.map((variantField, variantIndex) => (
           <Card key={variantField.id} className="border">
-            <CardContent className="flex flex-col gap-y-2">
+            <CardContent className="flex flex-col gap-y-2 pt-4">
               <div className="flex items-center justify-between gap-4">
                 <FormField
                   control={form.control}
@@ -395,246 +381,165 @@ export default function VariantsSection({
           onClick={addVariant}
           className="w-full"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4" />
           Añadir otra opción
         </Button>
 
-        {/* Variant Combinations Table */}
+        <Separator />
+
+        {/* Variant Combinations Display - Card Layout instead of Table */}
         {variantCombinations.length > 0 && (
-          <div className="mt-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium">Variantes</h3>
-            </div>
+          <div className="w-full">
+            <div className="w-full flex flex-col gap-4">
+              {variantCombinations.map((combination, index: number) => {
+                // Get the first option to use for form field references
+                const firstOption = combination[0];
+                if (!firstOption) return null; // Skip if no option is found
 
-            <div className="border bg-background overflow-hidden rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[40px]">
-                      <Checkbox
-                        checked={
-                          selectedVariants.length === variantCombinations.length
-                        }
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setSelectedVariants(
-                              Array.from(
-                                { length: variantCombinations.length },
-                                (_, i) => i
-                              )
-                            );
-                          } else {
-                            setSelectedVariants([]);
-                          }
-                        }}
-                      />
-                    </TableHead>
-                    <TableHead>Variante</TableHead>
-                    <TableHead className="w-[200px]">Precio</TableHead>
-                    <TableHead className="w-[150px]">Disponible</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {variantCombinations.map((combination, index: number) => {
-                    // Get the first option to use for form field references
-                    const firstOption = combination[0];
-                    if (!firstOption) return null; // Skip if no option is found
+                // Find the variant index by name
+                const variantIndex = variantFields.findIndex((v) => {
+                  // Get the variant name from the form values instead of the field
+                  const variantName = form.getValues(
+                    `variants.${variantFields.indexOf(v)}.name`
+                  );
+                  return variantName === firstOption.variantName;
+                });
 
-                    // Find the variant index by name
-                    const variantIndex = variantFields.findIndex((v) => {
-                      // Get the variant name from the form values instead of the field
-                      const variantName = form.getValues(
-                        `variants.${variantFields.indexOf(v)}.name`
-                      );
-                      return variantName === firstOption.variantName;
-                    });
+                // If variant not found, skip this combination
+                if (variantIndex === -1) return null;
 
-                    // If variant not found, skip this combination
-                    if (variantIndex === -1) return null;
+                // Get options array with null check
+                const options =
+                  form.getValues(`variants.${variantIndex}.options`) || [];
 
-                    // Get options array with null check
-                    const options =
-                      form.getValues(`variants.${variantIndex}.options`) || [];
+                // Find the option index by name
+                const optionIndex = options.findIndex(
+                  (o: VariantOption) => o?.name === firstOption.optionName
+                );
 
-                    // Find the option index by name
-                    const optionIndex = options.findIndex(
-                      (o: VariantOption) => o?.name === firstOption.optionName
-                    );
+                // If option not found, skip this combination
+                if (optionIndex === -1) return null;
 
-                    // If option not found, skip this combination
-                    if (optionIndex === -1) return null;
+                // Create a unique key for this variant option
+                const variantKey = `${variantIndex}-${optionIndex}`;
 
-                    // Get the current images for this variant option
-                    const images =
-                      form.getValues(
-                        `variants.${variantIndex}.options.${optionIndex}.images_url`
-                      ) || [];
-
-                    // Create a unique key for this variant option
-                    const variantKey = `${variantIndex}-${optionIndex}`;
-                    const isExpanded = expandedVariant === variantKey;
-
-                    return (
-                      <React.Fragment key={index}>
-                        <TableRow>
-                          <TableCell>
-                            <Checkbox
-                              checked={selectedVariants.includes(index)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedVariants([
-                                    ...selectedVariants,
-                                    index,
-                                  ]);
-                                } else {
-                                  setSelectedVariants(
-                                    selectedVariants.filter((i) => i !== index)
-                                  );
-                                }
-                              }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-4">
-                              <div
-                                className="w-[100px] h-[100px] border border-dashed rounded-md flex items-center justify-center cursor-pointer bg-muted/30"
-                                onClick={() =>
-                                  toggleExpandedVariant(variantKey)
-                                }
-                              >
-                                {images.length > 0 ? (
-                                  <img
-                                    src={images[0] || "/placeholder.svg"}
-                                    alt={`Imagen de ${firstOption.optionName}`}
-                                    className="w-full h-full object-cover rounded-md"
-                                  />
-                                ) : (
-                                  <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                                )}
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="font-medium">
-                                  {combination
-                                    .map(
-                                      (item: VariantOptionItem) =>
-                                        item.optionName
-                                    )
-                                    .join(" / ")}
-                                </span>
-                                <FormField
-                                  control={form.control}
-                                  name={`variants.${variantIndex}.options.${optionIndex}.sku`}
-                                  render={({ field }) => (
-                                    <Input
-                                      placeholder="SKU"
-                                      className="mt-1 h-8 text-sm text-muted-foreground"
-                                      {...field}
-                                      value={field.value || ""}
-                                      onChange={(e) => {
-                                        field.onChange(e.target.value);
-                                        // Si es la primera opción de esta variante y se cambió el SKU, generar SKUs secuenciales
-                                        if (
-                                          optionIndex === 0 &&
-                                          e.target.value
-                                        ) {
-                                          generateSequentialSKUs(
-                                            e.target.value,
-                                            variantIndex
-                                          );
-                                        }
-                                      }}
-                                    />
-                                  )}
+                return (
+                  <Card key={index} className="overflow-hidden">
+                    <CardContent className="flex flex-col gap-4">
+                      <p className="text-base font-medium">
+                        {combination
+                          .map((item: VariantOptionItem) => item.optionName)
+                          .join(" / ")}
+                      </p>
+                      <div className="flex gap-4 items-stretch justify-start">
+                        <FormField
+                          control={form.control}
+                          name={`variants.${variantIndex}.options.${optionIndex}.image_url`}
+                          render={({ field }) => (
+                            <FormItem className="">
+                              <FormControl>
+                                <SingleImageUpload
+                                  value={field.value || ""}
+                                  onChange={field.onChange}
+                                  productId={productId || undefined}
+                                  variantOptionId={
+                                    variantOptionIds[variantKey] || undefined
+                                  }
                                 />
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="flex flex-col gap-4 items-stretch justify-start flex-1">
+                          <FormItem>
+                            <FormLabel>SKU</FormLabel>
                             <FormField
                               control={form.control}
-                              name={`variants.${variantIndex}.options.${optionIndex}.price`}
+                              name={`variants.${variantIndex}.options.${optionIndex}.sku`}
                               render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <div className="relative">
+                                <Input
+                                  placeholder="SKU"
+                                  className="bg-sidebar"
+                                  {...field}
+                                  value={field.value || ""}
+                                  onChange={(e) => {
+                                    field.onChange(e.target.value);
+                                    // Si es la primera opción de esta variante y se cambió el SKU, generar SKUs secuenciales
+                                    if (optionIndex === 0 && e.target.value) {
+                                      generateSequentialSKUs(
+                                        e.target.value,
+                                        variantIndex
+                                      );
+                                    }
+                                  }}
+                                />
+                              )}
+                            />
+                          </FormItem>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormItem>
+                              <FormLabel>Precio</FormLabel>
+                              <FormField
+                                control={form.control}
+                                name={`variants.${variantIndex}.options.${optionIndex}.price`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
                                       <AmountInput
-                                        className="bg-sidebar pl-8"
+                                        className="bg-sidebar"
                                         value={field.value || 0}
                                         onChange={field.onChange}
                                       />
-                                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-                                        $
-                                      </span>
-                                    </div>
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                          </TableCell>
-                          <TableCell className="w-fit">
-                            <FormField
-                              control={form.control}
-                              name={`variants.${variantIndex}.options.${optionIndex}.stock`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      placeholder="0"
-                                      className="bg-sidebar w-full"
-                                      {...field}
-                                      value={field.value ?? ""}
-                                      onChange={(e) =>
-                                        field.onChange(
-                                          e.target.value
-                                            ? Number.parseInt(e.target.value)
-                                            : null
-                                        )
-                                      }
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                          </TableCell>
-                        </TableRow>
-                        {isExpanded && (
-                          <TableRow>
-                            <TableCell colSpan={4} className="p-0 border-t-0">
-                              <div className="p-4 bg-muted/20">
-                                <FormField
-                                  control={form.control}
-                                  name={`variants.${variantIndex}.options.${optionIndex}.images_url`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>
-                                        Imágenes de la variante
-                                      </FormLabel>
-                                      <FormControl>
-                                        <ImageUploadDropzone
-                                          value={field.value || []}
-                                          onChange={field.onChange}
-                                          maxFiles={5}
-                                          productId={productId || undefined}
-                                          variantOptionId={
-                                            variantOptionIds[variantKey] ||
-                                            undefined
-                                          }
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </FormItem>
+                            <FormItem>
+                              <FormLabel>Disponible</FormLabel>
+                              <FormField
+                                control={form.control}
+                                name={`variants.${variantIndex}.options.${optionIndex}.stock`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        className="bg-sidebar"
+                                        {...field}
+                                        value={field.value ?? ""}
+                                        onChange={(e) =>
+                                          field.onChange(
+                                            e.target.value
+                                              ? Number.parseInt(e.target.value)
+                                              : null
+                                          )
+                                        }
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </FormItem>
+                          </div>
+                          {/* Hidden field for fixed commission rate */}
+                          <FormField
+                            control={form.control}
+                            name={`variants.${variantIndex}.options.${optionIndex}.accorded_commission`}
+                            render={({ field }) => (
+                              <input type="hidden" {...field} value={0.085} />
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
 
             <div className="mt-4 text-sm text-muted-foreground text-center">

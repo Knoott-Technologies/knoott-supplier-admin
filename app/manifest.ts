@@ -2,8 +2,8 @@ import { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Knoott - Supplier Admin",
-    short_name: "Suppliers",
+    name: "Knoott - Partners",
+    short_name: "Partners",
     description: "Administra tu negocio dentro de Knoott",
     lang: "es-419",
     display: "standalone",
@@ -24,7 +24,7 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         name: "Dashboard",
         url: "/dashboard",
-        description: "Tu dashboard de Knoott Suppliers",
+        description: "Tu dashboard de Knoott Partners",
         icons: [
           {
             src: "icons/icon-48x48.png",

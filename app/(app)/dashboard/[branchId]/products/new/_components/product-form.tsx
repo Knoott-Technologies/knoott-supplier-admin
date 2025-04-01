@@ -13,7 +13,6 @@ import ImagesSection from "./images-section";
 import CategorizationSection from "./categorization-section";
 import SpecificationsSection from "./specifications-section";
 import VariantsSection from "./variants-section";
-import { type } from "node:os";
 import { Database } from "@/database.types";
 
 // Define the combined schema for all form sections
@@ -71,6 +70,7 @@ const productFormSchema = z.object({
               sku: z.string().optional(),
               images_url: z.array(z.string()).default([]),
               metadata: z.any().nullable(),
+              accorded_commision: z.number().default(0.085),
             })
           )
           .min(1, "Al menos una opción es requerida"),
@@ -114,24 +114,7 @@ export default function ProductForm({
       dimensions: [],
       specs: [],
       keywords: [],
-      variants: [
-        {
-          name: "",
-          display_name: "",
-          options: [
-            {
-              name: "",
-              display_name: "",
-              price: 0,
-              stock: null,
-              is_default: true,
-              sku: "",
-              images_url: [],
-              metadata: null,
-            },
-          ],
-        },
-      ],
+      variants: [],
     },
   });
 
