@@ -135,6 +135,7 @@ export type Database = {
           id: number
           image_desktop: string
           image_mobile: string
+          placement: number | null
           product_id: number | null
           starts_at: string
           type: Database["public"]["Enums"]["banner_types"]
@@ -150,6 +151,7 @@ export type Database = {
           id?: number
           image_desktop: string
           image_mobile: string
+          placement?: number | null
           product_id?: number | null
           starts_at?: string
           type?: Database["public"]["Enums"]["banner_types"]
@@ -165,6 +167,7 @@ export type Database = {
           id?: number
           image_desktop?: string
           image_mobile?: string
+          placement?: number | null
           product_id?: number | null
           starts_at?: string
           type?: Database["public"]["Enums"]["banner_types"]
@@ -187,6 +190,13 @@ export type Database = {
           {
             foreignKeyName: "catalog_banners_category_id_fkey"
             columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_banners_placement_fkey"
+            columns: ["placement"]
             isOneToOne: false
             referencedRelation: "catalog_collections"
             referencedColumns: ["id"]
