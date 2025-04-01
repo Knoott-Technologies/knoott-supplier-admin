@@ -159,24 +159,19 @@ export const NotificationsPreferencesForm = ({
   const unsubscribeFromPush = async () => {
     try {
       // Añadir más logging para depuración
-      console.log("Iniciando proceso de cancelación de suscripción");
-      console.log("Estado actual de suscripción:", currentSubscription);
 
       if (!currentSubscription) {
-        console.log("No hay suscripción activa para cancelar");
         return true;
       }
 
       // Guardar una referencia al endpoint antes de cancelar
       const endpoint = currentSubscription.endpoint;
-      console.log("Endpoint a cancelar:", endpoint);
 
       // Intentar cancelar la suscripción en el navegador
       let result = false;
       try {
         // @ts-expect-error - Definido en push-subscribe.js
         result = await window.pushNotifications.unsubscribe();
-        console.log("Resultado de cancelación del navegador:", result);
       } catch (unsubError) {
         console.error(
           "Error específico al cancelar en el navegador:",
@@ -187,7 +182,6 @@ export const NotificationsPreferencesForm = ({
 
       // Intentar eliminar la suscripción del servidor incluso si el paso anterior falló
       try {
-        console.log("Enviando solicitud de cancelación al servidor");
         const response = await fetch("/api/push/unsubscribe", {
           method: "POST",
           headers: {
@@ -203,14 +197,12 @@ export const NotificationsPreferencesForm = ({
           throw new Error(`Error del servidor: ${response.status}`);
         }
 
-        console.log("Cancelación en el servidor exitosa");
       } catch (serverError) {
         console.error("Error al comunicarse con el servidor:", serverError);
         // No lanzar excepción, pero registrar el error
       }
 
       // Actualizar el estado local independientemente de los resultados anteriores
-      console.log("Actualizando estado local de suscripción a null");
       setCurrentSubscription(null);
 
       return true;
@@ -243,14 +235,10 @@ export const NotificationsPreferencesForm = ({
           form.setValue("push_enabled", false);
         }
       } else {
-        // Usar un enfoque más robusto para cancelar la suscripción
-        console.log("Iniciando proceso de desactivación de notificaciones");
-
         // Intentar cancelar suscripción con manejo mejorado de errores
         const unsubscribed = await unsubscribeFromPush();
 
         if (unsubscribed) {
-          console.log("Cancelación completada correctamente");
           toast.success("Notificaciones push deshabilitadas correctamente");
           // Asegurar que el estado del formulario se actualice correctamente
           form.setValue("push_enabled", false);
@@ -265,10 +253,6 @@ export const NotificationsPreferencesForm = ({
               await registration.pushManager.getSubscription();
             const actuallySubscribed = !!subscription;
 
-            console.log(
-              "Verificación post-error: ¿Suscrito?",
-              actuallySubscribed
-            );
             form.setValue("push_enabled", actuallySubscribed);
           } catch (verifyError) {
             console.error("Error al verificar estado final:", verifyError);

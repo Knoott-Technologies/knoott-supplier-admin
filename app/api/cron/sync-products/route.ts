@@ -240,9 +240,6 @@ async function syncProviderProducts(
   supabase: any
 ): Promise<SyncResult> {
   try {
-    console.log(
-      `Iniciando sincronización con ${integration.provider} para branch ${integration.provider_branch_id}`
-    );
 
     let products: any[] = [];
 
@@ -306,7 +303,6 @@ async function fetchWondersignProducts(
   integration: ApiIntegration & { api_key: string; api_secret: string | null }
 ): Promise<any[]> {
   try {
-    console.log("Obteniendo productos de Wondersign API:", integration.api_url);
 
     const response = await fetch(`${integration.api_url}/products`, {
       method: "GET",
@@ -336,7 +332,6 @@ async function fetchShopifyProducts(
   integration: ApiIntegration & { api_key: string; api_secret: string | null }
 ): Promise<any[]> {
   try {
-    console.log("Obteniendo productos de Shopify:", integration.api_url);
 
     const response = await fetch(`${integration.api_url}/products.json`, {
       method: "GET",
@@ -366,7 +361,6 @@ async function fetchWooCommerceProducts(
   integration: ApiIntegration & { api_key: string; api_secret: string | null }
 ): Promise<any[]> {
   try {
-    console.log("Obteniendo productos de WooCommerce:", integration.api_url);
 
     const response = await fetch(
       `${integration.api_url}/wp-json/wc/v3/products`,
@@ -401,7 +395,6 @@ async function fetchMagentoProducts(
   integration: ApiIntegration & { api_key: string; api_secret: string | null }
 ): Promise<any[]> {
   try {
-    console.log("Obteniendo productos de Magento:", integration.api_url);
 
     // Primero obtener un token de Magento
     const tokenResponse = await fetch(
@@ -458,10 +451,6 @@ async function fetchCustomProducts(
   integration: ApiIntegration & { api_key: string; api_secret: string | null }
 ): Promise<any[]> {
   try {
-    console.log(
-      "Obteniendo productos de API personalizada:",
-      integration.api_url
-    );
 
     // Configurar headers según la configuración
     const headers: Record<string, string> = {
@@ -562,11 +551,6 @@ async function processProducts(
         );
 
         if (!mappedProduct || !mappedProduct.variant.options[0].sku) {
-          console.log(
-            `Producto sin SKU, omitiendo: ${JSON.stringify(
-              product.name || "Desconocido"
-            )}`
-          );
           stats.skipped++;
           continue;
         }
@@ -585,10 +569,6 @@ async function processProducts(
         }
 
         if (existingVariantOption) {
-          // Actualizar producto existente
-          console.log(
-            `Actualizando producto existente: ${mappedProduct.name}, SKU: ${mappedProduct.variant.options[0].sku}`
-          );
 
           // Convertir dimensiones y specs al formato de la base de datos
           const dimensionsJson =
@@ -652,10 +632,6 @@ async function processProducts(
 
           stats.updated++;
         } else {
-          // Crear nuevo producto
-          console.log(
-            `Creando nuevo producto: ${mappedProduct.name}, SKU: ${mappedProduct.variant.options[0].sku}`
-          );
 
           // Convertir dimensiones y specs al formato de la base de datos
           const dimensionsJson =
@@ -1268,9 +1244,6 @@ function mapCustomProduct(
 ): MappedProduct | null {
   // Mapeo para API personalizada
   if (!mappingConfig) {
-    console.log(
-      "No se proporcionó configuración de mapeo para API personalizada"
-    );
     return null;
   }
 

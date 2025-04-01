@@ -22,8 +22,6 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("data", data);
-
     // Insert the business into the database
     const { data: business, error } = await supabase
       .from("provider_business")
