@@ -56,11 +56,13 @@ interface VariantOptionItem {
 interface VariantsSectionProps {
   form: UseFormReturn<any>;
   productId: string | null;
+  commission: number;
 }
 
 export default function VariantsSection({
   form,
   productId,
+  commission,
 }: VariantsSectionProps) {
   const [activeVariant, setActiveVariant] = useState<string | null>(null);
   const [variantOptionIds, setVariantOptionIds] = useState<
@@ -93,7 +95,7 @@ export default function VariantsSection({
           sku: "",
           image_url: "", // Changed from images_url array to single image_url
           metadata: null,
-          accorded_commission: 0.085, // Fixed commission rate of 8.5%
+          accorded_commission: commission, // Fixed commission rate of 8.5%
         },
       ],
     });

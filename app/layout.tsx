@@ -16,8 +16,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Knoott Partners Admin",
-    default: "Knoott Partners Admin",
+    template: "%s | Knoott Partners",
+    default: "Knoott Partners",
   },
   description:
     "Ingresa a la plataforma de Knoott Partners, para gestionar tu negocio, productos, pedidos y más.",

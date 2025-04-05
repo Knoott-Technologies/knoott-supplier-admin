@@ -86,16 +86,20 @@ type Brand = Database["public"]["Tables"]["catalog_brands"]["Row"];
 
 type Category = Database["public"]["Tables"]["catalog_collections"]["Row"];
 
+type Branch = Database["public"]["Tables"]["provider_branches"]["Row"];
+
 interface ProductFormProps {
   branchId: string;
   brands: Brand[];
   categories: Category[];
+  branch: Branch;
 }
 
 export default function ProductForm({
   branchId,
   brands,
   categories,
+  branch,
 }: ProductFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -193,7 +197,11 @@ export default function ProductForm({
               <GeneralInfoSection form={form} />
               <ImagesSection form={form} />
               <SpecificationsSection form={form} />
-              <VariantsSection form={form} productId={productId} />
+              <VariantsSection
+                commission={branch.commision_percentaje}
+                form={form}
+                productId={productId}
+              />
             </section>
             <section className="w-full h-fit items-start justify-start flex flex-col lg:sticky lg:top-[calc(56px_+_28px)]">
               <CategorizationSection

@@ -138,6 +138,8 @@ export type Database = {
           placement: number | null
           product_id: number | null
           starts_at: string
+          text: string | null
+          title: string | null
           type: Database["public"]["Enums"]["banner_types"]
         }
         Insert: {
@@ -154,6 +156,8 @@ export type Database = {
           placement?: number | null
           product_id?: number | null
           starts_at?: string
+          text?: string | null
+          title?: string | null
           type?: Database["public"]["Enums"]["banner_types"]
         }
         Update: {
@@ -170,6 +174,8 @@ export type Database = {
           placement?: number | null
           product_id?: number | null
           starts_at?: string
+          text?: string | null
+          title?: string | null
           type?: Database["public"]["Enums"]["banner_types"]
         }
         Relationships: [
@@ -644,6 +650,7 @@ export type Database = {
           bank_account_number: number | null
           branch_name: string
           branch_reference: string
+          commision_percentaje: number
           contact_phone_number: string
           created_at: string
           description: string | null
@@ -654,6 +661,7 @@ export type Database = {
           bank_account_number?: number | null
           branch_name: string
           branch_reference?: string
+          commision_percentaje?: number
           contact_phone_number: string
           created_at?: string
           description?: string | null
@@ -664,6 +672,7 @@ export type Database = {
           bank_account_number?: number | null
           branch_name?: string
           branch_reference?: string
+          commision_percentaje?: number
           contact_phone_number?: string
           created_at?: string
           description?: string | null
@@ -1478,7 +1487,12 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_user_provider_ids: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: string[]
+      }
     }
     Enums: {
       banner_status: "active" | "inactive"

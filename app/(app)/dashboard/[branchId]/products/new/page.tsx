@@ -10,6 +10,12 @@ export default async function NewProductPage({
 }) {
   const supabase = createClient(cookies());
 
+  const { data: branch, error: branchError } = await supabase
+    .from("provider_branches")
+    .select("*")
+    .eq("id", params.branchId)
+    .single();
+
   // Fetch brands
   const { data: brands } = await supabase
     .from("catalog_brands")
@@ -31,6 +37,7 @@ export default async function NewProductPage({
         />
       </div>
       <ProductForm
+        branch={branch}
         branchId={params.branchId}
         brands={brands || []}
         categories={categories || []}

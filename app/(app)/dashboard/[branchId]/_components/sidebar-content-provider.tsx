@@ -92,11 +92,6 @@ export const SidebarContentProvider = ({
       label: "Mi tienda",
       items: [
         {
-          title: "Transacciones",
-          icon: ArrowLeftRight,
-          href: `${startUrl}/transactions`,
-        },
-        {
           title: "Productos",
           icon: Tag,
           href: `${startUrl}/products`,
@@ -106,10 +101,14 @@ export const SidebarContentProvider = ({
           icon: Package,
           href: `${startUrl}/orders`,
         },
+        {
+          title: "Transacciones",
+          icon: ArrowLeftRight,
+          href: `${startUrl}/transactions`,
+        },
       ],
     },
   ];
-
 
   return (
     <>
