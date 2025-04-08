@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trash2, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -51,6 +50,13 @@ interface State {
   value: string;
 }
 
+interface DeliveryMapWrapperProps
+  extends Omit<DeliveryMapProps, "geoJsonData"> {
+  initialCities?: City[];
+  initialStates?: State[];
+  geoJsonData?: FeatureCollection | null;
+}
+
 // Función para extraer el nombre del estado del código
 const getEstadoName = (cveEnt: string): string => {
   const estados: Record<string, string> = {
@@ -90,25 +96,35 @@ const getEstadoName = (cveEnt: string): string => {
   return estados[cveEnt] || cveEnt;
 };
 
-export function DeliveryMapWrapper(
-  props: Omit<DeliveryMapProps, "geoJsonData">
-) {
-  const [selectedRegions, setSelectedRegions] = useState<string[]>(
-    props.value || []
-  );
+export function DeliveryMapWrapper({
+  value,
+  onChange,
+  initialCities = [],
+  initialStates = [],
+  geoJsonData = null,
+}: DeliveryMapWrapperProps) {
+  const [selectedRegions, setSelectedRegions] = useState<string[]>(value || []);
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [cities, setCities] = useState<City[]>([]);
-  const [states, setStates] = useState<State[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filteredCities, setFilteredCities] = useState<City[]>([]);
-  const [filteredStates, setFilteredStates] = useState<State[]>([]);
-  const [geoJsonData, setGeoJsonData] = useState<FeatureCollection | null>(
-    null
+  const [cities, setCities] = useState<City[]>(initialCities);
+  const [states, setStates] = useState<State[]>(initialStates);
+  const [loading, setLoading] = useState(
+    initialCities.length === 0 || initialStates.length === 0
+  );
+  const [filteredCities, setFilteredCities] = useState<City[]>(initialCities);
+  const [filteredStates, setFilteredStates] = useState<State[]>(initialStates);
+  const [geoJsonDataState, setGeoJsonData] = useState<FeatureCollection | null>(
+    geoJsonData
   );
 
-  // Load GeoJSON data and extract cities and states
+  // Load GeoJSON data and extract cities and states if not provided
   useEffect(() => {
+    // If we already have data, skip fetching
+    if (initialCities.length > 0 && initialStates.length > 0 && geoJsonData) {
+      setLoading(false);
+      return;
+    }
+
     const fetchGeoData = async () => {
       try {
         setLoading(true);
@@ -119,53 +135,56 @@ export function DeliveryMapWrapper(
         const data = await response.json();
         setGeoJsonData(data);
 
-        // Extract unique states and cities from GeoJSON
-        const statesMap = new Map<string, string>();
-        const citiesArray: City[] = [];
+        // Only extract states and cities if not provided
+        if (initialCities.length === 0 || initialStates.length === 0) {
+          // Extract unique states and cities from GeoJSON
+          const statesMap = new Map<string, string>();
+          const citiesArray: City[] = [];
 
-        // Process features to extract states and cities
-        if (data && data.features) {
-          data.features.forEach((feature: any) => {
-            if (feature.properties) {
-              const municipio =
-                feature.properties.NAME_2 || feature.properties.NOMGEO || "";
-              let estado = "";
+          // Process features to extract states and cities
+          if (data && data.features) {
+            data.features.forEach((feature: any) => {
+              if (feature.properties) {
+                const municipio =
+                  feature.properties.NAME_2 || feature.properties.NOMGEO || "";
+                let estado = "";
 
-              // Get state name
-              if (feature.properties.NAME_1) {
-                estado = feature.properties.NAME_1;
-              } else if (feature.properties.CVE_ENT) {
-                estado = getEstadoName(feature.properties.CVE_ENT);
+                // Get state name
+                if (feature.properties.NAME_1) {
+                  estado = feature.properties.NAME_1;
+                } else if (feature.properties.CVE_ENT) {
+                  estado = getEstadoName(feature.properties.CVE_ENT);
+                }
+
+                // Skip if missing data
+                if (!municipio || !estado) return;
+
+                // Add state to map
+                statesMap.set(estado, estado);
+
+                // Add city to array
+                citiesArray.push({
+                  name: municipio,
+                  state: estado,
+                  value: `${municipio}|${estado}`,
+                });
               }
+            });
+          }
 
-              // Skip if missing data
-              if (!municipio || !estado) return;
+          // Convert states map to array
+          const statesArray: State[] = Array.from(statesMap.entries()).map(
+            ([name]) => ({
+              name,
+              value: name,
+            })
+          );
 
-              // Add state to map
-              statesMap.set(estado, estado);
-
-              // Add city to array
-              citiesArray.push({
-                name: municipio,
-                state: estado,
-                value: `${municipio}|${estado}`,
-              });
-            }
-          });
+          setStates(statesArray);
+          setFilteredStates(statesArray);
+          setCities(citiesArray);
+          setFilteredCities(citiesArray);
         }
-
-        // Convert states map to array
-        const statesArray: State[] = Array.from(statesMap.entries()).map(
-          ([name]) => ({
-            name,
-            value: name,
-          })
-        );
-
-        setStates(statesArray);
-        setFilteredStates(statesArray);
-        setCities(citiesArray);
-        setFilteredCities(citiesArray);
       } catch (error) {
         console.error("Error loading GeoJSON data:", error);
 
@@ -222,7 +241,7 @@ export function DeliveryMapWrapper(
     };
 
     fetchGeoData();
-  }, []);
+  }, [initialCities, initialStates, geoJsonData]);
 
   // Filter cities and states based on search term
   useEffect(() => {
@@ -251,17 +270,17 @@ export function DeliveryMapWrapper(
 
   // Update parent form when selections change
   useEffect(() => {
-    if (JSON.stringify(props.value) !== JSON.stringify(selectedRegions)) {
-      props.onChange(selectedRegions);
+    if (JSON.stringify(value) !== JSON.stringify(selectedRegions)) {
+      onChange(selectedRegions);
     }
-  }, [selectedRegions, props]);
+  }, [selectedRegions, value, onChange]);
 
   // Update local state when props change
   useEffect(() => {
-    if (JSON.stringify(props.value) !== JSON.stringify(selectedRegions)) {
-      setSelectedRegions(props.value || []);
+    if (JSON.stringify(value) !== JSON.stringify(selectedRegions)) {
+      setSelectedRegions(value || []);
     }
-  }, [props.value]);
+  }, [value]);
 
   // Add a selected city
   const addCity = (value: string) => {
@@ -448,7 +467,7 @@ export function DeliveryMapWrapper(
       <DeliveryMapClient
         value={selectedRegions}
         onChange={handleMapSelectionChange}
-        geoJsonData={geoJsonData}
+        geoJsonData={geoJsonDataState}
       />
 
       {/* Selected regions display */}

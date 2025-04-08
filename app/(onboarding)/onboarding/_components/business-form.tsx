@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import type { FeatureCollection } from "geojson";
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -217,13 +218,27 @@ const businessFormSchema = z.object({
 
 type BusinessFormValues = z.infer<typeof businessFormSchema>;
 
-export function BusinessForm() {
+interface BusinessFormProps {
+  initialStates?: string[];
+  initialCities?: Record<string, string[]>;
+  initialSectors?: string[];
+  geoJsonData?: FeatureCollection | null;
+}
+
+export function BusinessForm({
+  initialStates = [],
+  initialCities = {},
+  initialSectors = [],
+  geoJsonData = null,
+}: BusinessFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const [states, setStates] = useState<string[]>([]);
+  const [states, setStates] = useState<string[]>(initialStates);
   const [cities, setCities] = useState<string[]>([]);
-  const [sectors, setSectors] = useState<string[]>([]);
+  const [sectors, setSectors] = useState<string[]>(initialSectors);
   const [selectedState, setSelectedState] = useState<string>("");
+  const [mapCities, setMapCities] = useState<any[]>([]);
+  const [mapStates, setMapStates] = useState<any[]>([]);
 
   // Valores por defecto del formulario
   const defaultValues: Partial<BusinessFormValues> = {
@@ -261,19 +276,48 @@ export function BusinessForm() {
     defaultValues,
   });
 
-  // Cargar estados y sectores al montar el componente
+  // Cargar estados y sectores si no se proporcionaron inicialmente
   useEffect(() => {
     const fetchStatesAndSectors = async () => {
       try {
-        // Cargar estados
-        const statesResponse = await fetch("/api/states-cities?type=states");
-        const statesData = await statesResponse.json();
-        setStates(statesData.states || []);
+        // Solo cargar estados si no se proporcionaron
+        if (initialStates.length === 0) {
+          const statesResponse = await fetch("/api/states-cities?type=states");
+          const statesData = await statesResponse.json();
+          setStates(statesData.states || []);
+        }
 
-        // Cargar sectores
-        const sectorsResponse = await fetch("/api/states-cities?type=sectors");
-        const sectorsData = await sectorsResponse.json();
-        setSectors(sectorsData.sectors || []);
+        // Solo cargar sectores si no se proporcionaron
+        if (initialSectors.length === 0) {
+          const sectorsResponse = await fetch(
+            "/api/states-cities?type=sectors"
+          );
+          const sectorsData = await sectorsResponse.json();
+          setSectors(sectorsData.sectors || []);
+        }
+
+        // Preparar datos para el mapa
+        if (initialStates.length > 0) {
+          // Convertir estados a formato para el mapa
+          const statesForMap = initialStates.map((state) => ({
+            name: state,
+            value: state,
+          }));
+          setMapStates(statesForMap);
+
+          // Preparar ciudades para el mapa
+          const allCities: any[] = [];
+          Object.entries(initialCities).forEach(([state, stateCities]) => {
+            stateCities.forEach((city) => {
+              allCities.push({
+                name: city,
+                state: state,
+                value: `${city}|${state}`,
+              });
+            });
+          });
+          setMapCities(allCities);
+        }
       } catch (error) {
         console.error("Error al cargar datos:", error);
         toast.error("Error al cargar datos de estados y sectores");
@@ -281,7 +325,7 @@ export function BusinessForm() {
     };
 
     fetchStatesAndSectors();
-  }, []);
+  }, [initialStates, initialCities, initialSectors]);
 
   // Cargar ciudades cuando cambia el estado seleccionado
   useEffect(() => {
@@ -291,6 +335,13 @@ export function BusinessForm() {
         return;
       }
 
+      // Si tenemos ciudades precargadas para este estado, usarlas
+      if (initialCities && initialCities[selectedState]) {
+        setCities(initialCities[selectedState]);
+        return;
+      }
+
+      // Si no, cargarlas desde la API
       try {
         const response = await fetch(
           `/api/states-cities?type=cities&state=${encodeURIComponent(
@@ -306,7 +357,7 @@ export function BusinessForm() {
     };
 
     fetchCities();
-  }, [selectedState]);
+  }, [selectedState, initialCities]);
 
   // Manejar cambio de estado en el formulario
   const handleStateChange = (state: string) => {
@@ -862,6 +913,9 @@ export function BusinessForm() {
                       <DeliveryMapWrapper
                         value={field.value}
                         onChange={field.onChange}
+                        initialCities={mapCities}
+                        initialStates={mapStates}
+                        geoJsonData={geoJsonData}
                       />
                     </FormControl>
                     <FormDescription>
@@ -921,7 +975,7 @@ export function BusinessForm() {
                               https://facebook.com/
                             </div>
                             <Input
-                               className="border-0 flex-1 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring pl-0"
+                              className="border-0 flex-1 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring pl-0"
                               placeholder="tunegocio"
                               {...field}
                             />
@@ -949,7 +1003,7 @@ export function BusinessForm() {
                               https://instagram.com/
                             </div>
                             <Input
-                               className="border-0 flex-1 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring pl-0"
+                              className="border-0 flex-1 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring pl-0"
                               placeholder="tunegocio"
                               {...field}
                             />
@@ -977,7 +1031,7 @@ export function BusinessForm() {
                               https://twitter.com/
                             </div>
                             <Input
-                               className="border-0 flex-1 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring pl-0"
+                              className="border-0 flex-1 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring pl-0"
                               placeholder="tunegocio"
                               {...field}
                             />
@@ -1033,7 +1087,7 @@ export function BusinessForm() {
                               https://linkedin.com/company/
                             </div>
                             <Input
-                               className="border-0 flex-1 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring pl-0"
+                              className="border-0 flex-1 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring pl-0"
                               placeholder="tunegocio"
                               {...field}
                             />
@@ -1061,7 +1115,7 @@ export function BusinessForm() {
                               https://tiktok.com/@
                             </div>
                             <Input
-                               className="border-0 flex-1 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring pl-0"
+                              className="border-0 flex-1 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring pl-0"
                               placeholder="tunegocio"
                               {...field}
                             />
