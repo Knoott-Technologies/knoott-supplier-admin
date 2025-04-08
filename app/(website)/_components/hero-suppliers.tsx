@@ -76,7 +76,7 @@ export const HeroSuppliers = ({
                   <Link href={`/dashboard/`}>
                     <span className="flex -space-x-[0.45rem]">
                       {userBusiness.map((business) => (
-                        <span className="ring-background rounded-full ring-1 overflow-hidden">
+                        <span key={business.id} className="ring-background rounded-full ring-1 overflow-hidden">
                           <Image
                             src={business.business.business_logo_url}
                             width={18}

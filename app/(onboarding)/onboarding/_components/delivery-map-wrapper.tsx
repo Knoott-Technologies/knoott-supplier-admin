@@ -464,7 +464,7 @@ export function DeliveryMapWrapper(
                 onClick={() => removeEntireState(state)}
               >
                 Eliminar todas
-                <Trash2 className="!size-3"/>
+                <Trash2 className="!size-3" />
               </Button>
             </div>
             <div className="flex flex-wrap gap-1">
@@ -472,6 +472,7 @@ export function DeliveryMapWrapper(
                 const [city] = region.split("|");
                 return (
                   <Button
+                    key={region}
                     variant="ghost"
                     size="sm"
                     className="text-xs text-muted-foreground h-fit py-1.5 hover:text-destructive"
