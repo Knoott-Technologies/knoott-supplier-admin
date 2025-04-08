@@ -6,7 +6,7 @@ import ProductFormEdit from "./_components/product-form-edit";
 export default async function ProductEditPage({
   params,
 }: {
-  params: { productId: string };
+  params: { productId: string; branchId: string };
 }) {
   const supabase = createClient(cookies());
 
@@ -48,6 +48,12 @@ export default async function ProductEditPage({
     .select("*")
     .eq("product_id", params.productId);
 
+  const { data: commision } = await supabase
+    .from("provider_branches")
+    .select("accorded_commission")
+    .eq("id", params.branchId)
+    .single();
+
   return (
     <main className="h-fit w-full mx-auto no-scrollbar">
       <div className="w-full max-w-5xl mx-auto px-3 md:px-0 pt-5 lg:pt-7">
@@ -57,6 +63,7 @@ export default async function ProductEditPage({
         />
       </div>
       <ProductFormEdit
+        commision={commision?.accorded_commission || 0.085}
         product={product}
         variants={variants || []}
         variantOptions={variantOptions || []}

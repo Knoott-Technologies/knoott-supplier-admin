@@ -1,6 +1,5 @@
 import {
   Source_Sans_3,
-  Libre_Baskerville,
   Playfair_Display,
 } from "next/font/google";
 

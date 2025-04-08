@@ -6,9 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 import { Database } from "@/database.types";
 import GeneralInfoSection from "../../../new/_components/general-info-section";
@@ -92,6 +90,7 @@ interface ProductFormEditProps {
   variantOptions: any[];
   brands: Brand[];
   categories: Category[];
+  commision: number;
 }
 
 export default function ProductFormEdit({
@@ -100,6 +99,7 @@ export default function ProductFormEdit({
   variantOptions,
   brands,
   categories,
+  commision
 }: ProductFormEditProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -258,7 +258,11 @@ export default function ProductFormEdit({
               <GeneralInfoSection form={form} />
               <ImagesSection form={form} />
               <SpecificationsSection form={form} />
-              <VariantsSection form={form} productId={product?.id} />
+              <VariantsSection
+                commission={commision}
+                form={form}
+                productId={product?.id}
+              />
             </section>
             <section className="w-full h-fit items-start justify-start flex flex-col lg:sticky lg:top-[calc(56px_+_28px)]">
               <CategorizationSection
