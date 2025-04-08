@@ -1,4 +1,3 @@
-import { libre } from "@/components/fonts/font-def";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -6,30 +5,28 @@ import {
   SheetContent,
   SheetFooter,
   SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Database } from "@/database.types";
+import type { Database } from "@/database.types";
 import { cn } from "@/lib/utils";
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { ArrowRight, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Logo } from "../logo";
 
+type UserBusinessType =
+  Database["public"]["Tables"]["provider_business_users"]["Row"] & {
+    business: Database["public"]["Tables"]["provider_business"]["Row"];
+  };
+
 export const NavigationMenuMobile = ({
   user,
   isScrolled,
-  userProvider,
+  userBusinesses,
 }: {
   user: User | null;
-  userProvider:
-    | (Database["public"]["Tables"]["user_provider_branches"]["Row"] & {
-        branch: Database["public"]["Tables"]["provider_branches"]["Row"] & {
-          business: Database["public"]["Tables"]["provider_business"]["Row"];
-        };
-      })[]
-    | null;
+  userBusinesses: UserBusinessType[] | null;
   isScrolled: boolean;
 }) => {
   return (
@@ -159,14 +156,14 @@ export const NavigationMenuMobile = ({
             )}
           </div>
           <SheetFooter className="w-full bg-sidebar border-t p-3 pb-8 md:pb-3 flex flex-col sm:flex-col gap-y-2">
-            {(user && !userProvider && (
+            {(user && !userBusinesses && (
               <SheetClose asChild>
                 <Button variant={"defaultBlack"} className="w-full">
                   Registra tu negocio
                 </Button>
               </SheetClose>
             )) ||
-              (userProvider && (
+              (userBusinesses && userBusinesses.length > 0 && (
                 <SheetClose asChild>
                   <Button
                     variant={"defaultBlack"}

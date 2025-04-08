@@ -9,65 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      api_integrations: {
-        Row: {
-          additional_params: Json | null
-          api_key: string
-          api_secret: string | null
-          api_url: string
-          auto_sync: boolean
-          created_at: string
-          id: number
-          last_sync_at: string | null
-          last_sync_message: string | null
-          last_sync_status: string | null
-          provider: string
-          provider_branch_id: string
-          sync_frequency: string | null
-          updated_at: string
-        }
-        Insert: {
-          additional_params?: Json | null
-          api_key: string
-          api_secret?: string | null
-          api_url: string
-          auto_sync?: boolean
-          created_at?: string
-          id?: number
-          last_sync_at?: string | null
-          last_sync_message?: string | null
-          last_sync_status?: string | null
-          provider: string
-          provider_branch_id: string
-          sync_frequency?: string | null
-          updated_at?: string
-        }
-        Update: {
-          additional_params?: Json | null
-          api_key?: string
-          api_secret?: string | null
-          api_url?: string
-          auto_sync?: boolean
-          created_at?: string
-          id?: number
-          last_sync_at?: string | null
-          last_sync_message?: string | null
-          last_sync_status?: string | null
-          provider?: string
-          provider_branch_id?: string
-          sync_frequency?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "api_integrations_provider_branch_id_fkey"
-            columns: ["provider_branch_id"]
-            isOneToOne: false
-            referencedRelation: "provider_branches"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       cart_items: {
         Row: {
           amount: number
@@ -474,6 +415,7 @@ export type Database = {
           name: string
           presence_in_gifts: number
           provider_branch_id: string | null
+          provider_business_id: string | null
           short_description: string
           short_name: string
           specs: Json | null
@@ -492,6 +434,7 @@ export type Database = {
           name: string
           presence_in_gifts?: number
           provider_branch_id?: string | null
+          provider_business_id?: string | null
           short_description: string
           short_name: string
           specs?: Json | null
@@ -510,6 +453,7 @@ export type Database = {
           name?: string
           presence_in_gifts?: number
           provider_branch_id?: string | null
+          provider_business_id?: string | null
           short_description?: string
           short_name?: string
           specs?: Json | null
@@ -537,6 +481,13 @@ export type Database = {
             columns: ["provider_branch_id"]
             isOneToOne: false
             referencedRelation: "provider_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_provider_business_id_fkey"
+            columns: ["provider_business_id"]
+            isOneToOne: false
+            referencedRelation: "provider_business"
             referencedColumns: ["id"]
           },
           {
@@ -689,14 +640,104 @@ export type Database = {
           },
         ]
       }
-      provider_branches_transactions: {
+      provider_business: {
+        Row: {
+          bank_account_number: string | null
+          bank_name: string | null
+          business_legal_name: string | null
+          business_logo_url: string
+          business_name: string
+          business_sector: string | null
+          city: string | null
+          commission_percentage: number | null
+          contact_phone_number: string | null
+          country: string | null
+          created_at: string
+          delivery_zones: Json | null
+          description: string | null
+          external_number: string | null
+          id: string
+          internal_number: string | null
+          is_verified: boolean
+          main_email: string | null
+          main_phone_number: string | null
+          neighborhood: string | null
+          postal_code: string | null
+          reference: string
+          social_media: Json | null
+          state: string | null
+          street: string | null
+          tax_situation_url: string | null
+          website_url: string | null
+        }
+        Insert: {
+          bank_account_number?: string | null
+          bank_name?: string | null
+          business_legal_name?: string | null
+          business_logo_url: string
+          business_name: string
+          business_sector?: string | null
+          city?: string | null
+          commission_percentage?: number | null
+          contact_phone_number?: string | null
+          country?: string | null
+          created_at?: string
+          delivery_zones?: Json | null
+          description?: string | null
+          external_number?: string | null
+          id?: string
+          internal_number?: string | null
+          is_verified?: boolean
+          main_email?: string | null
+          main_phone_number?: string | null
+          neighborhood?: string | null
+          postal_code?: string | null
+          reference?: string
+          social_media?: Json | null
+          state?: string | null
+          street?: string | null
+          tax_situation_url?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          bank_account_number?: string | null
+          bank_name?: string | null
+          business_legal_name?: string | null
+          business_logo_url?: string
+          business_name?: string
+          business_sector?: string | null
+          city?: string | null
+          commission_percentage?: number | null
+          contact_phone_number?: string | null
+          country?: string | null
+          created_at?: string
+          delivery_zones?: Json | null
+          description?: string | null
+          external_number?: string | null
+          id?: string
+          internal_number?: string | null
+          is_verified?: boolean
+          main_email?: string | null
+          main_phone_number?: string | null
+          neighborhood?: string | null
+          postal_code?: string | null
+          reference?: string
+          social_media?: Json | null
+          state?: string | null
+          street?: string | null
+          tax_situation_url?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      provider_business_transactions: {
         Row: {
           amount: number
           created_at: string
           description: string | null
           id: number
           order_id: number | null
-          provider_branch_id: string
+          provider_business_id: string | null
           reference: string
           status: Database["public"]["Enums"]["transaction_status"]
         }
@@ -706,7 +747,7 @@ export type Database = {
           description?: string | null
           id?: number
           order_id?: number | null
-          provider_branch_id: string
+          provider_business_id?: string | null
           reference: string
           status?: Database["public"]["Enums"]["transaction_status"]
         }
@@ -716,68 +757,65 @@ export type Database = {
           description?: string | null
           id?: number
           order_id?: number | null
-          provider_branch_id?: string
+          provider_business_id?: string | null
           reference?: string
           status?: Database["public"]["Enums"]["transaction_status"]
         }
         Relationships: [
           {
-            foreignKeyName: "provider_branches_transactions_order_id_fkey"
+            foreignKeyName: "provider_business_transactions_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "wedding_product_orders"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "provider_branches_transactions_provider_branch_id_fkey"
-            columns: ["provider_branch_id"]
+            foreignKeyName: "provider_business_transactions_provider_business_id_fkey"
+            columns: ["provider_business_id"]
             isOneToOne: false
-            referencedRelation: "provider_branches"
+            referencedRelation: "provider_business"
             referencedColumns: ["id"]
           },
         ]
       }
-      provider_business: {
+      provider_business_users: {
         Row: {
-          business_logo_url: string
-          business_name: string
-          business_sector: string | null
+          business_id: string
           created_at: string
           id: string
-          is_verified: boolean
-          main_email: string | null
-          main_phone_number: string | null
-          reference: string
-          social_media: Json | null
-          website_url: string | null
+          role: Database["public"]["Enums"]["provider_businees_user_roles"]
+          user_id: string
         }
         Insert: {
-          business_logo_url: string
-          business_name: string
-          business_sector?: string | null
+          business_id: string
           created_at?: string
           id?: string
-          is_verified?: boolean
-          main_email?: string | null
-          main_phone_number?: string | null
-          reference?: string
-          social_media?: Json | null
-          website_url?: string | null
+          role?: Database["public"]["Enums"]["provider_businees_user_roles"]
+          user_id: string
         }
         Update: {
-          business_logo_url?: string
-          business_name?: string
-          business_sector?: string | null
+          business_id?: string
           created_at?: string
           id?: string
-          is_verified?: boolean
-          main_email?: string | null
-          main_phone_number?: string | null
-          reference?: string
-          social_media?: Json | null
-          website_url?: string | null
+          role?: Database["public"]["Enums"]["provider_businees_user_roles"]
+          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "provider_business_users_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "provider_business"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_business_users_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       push_subscriptions: {
         Row: {
@@ -933,45 +971,6 @@ export type Database = {
           },
         ]
       }
-      user_provider_branches: {
-        Row: {
-          created_at: string
-          id: number
-          provider_id: string
-          role: Database["public"]["Enums"]["user_provider_branches_role"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          provider_id: string
-          role?: Database["public"]["Enums"]["user_provider_branches_role"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          provider_id?: string
-          role?: Database["public"]["Enums"]["user_provider_branches_role"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_provider_branches_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "provider_branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_provider_branches_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_weddings: {
         Row: {
           created_at: string
@@ -1019,6 +1018,7 @@ export type Database = {
           id: string
           last_name: string
           phone_number: string
+          role: Database["public"]["Enums"]["admin_role"] | null
           stripe_cus_id: string | null
           updated_at: string | null
         }
@@ -1029,6 +1029,7 @@ export type Database = {
           id?: string
           last_name: string
           phone_number: string
+          role?: Database["public"]["Enums"]["admin_role"] | null
           stripe_cus_id?: string | null
           updated_at?: string | null
         }
@@ -1039,6 +1040,7 @@ export type Database = {
           id?: string
           last_name?: string
           phone_number?: string
+          role?: Database["public"]["Enums"]["admin_role"] | null
           stripe_cus_id?: string | null
           updated_at?: string | null
         }
@@ -1154,7 +1156,7 @@ export type Database = {
           paid_at: string | null
           povider_received_amount: number
           product_id: number | null
-          provider_branch_id: string
+          provider_business_id: string | null
           shipped_at: string | null
           shipped_ordered_by: string | null
           shipping_guide_url: string | null
@@ -1178,7 +1180,7 @@ export type Database = {
           paid_at?: string | null
           povider_received_amount?: number
           product_id?: number | null
-          provider_branch_id: string
+          provider_business_id?: string | null
           shipped_at?: string | null
           shipped_ordered_by?: string | null
           shipping_guide_url?: string | null
@@ -1202,7 +1204,7 @@ export type Database = {
           paid_at?: string | null
           povider_received_amount?: number
           product_id?: number | null
-          provider_branch_id?: string
+          provider_business_id?: string | null
           shipped_at?: string | null
           shipped_ordered_by?: string | null
           shipping_guide_url?: string | null
@@ -1241,10 +1243,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "wedding_product_orders_provider_branch_id_fkey"
-            columns: ["provider_branch_id"]
+            foreignKeyName: "wedding_product_orders_provider_business_id_fkey"
+            columns: ["provider_business_id"]
             isOneToOne: false
-            referencedRelation: "provider_branches"
+            referencedRelation: "provider_business"
             referencedColumns: ["id"]
           },
           {
@@ -1346,10 +1348,12 @@ export type Database = {
           description: string | null
           id: number
           is_greeted: boolean
+          knoott_received_amount: number | null
           reference: string
           status: Database["public"]["Enums"]["transaction_status"]
           type: Database["public"]["Enums"]["transaction_types"]
           user_id: string | null
+          user_received_amount: number | null
           wedding_id: string
         }
         Insert: {
@@ -1359,10 +1363,12 @@ export type Database = {
           description?: string | null
           id?: number
           is_greeted?: boolean
+          knoott_received_amount?: number | null
           reference: string
           status?: Database["public"]["Enums"]["transaction_status"]
           type?: Database["public"]["Enums"]["transaction_types"]
           user_id?: string | null
+          user_received_amount?: number | null
           wedding_id: string
         }
         Update: {
@@ -1372,10 +1378,12 @@ export type Database = {
           description?: string | null
           id?: number
           is_greeted?: boolean
+          knoott_received_amount?: number | null
           reference?: string
           status?: Database["public"]["Enums"]["transaction_status"]
           type?: Database["public"]["Enums"]["transaction_types"]
           user_id?: string | null
+          user_received_amount?: number | null
           wedding_id?: string
         }
         Relationships: [
@@ -1488,13 +1496,12 @@ export type Database = {
     }
     Functions: {
       get_user_provider_ids: {
-        Args: {
-          user_uuid: string
-        }
+        Args: { user_uuid: string }
         Returns: string[]
       }
     }
     Enums: {
+      admin_role: "superadmin" | "mod" | "marketing" | "account_manager"
       banner_status: "active" | "inactive"
       banner_styles: "main" | "secondary" | "tertiary" | "quaternary"
       banner_types: "brand" | "category" | "product"
@@ -1514,6 +1521,7 @@ export type Database = {
         | "draft"
         | "requires_verification"
         | "deleted"
+      provider_businees_user_roles: "admin" | "supervisor" | "staff"
       transaction_status: "completed" | "pending" | "canceled"
       transaction_types: "income" | "egress" | "purchase"
       user_provider_branches_role: "admin" | "supervisor" | "cashier"
@@ -1526,27 +1534,29 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -1554,20 +1564,22 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -1575,20 +1587,22 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -1596,21 +1610,23 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
@@ -1619,6 +1635,41 @@ export type CompositeTypes<
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      admin_role: ["superadmin", "mod", "marketing", "account_manager"],
+      banner_status: ["active", "inactive"],
+      banner_styles: ["main", "secondary", "tertiary", "quaternary"],
+      banner_types: ["brand", "category", "product"],
+      brand_status: ["on_revision", "active"],
+      cart_status: ["pending", "completed", "abandoned"],
+      collection_status: ["on_revision", "active"],
+      order_status: [
+        "paid",
+        "pending",
+        "shipped",
+        "delivered",
+        "canceled",
+        "requires_confirmation",
+      ],
+      product_status: [
+        "active",
+        "archived",
+        "draft",
+        "requires_verification",
+        "deleted",
+      ],
+      provider_businees_user_roles: ["admin", "supervisor", "staff"],
+      transaction_status: ["completed", "pending", "canceled"],
+      transaction_types: ["income", "egress", "purchase"],
+      user_provider_branches_role: ["admin", "supervisor", "cashier"],
+      wedding_status: ["active", "paused", "closed"],
+      wedding_user_role: ["admin", "planner"],
+    },
+  },
+} as const

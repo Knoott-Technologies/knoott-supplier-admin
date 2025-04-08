@@ -1,7 +1,7 @@
 "use client";
 
-import { Database } from "@/database.types";
-import { User } from "@supabase/supabase-js";
+import type { Database } from "@/database.types";
+import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { Logo } from "../logo";
 import { useState, useEffect } from "react";
@@ -11,18 +11,17 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { NavigationMenuMobile } from "./navigation-menu-mobile";
 
+type UserBusinessType =
+  Database["public"]["Tables"]["provider_business_users"]["Row"] & {
+    business: Database["public"]["Tables"]["provider_business"]["Row"];
+  };
+
 export const HeaderWebsite = ({
   user,
-  userProvider,
+  userBusinesses,
 }: {
   user: User | null;
-  userProvider:
-    | (Database["public"]["Tables"]["user_provider_branches"]["Row"] & {
-        branch: Database["public"]["Tables"]["provider_branches"]["Row"] & {
-          business: Database["public"]["Tables"]["provider_business"]["Row"];
-        };
-      })[]
-    | null;
+  userBusinesses: UserBusinessType[] | null;
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -63,7 +62,7 @@ export const HeaderWebsite = ({
         {(user && (
           <UserDropdown
             user={user}
-            userProviders={userProvider}
+            userBusinesses={userBusinesses}
             isScrolled={isScrolled}
           />
         )) || (
@@ -89,7 +88,7 @@ export const HeaderWebsite = ({
       <div className="h-full items-center justify-end gap-1 lg:hidden">
         <NavigationMenuMobile
           user={user}
-          userProvider={userProvider}
+          userBusinesses={userBusinesses}
           isScrolled={isScrolled}
         />
       </div>

@@ -19,7 +19,7 @@ export async function POST(request: Request) {
         short_description: product.short_description,
         brand_id: product.brand_id,
         subcategory_id: product.subcategory_id,
-        provider_branch_id: product.provider_branch_id,
+        provider_business_id: product.provider_business_id,
         images_url: product.images_url,
         dimensions:
           product.dimensions?.length > 0

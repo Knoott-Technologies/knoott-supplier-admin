@@ -4,28 +4,25 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { User } from "@supabase/supabase-js";
-import { ArrowLeft, UserIcon } from "lucide-react";
-import Link from "next/link";
+import type { User } from "@supabase/supabase-js";
 import { ProfileSidebarContent } from "./profile-sidebar-content";
-import { Database } from "@/database.types";
+import type { Database } from "@/database.types";
 import { LogoutButton } from "@/components/universal/logout-button";
 import { ProfileBackButton } from "./profile-back-button";
 
-export type UserBranches =
-  Database["public"]["Tables"]["user_provider_branches"]["Row"] & {
-    branch: Database["public"]["Tables"]["provider_branches"]["Row"];
+export type UserBusinesses =
+  Database["public"]["Tables"]["provider_business_users"]["Row"] & {
+    business: Database["public"]["Tables"]["provider_business"]["Row"];
   };
 
 export const ProfileSidebar = ({
   user,
-  userBranches,
+  userBusinesses,
 }: {
   user: User;
-  userBranches: UserBranches[];
+  userBusinesses: UserBusinesses[];
 }) => {
   return (
     <Sidebar variant="sidebar" collapsible="icon">
@@ -33,7 +30,7 @@ export const ProfileSidebar = ({
         <ProfileBackButton />
       </SidebarHeader>
       <SidebarContent>
-        <ProfileSidebarContent userBranches={userBranches} user={user} />
+        <ProfileSidebarContent userBusinesses={userBusinesses} user={user} />
       </SidebarContent>
       <SidebarFooter className="bg-background border-t">
         <SidebarMenu>

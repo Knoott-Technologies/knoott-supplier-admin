@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     const { record, old_record } = data;
 
-    if (!record || !record.provider_branch_id) {
+    if (!record || !record.provider_business_id) {
       return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
     }
 
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     // Variables para la notificación
     let notificationTitle = "Actualización de orden";
     let notificationBody = "Hay una actualización en tu orden.";
-    let notificationUrl = `/dashboard/${record.provider_branch_id}/orders/${record.id}`;
+    let notificationUrl = `/dashboard/${record.provider_business_id}/orders/${record.id}`;
 
     // Verificar si es un nuevo registro o una actualización
     const isNewRecord = !old_record;
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
           notificationBody = `La orden #${record.id} de ${productName}${
             variantName ? ` (${variantName})` : ""
           } requiere tu confirmación para continuar con el proceso.`;
-          notificationUrl = `/dashboard/${record.provider_branch_id}/orders/${record.id}#confirmation`;
+          notificationUrl = `/dashboard/${record.provider_business_id}/orders/${record.id}#confirmation`;
           break;
         case "pending":
           // Confirmada - esperando pago del administrador
@@ -145,9 +145,9 @@ export async function POST(req: NextRequest) {
 
     // Obtener usuarios del proveedor
     const { data: providerUsers, error: providerUsersError } = await supabase
-      .from("user_provider_branches")
+      .from("provider_business_users")
       .select("user_id")
-      .eq("provider_id", record.provider_branch_id);
+      .eq("business_id", record.provider_business_id);
 
     if (providerUsersError) {
       console.error(

@@ -8,11 +8,11 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    const branchId = formData.get("branchId") as string;
+    const business_id = formData.get("business_id") as string;
 
-    if (!file || !branchId) {
+    if (!file || !business_id) {
       return NextResponse.json(
-        { error: "Missing file or branchId" },
+        { error: "Missing file or business_id" },
         { status: 400 }
       );
     }
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
           .from("products")
           .select("id")
           .eq("name", productData.nombre)
-          .eq("provider_branch_id", branchId)
+          .eq("provider_branch_id", business_id)
           .single();
 
         if (existingProduct) {
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
               short_description: productData.descripcion_corta,
               brand_id: productData.marca_id || null,
               subcategory_id: productData.subcategoria_id,
-              provider_branch_id: branchId,
+              provider_branch_id: business_id,
               keywords,
               dimensions,
               specs,

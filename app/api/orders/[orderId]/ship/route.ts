@@ -6,10 +6,10 @@ export async function POST(
   { params }: { params: { orderId: string } }
 ) {
   try {
-    const { userId, branchId, shippingGuideUrl, etaFirst, etaSecond } =
+    const { userId, businessId, shippingGuideUrl, etaFirst, etaSecond } =
       await req.json();
 
-    if (!userId || !branchId) {
+    if (!userId || !businessId) {
       return NextResponse.json(
         { error: "Se requiere ID de usuario y sucursal" },
         { status: 400 }
@@ -38,7 +38,7 @@ export async function POST(
       .from("wedding_product_orders")
       .select("*")
       .eq("id", params.orderId)
-      .eq("provider_branch_id", branchId)
+      .eq("provider_business_id", businessId)
       .eq("status", "paid")
       .single();
 
@@ -50,16 +50,16 @@ export async function POST(
     }
 
     // Verificar que el usuario tiene permisos en esta sucursal
-    const { data: userBranch, error: userBranchError } = await supabase
-      .from("user_provider_branches")
+    const { data: userBusiness, error: userBusinessError } = await supabase
+      .from("provider_business_users")
       .select("*")
       .eq("user_id", userId)
-      .eq("provider_id", branchId)
+      .eq("business_id", businessId)
       .single();
 
-    if (userBranchError || !userBranch) {
+    if (userBusinessError || !userBusiness) {
       return NextResponse.json(
-        { error: "No tienes permisos para enviar esta orden" },
+        { error: "No tienes permisos para confirmar esta orden" },
         { status: 403 }
       );
     }

@@ -111,7 +111,6 @@ export async function PUT(
         dimensions: dimensionsObject,
         specs: specsObject,
         keywords: product.keywords || [],
-        // Don't update status or provider_branch_id
       })
       .eq("id", productId)
       .select()

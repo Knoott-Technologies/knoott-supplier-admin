@@ -1,20 +1,24 @@
 import { libre } from "@/components/fonts/font-def";
 import { Button } from "@/components/ui/button";
 import { Video } from "@/components/universal/video-optimized";
-import { Database } from "@/database.types";
+import type { Database } from "@/database.types";
 import { cn } from "@/lib/utils";
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+
+type UserBusinessType =
+  Database["public"]["Tables"]["provider_business_users"]["Row"] & {
+    business: Database["public"]["Tables"]["provider_business"]["Row"];
+  };
 
 export const HeroSuppliers = ({
   user,
-  userProvider,
+  userBusiness,
 }: {
   user: User | null;
-  userProvider:
-    | Database["public"]["Tables"]["user_provider_branches"]["Row"]
-    | null;
+  userBusiness: UserBusinessType[] | null;
 }) => {
   return (
     <section className="w-full h-fit items-start justify-start flex flex-col relative overflow-hidden">
@@ -50,7 +54,7 @@ export const HeroSuppliers = ({
               lo que podemos lograr juntos.
             </p>
           </span>
-          {(user && !userProvider && (
+          {(user && !userBusiness && (
             <div className="w-full h-fit items-start lg:items-center justify-start flex flex-col lg:flex-row gap-2">
               <Button
                 variant={"defaultBlack"}
@@ -61,7 +65,7 @@ export const HeroSuppliers = ({
               </Button>
             </div>
           )) ||
-            (userProvider && (
+            (userBusiness && (
               <div className="w-full h-fit items-start lg:items-center justify-start flex flex-col lg:flex-row gap-2">
                 <Button
                   variant={"defaultBlack"}
@@ -69,8 +73,20 @@ export const HeroSuppliers = ({
                   className="w-full md:w-auto"
                   asChild
                 >
-                  <Link href={`/dashboard`}>
-                    Entrar a mi dashboard <ArrowRight />
+                  <Link href={`/dashboard/`}>
+                    <span className="flex -space-x-[0.45rem]">
+                      {userBusiness.map((business) => (
+                        <span className="ring-background rounded-full ring-1 overflow-hidden">
+                          <Image
+                            src={business.business.business_logo_url}
+                            width={18}
+                            height={18}
+                            alt="Avatar 01"
+                          />
+                        </span>
+                      ))}
+                    </span>
+                    Entrar a mi dashboard
                   </Link>
                 </Button>
               </div>
