@@ -36,7 +36,7 @@ export const columns: ColumnDef<TransactionWallet>[] = [
           {formatInTimeZone(
             new Date(info.row.original.created_at),
             timeZone,
-            "PPP HH:mm a",
+            "PPP hh:mm a",
             { locale: es }
           )}
         </div>
