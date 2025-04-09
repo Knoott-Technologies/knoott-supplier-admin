@@ -24,6 +24,7 @@ const TransactionPage = async ({
     .select("*")
     .eq("provider_business_id", params.businessId)
     .order("created_at", { ascending: false });
+
   if (error) {
     console.error("Error fetching transactions:", error);
     return <div>Error fetching transactions</div>;
@@ -40,7 +41,7 @@ const TransactionPage = async ({
         description="Aquí puedes ver todas las transacciones realizadas en esta sucursal."
       />
       <section className="w-full h-fit items-start justify-start flex flex-col gap-y-5 lg:gap-y-7">
-        <DataTable columns={columns} data={[]} />
+        <DataTable columns={columns} data={transactions} />
       </section>
     </main>
   );

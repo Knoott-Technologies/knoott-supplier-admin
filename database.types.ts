@@ -414,7 +414,6 @@ export type Database = {
           keywords: string[] | null
           name: string
           presence_in_gifts: number
-          provider_branch_id: string | null
           provider_business_id: string | null
           short_description: string
           short_name: string
@@ -433,7 +432,6 @@ export type Database = {
           keywords?: string[] | null
           name: string
           presence_in_gifts?: number
-          provider_branch_id?: string | null
           provider_business_id?: string | null
           short_description: string
           short_name: string
@@ -452,7 +450,6 @@ export type Database = {
           keywords?: string[] | null
           name?: string
           presence_in_gifts?: number
-          provider_branch_id?: string | null
           provider_business_id?: string | null
           short_description?: string
           short_name?: string
@@ -474,13 +471,6 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "random_brands"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "products_provider_branch_id_fkey"
-            columns: ["provider_branch_id"]
-            isOneToOne: false
-            referencedRelation: "provider_branches"
             referencedColumns: ["id"]
           },
           {
