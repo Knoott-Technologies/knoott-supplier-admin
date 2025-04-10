@@ -9,12 +9,6 @@ import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import {
   Circle,
-  AlertCircle,
-  CheckCircle,
-  Truck,
-  Package,
-  XCircle,
-  CreditCard,
 } from "lucide-react";
 import { Order } from "../../page";
 

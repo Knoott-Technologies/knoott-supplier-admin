@@ -383,7 +383,7 @@ export const OrderDetails = ({ order }: { order: Order }) => {
                         </p>
                       </span>
                     </div>
-                  </span>
+                  </span> 
                 </div>
               </div>
               <div className="w-full flex flex-col gap-y-0 items-start justify-start">

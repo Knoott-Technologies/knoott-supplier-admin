@@ -180,10 +180,15 @@ export const SidebarProfile = ({
                 className="flex items-center gap-2"
                 variant={"outline"}
               >
-                <Avatar className="size-5 rounded-none">
-                  <AvatarFallback className="text-xs rounded-none border">
-                    {user.user_metadata.first_name[0] +
-                      user.user_metadata.last_name[0]}
+                <Avatar
+                  className={cn("size-6 rounded-none")}
+                >
+                  <AvatarImage
+                    src={business.business_logo_url}
+                    alt={business.business_name}
+                  />
+                  <AvatarFallback className="rounded-none">
+                    {business.business_name.slice(0, 2)}
                   </AvatarFallback>
                 </Avatar>
                 <span className="flex-1 text-left max-w-[80%] truncate">
