@@ -177,24 +177,15 @@ const DashboardPage = async () => {
                 </Card>
               ))}
 
-              <Card className="w-full border-dashed bg-sidebar">
-                <CardContent className="flex flex-col items-center justify-center h-full">
-                  <Button
-                    asChild
-                    variant="outline"
-                    size={"sm"}
-                    className="w-full"
-                  >
-                    <Link
-                      href="/dashboard/new-business"
-                      className="flex items-center"
-                    >
-                      Nuevo negocio
-                      <Plus />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
+              <Link
+                href="/dashboard/new-business"
+                className="flex items-center flex-1 justify-center w-full border border-dashed p-4 bg-sidebar group hover:bg-muted/80 ease-in-out transition-all"
+              >
+                <div className="text-muted-foreground text-sm flex gap-1 items-center group-hover:text-foreground ease-in-out transition-all flex-col">
+                  <Plus className="size-6" />
+                  <p className="text-xs">Nuevo negocio</p>
+                </div>
+              </Link>
             </div>
           )}
         </section>

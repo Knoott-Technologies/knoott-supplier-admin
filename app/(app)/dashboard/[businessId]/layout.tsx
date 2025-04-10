@@ -38,6 +38,17 @@ const PlatformLayout = async ({
     redirect("/");
   }
 
+  const { data: userBusinesses } = await supabase
+    .from("provider_business_users")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("business_id", business.id)
+    .single();
+
+  if (!userBusinesses) {
+    redirect("/dashboard");
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar business={business} user={user} />
