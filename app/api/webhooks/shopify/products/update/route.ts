@@ -2,6 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { createAdminClient } from "@/utils/supabase/admin";
 
+// Configurar como Edge Function con un tiempo de ejecución más largo
+export const runtime = "edge";
+export const preferredRegion = "auto"; // Opcional: puedes especificar regiones específicas
+
 export async function POST(request: NextRequest) {
   try {
     // Obtener el cuerpo de la solicitud como texto para verificar HMAC
@@ -41,10 +45,17 @@ export async function POST(request: NextRequest) {
 
     // Parsear el cuerpo JSON después de verificar HMAC
     let data;
-
     try {
       data = JSON.parse(body);
-      console.log("Cuerpo JSON parseado:", data);
+      console.log("Datos del producto recibidos:", {
+        id: data.id,
+        title: data.title,
+        status: data.status,
+        hasVariants: data.variants?.length > 0,
+        variantCount: data.variants?.length,
+        hasImages: data.images?.length > 0,
+        imageCount: data.images?.length,
+      });
     } catch (parseError) {
       console.error("Error al parsear el cuerpo JSON:", parseError);
       console.log(
@@ -88,24 +99,32 @@ export async function POST(request: NextRequest) {
       `Integración encontrada: ${integration.id} para el negocio ${integration.business_id}`
     );
 
-    // Procesar la actualización del producto en segundo plano
-    // Respondemos inmediatamente para cumplir con el límite de tiempo de Shopify
-    const responsePromise = NextResponse.json({ success: true });
-    console.log("Enviando respuesta inmediata a Shopify");
+    // IMPORTANTE: En lugar de procesar en segundo plano, procesamos directamente
+    // ya que estamos en Edge Runtime con un tiempo de ejecución más largo
+    console.log(`Iniciando procesamiento para el producto ${data.id}`);
 
-    // Procesamiento asíncrono
-    console.log(
-      `Iniciando procesamiento asíncrono para el producto ${data.id}`
-    );
-    handleProductUpdate(data, integration, supabase).catch((error) => {
+    try {
+      await handleProductUpdate(data, integration, supabase);
+      console.log(
+        `Procesamiento completado exitosamente para el producto ${data.id}`
+      );
+      return NextResponse.json({
+        success: true,
+        message: "Producto procesado correctamente",
+      });
+    } catch (error: any) {
       console.error("Error procesando actualización de producto:", {
         productId: data.id,
         error: error.message,
         stack: error.stack,
       });
-    });
-
-    return responsePromise;
+      // Aún así devolvemos 200 para que Shopify no reintente
+      return NextResponse.json({
+        success: false,
+        message: "Error procesando producto, pero recibido correctamente",
+        error: error.message,
+      });
+    }
   } catch (error: any) {
     console.error("Error general en webhook products/update:", {
       message: error.message,
