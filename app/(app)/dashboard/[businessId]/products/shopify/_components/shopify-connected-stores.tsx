@@ -22,19 +22,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-interface ShopifyIntegration {
-  id: string;
-  shop_domain: string;
-  shop_name: string | null;
-  status: string;
-  last_synced: string | null;
-  product_count: number;
-  connected_at: string | null;
-}
+import { cn } from "@/lib/utils";
+import { Database } from "@/database.types";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 interface ShopifyConnectedStoresProps {
-  integrations: ShopifyIntegration[];
+  integrations: Database["public"]["Tables"]["shopify_integrations"]["Row"][];
   businessId: string;
 }
 
@@ -106,9 +99,9 @@ export const ShopifyConnectedStores = ({
   };
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 w-full">
       {integrations.map((integration) => (
-        <Card key={integration.id}>
+        <Card className="w-full" key={integration.id}>
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">
@@ -116,8 +109,12 @@ export const ShopifyConnectedStores = ({
               </CardTitle>
               <Badge
                 variant={
-                  integration.status === "active" ? "default" : "destructive"
+                  integration.status === "active" ? "outline" : "destructive"
                 }
+                className={cn(
+                  integration.status === "active" &&
+                    "bg-success/20 text-success hover:bg-success/20 border-transparent"
+                )}
               >
                 {integration.status === "active"
                   ? "Activa"
@@ -127,37 +124,49 @@ export const ShopifyConnectedStores = ({
               </Badge>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Dominio:</span>
-                <span>{integration.shop_domain}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Productos:</span>
-                <span>{integration.product_count}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">
-                  Última sincronización:
-                </span>
-                <span>
-                  {integration.last_synced
-                    ? new Date(integration.last_synced).toLocaleString()
-                    : "Nunca"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Conectada el:</span>
-                <span>
-                  {integration.connected_at
-                    ? new Date(integration.connected_at).toLocaleString()
-                    : "Pendiente"}
-                </span>
-              </div>
-            </div>
+          <CardContent className="bg-sidebar">
+            <Table className="border bg-background">
+              <TableBody>
+                <TableRow className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">
+                  <TableCell className="bg-muted/50 py-2 font-medium">
+                    Dominio
+                  </TableCell>
+                  <TableCell className="py-2">
+                    {integration.shop_domain}
+                  </TableCell>
+                </TableRow>
+                <TableRow className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">
+                  <TableCell className="bg-muted/50 py-2 font-medium">
+                    Productos
+                  </TableCell>
+                  <TableCell className="py-2">
+                    {integration.product_count}
+                  </TableCell>
+                </TableRow>
+                <TableRow className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">
+                  <TableCell className="bg-muted/50 py-2 font-medium">
+                    Última sincronización
+                  </TableCell>
+                  <TableCell className="py-2">
+                    {integration.last_synced
+                      ? new Date(integration.last_synced).toLocaleString()
+                      : "Nunca"}
+                  </TableCell>
+                </TableRow>
+                <TableRow className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">
+                  <TableCell className="bg-muted/50 py-2 font-medium">
+                    Conectada el
+                  </TableCell>
+                  <TableCell className="py-2">
+                    {integration.connected_at
+                      ? new Date(integration.connected_at).toLocaleString()
+                      : "Pendiente"}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </CardContent>
-          <CardFooter className="flex justify-between">
+          <CardFooter className="flex justify-between border-t">
             <Button
               variant="outline"
               size="sm"

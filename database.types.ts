@@ -845,6 +845,101 @@ export type Database = {
           },
         ]
       }
+      shopify_integrations: {
+        Row: {
+          access_token: string | null
+          auto_sync: boolean | null
+          business_id: string
+          category_mapping: Json | null
+          connected_at: string | null
+          created_at: string
+          id: string
+          last_synced: string | null
+          product_count: number | null
+          scope: string | null
+          shop_currency: string | null
+          shop_domain: string
+          shop_email: string | null
+          shop_locale: string | null
+          shop_name: string | null
+          shop_owner: string | null
+          shop_plan: string | null
+          shop_timezone: string | null
+          state: string | null
+          status: string
+          sync_frequency: string | null
+          sync_inventory: boolean | null
+          sync_prices: boolean | null
+          sync_products: boolean | null
+          updated_at: string
+          webhooks: Json | null
+        }
+        Insert: {
+          access_token?: string | null
+          auto_sync?: boolean | null
+          business_id: string
+          category_mapping?: Json | null
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          last_synced?: string | null
+          product_count?: number | null
+          scope?: string | null
+          shop_currency?: string | null
+          shop_domain: string
+          shop_email?: string | null
+          shop_locale?: string | null
+          shop_name?: string | null
+          shop_owner?: string | null
+          shop_plan?: string | null
+          shop_timezone?: string | null
+          state?: string | null
+          status?: string
+          sync_frequency?: string | null
+          sync_inventory?: boolean | null
+          sync_prices?: boolean | null
+          sync_products?: boolean | null
+          updated_at?: string
+          webhooks?: Json | null
+        }
+        Update: {
+          access_token?: string | null
+          auto_sync?: boolean | null
+          business_id?: string
+          category_mapping?: Json | null
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          last_synced?: string | null
+          product_count?: number | null
+          scope?: string | null
+          shop_currency?: string | null
+          shop_domain?: string
+          shop_email?: string | null
+          shop_locale?: string | null
+          shop_name?: string | null
+          shop_owner?: string | null
+          shop_plan?: string | null
+          shop_timezone?: string | null
+          state?: string | null
+          status?: string
+          sync_frequency?: string | null
+          sync_inventory?: boolean | null
+          sync_prices?: boolean | null
+          sync_products?: boolean | null
+          updated_at?: string
+          webhooks?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopify_integrations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "provider_business"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_carts: {
         Row: {
           created_at: string
@@ -1402,8 +1497,10 @@ export type Database = {
       }
       weddings: {
         Row: {
+          account_holder: string | null
           avatar_image_url: string
           balance: number | null
+          bank: string | null
           bank_account_number: number
           banner_image_url: string
           city: string | null
@@ -1420,8 +1517,10 @@ export type Database = {
           wedding_date: string
         }
         Insert: {
+          account_holder?: string | null
           avatar_image_url: string
           balance?: number | null
+          bank?: string | null
           bank_account_number: number
           banner_image_url: string
           city?: string | null
@@ -1438,8 +1537,10 @@ export type Database = {
           wedding_date: string
         }
         Update: {
+          account_holder?: string | null
           avatar_image_url?: string
           balance?: number | null
+          bank?: string | null
           bank_account_number?: number
           banner_image_url?: string
           city?: string | null

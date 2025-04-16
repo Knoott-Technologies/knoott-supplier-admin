@@ -6,6 +6,49 @@ import { type NextRequest, NextResponse } from "next/server";
 const SHOPIFY_API_KEY = process.env.SHOPIFY_API_KEY!;
 const SHOPIFY_API_SECRET = process.env.SHOPIFY_API_SECRET!;
 
+// Función para registrar webhooks después de la conexión exitosa
+async function registerShopifyWebhooks(shop: string, accessToken: string) {
+  const webhooks = [
+    {
+      topic: "products/create",
+      address: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/shopify/products/create`,
+    },
+    {
+      topic: "products/update",
+      address: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/shopify/products/update`,
+    },
+    {
+      topic: "products/delete",
+      address: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/shopify/products/delete`,
+    },
+  ];
+
+  for (const webhook of webhooks) {
+    try {
+      const response = await fetch(
+        `https://${shop}/admin/api/2023-07/webhooks.json`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Shopify-Access-Token": accessToken,
+          },
+          body: JSON.stringify({ webhook }),
+        }
+      );
+
+      if (!response.ok) {
+        console.error(
+          `Error al registrar webhook ${webhook.topic}:`,
+          await response.text()
+        );
+      }
+    } catch (error) {
+      console.error(`Error al registrar webhook ${webhook.topic}:`, error);
+    }
+  }
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const shop = searchParams.get("shop");
@@ -63,6 +106,9 @@ export async function GET(request: NextRequest) {
     }
 
     const { access_token } = await accessTokenResponse.json();
+
+    // Registrar webhooks
+    await registerShopifyWebhooks(shop, access_token);
 
     // Obtener información de la tienda
     const shopInfoResponse = await fetch(
