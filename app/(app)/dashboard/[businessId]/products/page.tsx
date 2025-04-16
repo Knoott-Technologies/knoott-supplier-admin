@@ -8,6 +8,7 @@ import { ChevronRight, Plus, Webhook } from "lucide-react";
 import { DataTable } from "./_components/products-table";
 import { FilterBar } from "./_components/filter-bar";
 import { ProductCrawler } from "./_components/product-crawler";
+import { Shopify } from "@/components/svgs/icons";
 
 const ProductsPage = async ({
   params,
@@ -30,7 +31,7 @@ const ProductsPage = async ({
 
   // Get URL parameters with default values
   const page = parseInt(searchParams.page || "1", 10);
-  const pageSize = parseInt(searchParams.pageSize || "20", 10); // 
+  const pageSize = parseInt(searchParams.pageSize || "20", 10); //
   const search = searchParams.search || "";
   const status = searchParams.status || "";
   const brandId = searchParams.brandId || "";
@@ -117,59 +118,53 @@ const ProductsPage = async ({
 
   return (
     <>
-      <Link
-        href={`/dashboard/${params.businessId}/products/api-integration`}
-        className="bg-background sticky top-12 z-20 border-b w-full"
-      >
-        <div className="bg-contrast/10 p-3 md:px-0 sticky top-0 z-10 text-contrast w-full">
-          <div className="flex justify-between items-center gap-2 md:max-w-[95%] mx-auto">
-            <div className="flex grow gap-3">
-              <Webhook className="mt-0.5 shrink-0 size-4" aria-hidden="true" />
-              <div className="flex grow justify-between gap-2 items-center">
-                <span className="flex flex-col items-start justify-start gap-y-0">
-                  <h3 className="text-sm font-semibold">
-                    Sincroniza tu catálogo automáticamente
-                  </h3>
-                  <p className="text-xs">
-                    Conecta tu API y mantén tus productos siempre actualizados
-                    en Knoott sin esfuerzo manual.
-                  </p>
-                </span>
-              </div>
-            </div>
-            <ChevronRight className="size-4" />
-          </div>
-        </div>
-      </Link>
       <main className="h-fit w-full md:max-w-[95%] px-3 md:px-0 py-5 pb-14 lg:py-7 mx-auto no-scrollbar">
         <PageHeader
           title="Productos"
           description="Administra todo tu catálogo desde un solo lugar. Agrega, edita o elimina productos según las necesidades de tu tienda."
         >
-          <Button
-            variant={"defaultBlack"}
-            className="hidden lg:flex"
-            size={"default"}
-            asChild
-          >
-            <Link
-              href={`/dashboard/${params.businessId}/products/new`}
+          <span className="flex gap-x-2 items-center">
+            <Button
+              variant={"outline"}
+              className="hidden lg:flex"
+              size={"default"}
+              asChild
             >
-              Agregar producto <Plus />
-            </Link>
-          </Button>
-          <Button
-            variant={"defaultBlack"}
-            className="lg:hidden flex"
-            size={"icon"}
-            asChild
-          >
-            <Link
-              href={`/dashboard/${params.businessId}/products/new`}
+              <Link href={`/dashboard/${params.businessId}/products/shopify`}>
+                Integrar Shopify <Shopify className="size-4" />
+              </Link>
+            </Button>
+            <Button
+              variant={"outline"}
+              className="lg:hidden flex"
+              size={"icon"}
+              asChild
             >
-              <Plus />
-            </Link>
-          </Button>
+              <Link href={`/dashboard/${params.businessId}/products/shopify`}>
+                <Shopify className="size-4" />
+              </Link>
+            </Button>
+            <Button
+              variant={"defaultBlack"}
+              className="hidden lg:flex"
+              size={"default"}
+              asChild
+            >
+              <Link href={`/dashboard/${params.businessId}/products/new`}>
+                Agregar producto <Plus />
+              </Link>
+            </Button>
+            <Button
+              variant={"defaultBlack"}
+              className="lg:hidden flex"
+              size={"icon"}
+              asChild
+            >
+              <Link href={`/dashboard/${params.businessId}/products/new`}>
+                <Plus />
+              </Link>
+            </Button>
+          </span>
         </PageHeader>
 
         <section className="w-full h-fit items-start justify-start flex flex-col gap-y-5 lg:gap-y-7">
