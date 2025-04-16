@@ -1,6 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
 import crypto from "crypto";
 import { createAdminClient } from "@/utils/supabase/admin";
 
