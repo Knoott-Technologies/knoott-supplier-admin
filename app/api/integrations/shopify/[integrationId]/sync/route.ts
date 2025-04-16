@@ -71,7 +71,7 @@ export async function POST(
 
 async function fetchShopifyProducts(shop: string, accessToken: string) {
   const response = await fetch(
-    `https://${shop}/admin/api/2023-07/products.json?limit=250`,
+    `https://${shop}/admin/api/2025-04/products.json?limit=250`,
     {
       headers: {
         "X-Shopify-Access-Token": accessToken,
@@ -101,7 +101,61 @@ async function syncProductsToDatabase(
 
   for (const shopifyProduct of products) {
     try {
-      // Verificar si el producto ya existe
+      // Primero verificar si el producto ya existe directamente en la tabla products
+      const { data: existingDirectProduct } = await supabase
+        .from("products")
+        .select("id")
+        .eq("shopify_product_id", shopifyProduct.id.toString())
+        .single();
+
+      if (existingDirectProduct) {
+        // El producto existe directamente en la tabla products
+        await updateExistingProduct(
+          existingDirectProduct.id,
+          shopifyProduct,
+          integration,
+          supabase
+        );
+
+        // Verificar si existe en la tabla de mapeo
+        const { data: existingMapping } = await supabase
+          .from("shopify_products")
+          .select("id")
+          .eq("integration_id", integration.id)
+          .eq("shopify_product_id", shopifyProduct.id.toString())
+          .single();
+
+        if (existingMapping) {
+          // Actualizar registro de sincronización
+          await supabase
+            .from("shopify_products")
+            .update({
+              title: shopifyProduct.title,
+              platform_product_id: existingDirectProduct.id,
+              synced_at: new Date().toISOString(),
+              shopify_updated_at: shopifyProduct.updated_at,
+            })
+            .eq("id", existingMapping.id);
+        } else {
+          // Crear registro de mapeo si no existe
+          await supabase.from("shopify_products").insert({
+            integration_id: integration.id,
+            business_id: integration.business_id,
+            shopify_id: shopifyProduct.id.toString(),
+            shopify_product_id: shopifyProduct.id.toString(),
+            title: shopifyProduct.title,
+            platform_product_id: existingDirectProduct.id,
+            shopify_created_at: shopifyProduct.created_at,
+            shopify_updated_at: shopifyProduct.updated_at,
+            synced_at: new Date().toISOString(),
+          });
+        }
+
+        updated++;
+        continue;
+      }
+
+      // Si no existe directamente, verificar en la tabla de mapeo
       const { data: existingProduct } = await supabase
         .from("shopify_products")
         .select("id, platform_product_id")
@@ -117,6 +171,24 @@ async function syncProductsToDatabase(
           integration,
           supabase
         );
+
+        // Actualizar el shopify_product_id en la tabla products si no está establecido
+        await supabase
+          .from("products")
+          .update({ shopify_product_id: shopifyProduct.id.toString() })
+          .eq("id", existingProduct.platform_product_id)
+          .is("shopify_product_id", null);
+
+        // Actualizar registro de sincronización
+        await supabase
+          .from("shopify_products")
+          .update({
+            title: shopifyProduct.title,
+            synced_at: new Date().toISOString(),
+            shopify_updated_at: shopifyProduct.updated_at,
+          })
+          .eq("id", existingProduct.id);
+
         updated++;
       } else {
         // Crear nuevo producto en la plataforma
@@ -223,6 +295,15 @@ async function createNewProduct(
     }
   }
 
+  // Extraer descripción corta (primeros 150 caracteres sin HTML)
+  let shortDescription = "";
+  if (shopifyProduct.body_html) {
+    shortDescription = shopifyProduct.body_html
+      .replace(/<[^>]*>/g, "") // Eliminar etiquetas HTML
+      .substring(0, 150)
+      .trim();
+  }
+
   // Crear el producto principal
   const { data: newProduct } = await supabase
     .from("products")
@@ -230,9 +311,7 @@ async function createNewProduct(
       name: shopifyProduct.title,
       short_name: shopifyProduct.title.substring(0, 50),
       description: shopifyProduct.body_html || "",
-      short_description: shopifyProduct.body_html
-        ? shopifyProduct.body_html.substring(0, 150)
-        : "",
+      short_description: shortDescription,
       brand_id: brandId,
       images_url: imageUrl,
       subcategory_id: subcategoryId,
@@ -243,6 +322,7 @@ async function createNewProduct(
         shopify_id: shopifyProduct.id.toString(),
         shopify_handle: shopifyProduct.handle,
       },
+      shopify_product_id: shopifyProduct.id.toString(), // Añadir el ID de Shopify directamente
     })
     .select("id")
     .single();
@@ -348,6 +428,15 @@ async function updateExistingProduct(
       ? shopifyProduct.images.map((img: any) => img.src)
       : [""];
 
+  // Extraer descripción corta (primeros 150 caracteres sin HTML)
+  let shortDescription = "";
+  if (shopifyProduct.body_html) {
+    shortDescription = shopifyProduct.body_html
+      .replace(/<[^>]*>/g, "") // Eliminar etiquetas HTML
+      .substring(0, 150)
+      .trim();
+  }
+
   // Actualizar el producto principal
   await supabase
     .from("products")
@@ -355,9 +444,7 @@ async function updateExistingProduct(
       name: shopifyProduct.title,
       short_name: shopifyProduct.title.substring(0, 50),
       description: shopifyProduct.body_html || "",
-      short_description: shopifyProduct.body_html
-        ? shopifyProduct.body_html.substring(0, 150)
-        : "",
+      short_description: shortDescription,
       images_url: imageUrl,
       status: shopifyProduct.published_at ? "active" : "draft",
       keywords: shopifyProduct.tags ? shopifyProduct.tags.split(", ") : [],
@@ -366,6 +453,7 @@ async function updateExistingProduct(
         shopify_id: shopifyProduct.id.toString(),
         shopify_handle: shopifyProduct.handle,
       },
+      shopify_product_id: shopifyProduct.id.toString(), // Asegurar que el ID de Shopify esté actualizado
     })
     .eq("id", productId);
 
@@ -385,7 +473,7 @@ async function updateExistingProduct(
       // Buscar si ya existe esta variante
       let variantId;
       const existingVariant = existingVariants?.find(
-        (v: { name: any; }) => v.name === option.name
+        (v: { name: any }) => v.name === option.name
       );
 
       if (existingVariant) {
@@ -427,7 +515,7 @@ async function updateExistingProduct(
 
         // Buscar si ya existe esta opción
         const existingOption = existingOptions?.find(
-          (o: { name: any; }) => o.name === optionValue
+          (o: { name: any }) => o.name === optionValue
         );
 
         if (existingOption) {
@@ -436,7 +524,7 @@ async function updateExistingProduct(
             .from("products_variant_options")
             .update({
               display_name: optionValue,
-              price: firstMatch ? Number.parseFloat(firstMatch.price) * 100 : null,
+              price: firstMatch ? Number.parseFloat(firstMatch.price) : null,
               stock: firstMatch ? firstMatch.inventory_quantity : null,
               sku: firstMatch ? firstMatch.sku : null,
               metadata: {
@@ -452,7 +540,7 @@ async function updateExistingProduct(
             variant_id: variantId,
             name: optionValue,
             display_name: optionValue,
-            price: firstMatch ? Number.parseFloat(firstMatch.price) * 100 : null,
+            price: firstMatch ? Number.parseFloat(firstMatch.price) : null,
             stock: firstMatch ? firstMatch.inventory_quantity : null,
             position: j,
             is_default: j === 0,

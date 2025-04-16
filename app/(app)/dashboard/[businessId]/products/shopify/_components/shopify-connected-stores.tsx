@@ -177,12 +177,12 @@ export const ShopifyConnectedStores = ({
             >
               {syncingStores[integration.id] ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   Sincronizando...
                 </>
               ) : (
                 <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
+                  <RefreshCw className="h-4 w-4" />
                   Sincronizar
                 </>
               )}
@@ -197,13 +197,13 @@ export const ShopifyConnectedStores = ({
                 >
                   {disconnectingStores[integration.id] ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                       Desconectando...
                     </>
                   ) : (
                     <>
-                      <Trash2 className="mr-2 h-4 w-4" />
                       Desconectar
+                      <Trash2 className="h-4 w-4" />
                     </>
                   )}
                 </Button>

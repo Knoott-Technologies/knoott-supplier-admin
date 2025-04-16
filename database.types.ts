@@ -415,6 +415,7 @@ export type Database = {
           name: string
           presence_in_gifts: number
           provider_business_id: string | null
+          shopify_product_id: string | null
           short_description: string
           short_name: string
           specs: Json | null
@@ -433,6 +434,7 @@ export type Database = {
           name: string
           presence_in_gifts?: number
           provider_business_id?: string | null
+          shopify_product_id?: string | null
           short_description: string
           short_name: string
           specs?: Json | null
@@ -451,6 +453,7 @@ export type Database = {
           name?: string
           presence_in_gifts?: number
           provider_business_id?: string | null
+          shopify_product_id?: string | null
           short_description?: string
           short_name?: string
           specs?: Json | null

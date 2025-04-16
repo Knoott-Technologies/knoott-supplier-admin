@@ -28,22 +28,22 @@ const ShopifyIntegration = async ({
           description="Conecta tu tienda con Shopify para sincronizar productos automáticamente."
         />
 
-        <div className="mt-8 space-y-8">
-          <div className="flex flex-col gap-y-2 items-center justify-center">
-            <ShopifyIntegrationForm businessId={params.businessId} />
-            <p className="text-xs text-muted-foreground max-w-md mx-auto text-center">
-              Al conectar tu tienda, podrás sincronizar automáticamente tus
-              productos de Shopify con nuestra plataforma.
-            </p>
-          </div>
-
-          {integrations && integrations.length > 0 && (
+        <div className="w-full flex flex-col">
+          {(integrations && integrations.length > 0 && (
             <div className="mt-8">
               <h2 className="text-xl font-semibold mb-4">Tiendas conectadas</h2>
               <ShopifyConnectedStores
                 integrations={integrations}
                 businessId={params.businessId}
               />
+            </div>
+          )) || (
+            <div className="flex flex-col gap-y-2 items-center justify-center">
+              <ShopifyIntegrationForm businessId={params.businessId} />
+              <p className="text-xs text-muted-foreground max-w-md mx-auto text-center">
+                Al conectar tu tienda, podrás sincronizar automáticamente tus
+                productos de Shopify con nuestra plataforma.
+              </p>
             </div>
           )}
         </div>

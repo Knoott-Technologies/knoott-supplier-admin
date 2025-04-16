@@ -82,18 +82,17 @@ async function handleProductUpdate(
       `Procesando actualización del producto ${product.id} para la integración ${integration.id}`
     );
 
-    // Verificar si el producto ya existe en la plataforma
-    const { data: existingShopifyProduct } = await supabase
-      .from("shopify_products")
-      .select("id, platform_product_id")
-      .eq("integration_id", integration.id)
+    // Verificar si el producto ya existe en la plataforma por shopify_product_id
+    const { data: existingProduct } = await supabase
+      .from("products")
+      .select("id")
       .eq("shopify_product_id", product.id.toString())
       .single();
 
-    if (existingShopifyProduct?.platform_product_id) {
-      // El producto existe, actualizarlo
+    if (existingProduct) {
+      // El producto existe directamente en la tabla products
       console.log(
-        `Actualizando producto existente: ${existingShopifyProduct.platform_product_id}`
+        `Actualizando producto existente por shopify_product_id: ${existingProduct.id}`
       );
 
       // Convertir el producto de Shopify al formato de la plataforma
@@ -107,69 +106,144 @@ async function handleProductUpdate(
       const { error: updateError } = await supabase
         .from("products")
         .update(platformProduct)
-        .eq("id", existingShopifyProduct.platform_product_id);
+        .eq("id", existingProduct.id);
 
       if (updateError) {
         throw new Error(`Error al actualizar producto: ${updateError.message}`);
       }
 
       // Actualizar variantes y opciones
-      await syncProductVariants(
-        product,
-        existingShopifyProduct.platform_product_id,
-        supabase
-      );
+      await syncProductVariants(product, existingProduct.id, supabase);
 
-      // Actualizar registro de sincronización
-      await supabase
+      // Verificar si existe en la tabla de mapeo
+      const { data: existingMapping } = await supabase
         .from("shopify_products")
-        .update({
+        .select("id")
+        .eq("integration_id", integration.id)
+        .eq("shopify_product_id", product.id.toString())
+        .single();
+
+      if (existingMapping) {
+        // Actualizar registro de sincronización
+        await supabase
+          .from("shopify_products")
+          .update({
+            title: product.title,
+            platform_product_id: existingProduct.id,
+            synced_at: new Date().toISOString(),
+            shopify_updated_at: product.updated_at,
+          })
+          .eq("id", existingMapping.id);
+      } else {
+        // Crear registro de mapeo si no existe
+        await supabase.from("shopify_products").insert({
+          integration_id: integration.id,
+          business_id: integration.business_id,
+          shopify_id: product.id.toString(),
+          shopify_product_id: product.id.toString(),
           title: product.title,
-          synced_at: new Date().toISOString(),
+          platform_product_id: existingProduct.id,
+          shopify_created_at: product.created_at,
           shopify_updated_at: product.updated_at,
-        })
-        .eq("id", existingShopifyProduct.id);
+          synced_at: new Date().toISOString(),
+        });
+      }
 
       console.log(`Producto ${product.id} actualizado correctamente`);
     } else {
-      // El producto no existe, crearlo
-      console.log(`Creando nuevo producto desde Shopify ID: ${product.id}`);
-
-      // Convertir el producto de Shopify al formato de la plataforma
-      const platformProduct = await convertShopifyProductToPlatformFormat(
-        product,
-        integration.business_id,
-        supabase
-      );
-
-      // Insertar el nuevo producto
-      const { data: newProduct, error: insertError } = await supabase
-        .from("products")
-        .insert(platformProduct)
-        .select("id")
+      // Verificar si el producto existe en la tabla de mapeo
+      const { data: existingShopifyProduct } = await supabase
+        .from("shopify_products")
+        .select("id, platform_product_id")
+        .eq("integration_id", integration.id)
+        .eq("shopify_product_id", product.id.toString())
         .single();
 
-      if (insertError || !newProduct) {
-        throw new Error(`Error al insertar producto: ${insertError?.message}`);
+      if (existingShopifyProduct?.platform_product_id) {
+        // El producto existe, actualizarlo
+        console.log(
+          `Actualizando producto existente: ${existingShopifyProduct.platform_product_id}`
+        );
+
+        // Convertir el producto de Shopify al formato de la plataforma
+        const platformProduct = await convertShopifyProductToPlatformFormat(
+          product,
+          integration.business_id,
+          supabase
+        );
+
+        // Actualizar el producto en la tabla products
+        const { error: updateError } = await supabase
+          .from("products")
+          .update(platformProduct)
+          .eq("id", existingShopifyProduct.platform_product_id);
+
+        if (updateError) {
+          throw new Error(
+            `Error al actualizar producto: ${updateError.message}`
+          );
+        }
+
+        // Actualizar variantes y opciones
+        await syncProductVariants(
+          product,
+          existingShopifyProduct.platform_product_id,
+          supabase
+        );
+
+        // Actualizar registro de sincronización
+        await supabase
+          .from("shopify_products")
+          .update({
+            title: product.title,
+            synced_at: new Date().toISOString(),
+            shopify_updated_at: product.updated_at,
+          })
+          .eq("id", existingShopifyProduct.id);
+
+        console.log(`Producto ${product.id} actualizado correctamente`);
+      } else {
+        // El producto no existe, crearlo
+        console.log(`Creando nuevo producto desde Shopify ID: ${product.id}`);
+
+        // Convertir el producto de Shopify al formato de la plataforma
+        const platformProduct = await convertShopifyProductToPlatformFormat(
+          product,
+          integration.business_id,
+          supabase
+        );
+
+        // Insertar el nuevo producto
+        const { data: newProduct, error: insertError } = await supabase
+          .from("products")
+          .insert(platformProduct)
+          .select("id")
+          .single();
+
+        if (insertError || !newProduct) {
+          throw new Error(
+            `Error al insertar producto: ${insertError?.message}`
+          );
+        }
+
+        // Crear variantes y opciones
+        await syncProductVariants(product, newProduct.id, supabase);
+
+        // Registrar producto de Shopify
+        await supabase.from("shopify_products").insert({
+          integration_id: integration.id,
+          business_id: integration.business_id,
+          shopify_id: product.id.toString(),
+          shopify_product_id: product.id.toString(),
+          title: product.title,
+          platform_product_id: newProduct.id,
+          shopify_created_at: product.created_at,
+          shopify_updated_at: product.updated_at,
+          synced_at: new Date().toISOString(),
+        });
+
+        console.log(`Nuevo producto creado con ID: ${newProduct.id}`);
       }
-
-      // Crear variantes y opciones
-      await syncProductVariants(product, newProduct.id, supabase);
-
-      // Registrar producto de Shopify
-      await supabase.from("shopify_products").insert({
-        integration_id: integration.id,
-        business_id: integration.business_id,
-        shopify_id: product.id.toString(),
-        shopify_product_id: product.id.toString(),
-        title: product.title,
-        platform_product_id: newProduct.id,
-        shopify_created_at: product.created_at,
-        shopify_updated_at: product.updated_at,
-        synced_at: new Date().toISOString(),
-      });
-
-      console.log(`Nuevo producto creado con ID: ${newProduct.id}`);
     }
 
     // Actualizar contador de productos en la integración
@@ -248,6 +322,7 @@ async function convertShopifyProductToPlatformFormat(
     status: shopifyProduct.status === "active" ? "active" : "draft",
     specs: shopifyProduct.tags ? { tags: shopifyProduct.tags } : null,
     keywords: shopifyProduct.tags ? shopifyProduct.tags.split(", ") : null,
+    shopify_product_id: shopifyProduct.id.toString(), // Añadir esta línea
   };
 }
 

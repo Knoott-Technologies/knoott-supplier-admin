@@ -249,6 +249,7 @@ async function convertShopifyProductToPlatformFormat(
     status: shopifyProduct.status === "active" ? "active" : "draft",
     specs: shopifyProduct.tags ? { tags: shopifyProduct.tags } : null,
     keywords: shopifyProduct.tags ? shopifyProduct.tags.split(", ") : null,
+    shopify_product_id: shopifyProduct.id.toString(), // Añadir esta línea
   };
 }
 
