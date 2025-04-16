@@ -89,6 +89,8 @@ async function handleProductUpdate(
       .eq("shopify_integration_id", integration.id)
       .single();
 
+      console.log("existingProduct", existingProduct)
+
     if (existingProduct) {
       // El producto existe, actualizarlo
       console.log(`Actualizando producto existente: ${existingProduct.id}`);
@@ -129,6 +131,8 @@ async function handleProductUpdate(
           shopify_synced_at: new Date().toISOString(),
         })
         .eq("id", existingProduct.id);
+
+        console.log("updateError", updateError)
 
       if (updateError) {
         throw new Error(`Error al actualizar producto: ${updateError.message}`);
