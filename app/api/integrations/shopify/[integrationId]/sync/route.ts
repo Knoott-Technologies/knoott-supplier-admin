@@ -436,7 +436,7 @@ async function updateExistingProduct(
             .from("products_variant_options")
             .update({
               display_name: optionValue,
-              price: firstMatch ? Number.parseFloat(firstMatch.price) : null,
+              price: firstMatch ? Number.parseFloat(firstMatch.price) * 100 : null,
               stock: firstMatch ? firstMatch.inventory_quantity : null,
               sku: firstMatch ? firstMatch.sku : null,
               metadata: {
@@ -452,7 +452,7 @@ async function updateExistingProduct(
             variant_id: variantId,
             name: optionValue,
             display_name: optionValue,
-            price: firstMatch ? Number.parseFloat(firstMatch.price) : null,
+            price: firstMatch ? Number.parseFloat(firstMatch.price) * 100 : null,
             stock: firstMatch ? firstMatch.inventory_quantity : null,
             position: j,
             is_default: j === 0,
