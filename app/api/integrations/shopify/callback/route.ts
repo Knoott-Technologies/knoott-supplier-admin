@@ -908,6 +908,8 @@ export async function GET(request: NextRequest) {
       })
       .eq("id", pendingConnection.id);
 
+      console.log(error);
+
     if (error) {
       console.error("Error al actualizar la conexión:", error);
       return NextResponse.redirect(
