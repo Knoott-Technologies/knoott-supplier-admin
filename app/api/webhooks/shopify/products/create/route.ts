@@ -82,24 +82,22 @@ async function handleProductCreate(
       `Procesando creación del producto ${product.id} para la integración ${integration.id}`
     );
 
-    // Verificar si el producto ya existe (podría haber sido creado manualmente)
-    const { data: existingShopifyProduct } = await supabase
-      .from("shopify_products")
-      .select("id, platform_product_id")
-      .eq("integration_id", integration.id)
+    // Verificar si el producto ya existe por shopify_product_id
+    const { data: existingProduct } = await supabase
+      .from("products")
+      .select("id")
       .eq("shopify_product_id", product.id.toString())
+      .eq("shopify_integration_id", integration.id)
       .single();
 
-    if (existingShopifyProduct?.platform_product_id) {
+    if (existingProduct) {
       // El producto ya existe, actualizarlo
-      console.log(
-        `Producto ya existe, actualizando: ${existingShopifyProduct.platform_product_id}`
-      );
+      console.log(`Producto ya existe, actualizando: ${existingProduct.id}`);
 
       // Convertir el producto de Shopify al formato de la plataforma
       const platformProduct = await convertShopifyProductToPlatformFormat(
         product,
-        integration.business_id,
+        integration,
         supabase
       );
 
@@ -107,28 +105,14 @@ async function handleProductCreate(
       const { error: updateError } = await supabase
         .from("products")
         .update(platformProduct)
-        .eq("id", existingShopifyProduct.platform_product_id);
+        .eq("id", existingProduct.id);
 
       if (updateError) {
         throw new Error(`Error al actualizar producto: ${updateError.message}`);
       }
 
       // Actualizar variantes y opciones
-      await syncProductVariants(
-        product,
-        existingShopifyProduct.platform_product_id,
-        supabase
-      );
-
-      // Actualizar registro de sincronización
-      await supabase
-        .from("shopify_products")
-        .update({
-          title: product.title,
-          synced_at: new Date().toISOString(),
-          shopify_updated_at: product.updated_at,
-        })
-        .eq("id", existingShopifyProduct.id);
+      await syncProductVariants(product, existingProduct.id, supabase);
 
       console.log(`Producto ${product.id} actualizado correctamente`);
     } else {
@@ -138,7 +122,7 @@ async function handleProductCreate(
       // Convertir el producto de Shopify al formato de la plataforma
       const platformProduct = await convertShopifyProductToPlatformFormat(
         product,
-        integration.business_id,
+        integration,
         supabase
       );
 
@@ -156,19 +140,6 @@ async function handleProductCreate(
       // Crear variantes y opciones
       await syncProductVariants(product, newProduct.id, supabase);
 
-      // Registrar producto de Shopify
-      await supabase.from("shopify_products").insert({
-        integration_id: integration.id,
-        business_id: integration.business_id,
-        shopify_id: product.id.toString(),
-        shopify_product_id: product.id.toString(),
-        title: product.title,
-        platform_product_id: newProduct.id,
-        shopify_created_at: product.created_at,
-        shopify_updated_at: product.updated_at,
-        synced_at: new Date().toISOString(),
-      });
-
       console.log(`Nuevo producto creado con ID: ${newProduct.id}`);
     }
 
@@ -180,10 +151,9 @@ async function handleProductCreate(
   }
 }
 
-// Reutilizar las mismas funciones auxiliares del archivo update
 async function convertShopifyProductToPlatformFormat(
   shopifyProduct: any,
-  businessId: string,
+  integration: { id: string; business_id: string },
   supabase: any
 ) {
   // Obtener imágenes
@@ -245,11 +215,21 @@ async function convertShopifyProductToPlatformFormat(
     brand_id: brandId,
     images_url: imagesUrl.length > 0 ? imagesUrl : [""],
     subcategory_id: subcategoryId,
-    provider_business_id: businessId,
+    provider_business_id: integration.business_id,
     status: shopifyProduct.status === "active" ? "active" : "draft",
-    specs: shopifyProduct.tags ? { tags: shopifyProduct.tags } : null,
+    specs: {
+      shopify_handle: shopifyProduct.handle,
+      shopify_tags: shopifyProduct.tags,
+      shopify_vendor: shopifyProduct.vendor,
+      shopify_product_type: shopifyProduct.product_type,
+    },
     keywords: shopifyProduct.tags ? shopifyProduct.tags.split(", ") : null,
-    shopify_product_id: shopifyProduct.id.toString(), // Añadir esta línea
+    // Campos específicos de Shopify
+    shopify_product_id: shopifyProduct.id.toString(),
+    shopify_integration_id: integration.id,
+    shopify_created_at: shopifyProduct.created_at,
+    shopify_updated_at: shopifyProduct.updated_at,
+    shopify_synced_at: new Date().toISOString(),
   };
 }
 
@@ -373,9 +353,10 @@ async function syncProductVariants(
 
 async function updateProductCount(integrationId: string, supabase: any) {
   const { count } = await supabase
-    .from("shopify_products")
+    .from("products")
     .select("id", { count: "exact" })
-    .eq("integration_id", integrationId);
+    .eq("shopify_integration_id", integrationId)
+    .eq("status", "active");
 
   await supabase
     .from("shopify_integrations")

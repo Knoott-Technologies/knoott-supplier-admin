@@ -415,7 +415,11 @@ export type Database = {
           name: string
           presence_in_gifts: number
           provider_business_id: string | null
+          shopify_created_at: string | null
+          shopify_integration_id: string | null
           shopify_product_id: string | null
+          shopify_synced_at: string | null
+          shopify_updated_at: string | null
           short_description: string
           short_name: string
           specs: Json | null
@@ -434,7 +438,11 @@ export type Database = {
           name: string
           presence_in_gifts?: number
           provider_business_id?: string | null
+          shopify_created_at?: string | null
+          shopify_integration_id?: string | null
           shopify_product_id?: string | null
+          shopify_synced_at?: string | null
+          shopify_updated_at?: string | null
           short_description: string
           short_name: string
           specs?: Json | null
@@ -453,7 +461,11 @@ export type Database = {
           name?: string
           presence_in_gifts?: number
           provider_business_id?: string | null
+          shopify_created_at?: string | null
+          shopify_integration_id?: string | null
           shopify_product_id?: string | null
+          shopify_synced_at?: string | null
+          shopify_updated_at?: string | null
           short_description?: string
           short_name?: string
           specs?: Json | null
@@ -481,6 +493,13 @@ export type Database = {
             columns: ["provider_business_id"]
             isOneToOne: false
             referencedRelation: "provider_business"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_shopify_integration_id_fkey"
+            columns: ["shopify_integration_id"]
+            isOneToOne: false
+            referencedRelation: "shopify_integrations"
             referencedColumns: ["id"]
           },
           {
@@ -870,10 +889,15 @@ export type Database = {
           shop_timezone: string | null
           state: string | null
           status: string
+          sync_completed_at: string | null
+          sync_error: string | null
           sync_frequency: string | null
           sync_inventory: boolean | null
           sync_prices: boolean | null
           sync_products: boolean | null
+          sync_progress: number | null
+          sync_started_at: string | null
+          sync_status: string | null
           updated_at: string
           webhooks: Json | null
         }
@@ -898,10 +922,15 @@ export type Database = {
           shop_timezone?: string | null
           state?: string | null
           status?: string
+          sync_completed_at?: string | null
+          sync_error?: string | null
           sync_frequency?: string | null
           sync_inventory?: boolean | null
           sync_prices?: boolean | null
           sync_products?: boolean | null
+          sync_progress?: number | null
+          sync_started_at?: string | null
+          sync_status?: string | null
           updated_at?: string
           webhooks?: Json | null
         }
@@ -926,10 +955,15 @@ export type Database = {
           shop_timezone?: string | null
           state?: string | null
           status?: string
+          sync_completed_at?: string | null
+          sync_error?: string | null
           sync_frequency?: string | null
           sync_inventory?: boolean | null
           sync_prices?: boolean | null
           sync_products?: boolean | null
+          sync_progress?: number | null
+          sync_started_at?: string | null
+          sync_status?: string | null
           updated_at?: string
           webhooks?: Json | null
         }

@@ -82,46 +82,28 @@ async function handleProductDelete(
       `Procesando eliminación del producto ${product.id} para la integración ${integration.id}`
     );
 
-    // Buscar el producto en la tabla de mapeo
-    const { data: shopifyProduct } = await supabase
-      .from("shopify_products")
-      .select("id, platform_product_id")
-      .eq("integration_id", integration.id)
+    // Buscar el producto directamente en la tabla products por shopify_product_id
+    const { data: existingProduct } = await supabase
+      .from("products")
+      .select("id")
       .eq("shopify_product_id", product.id.toString())
+      .eq("shopify_integration_id", integration.id)
       .single();
 
-    if (shopifyProduct?.platform_product_id) {
+    if (existingProduct) {
       console.log(
-        `Producto encontrado, ID en plataforma: ${shopifyProduct.platform_product_id}`
+        `Producto encontrado, ID en plataforma: ${existingProduct.id}`
       );
 
-      // Opción 1: Eliminar el producto completamente
-      // const { error: deleteError } = await supabase
-      //   .from("products")
-      //   .delete()
-      //   .eq("id", shopifyProduct.platform_product_id);
-
-      // Opción 2: Marcar el producto como inactivo (recomendado)
+      // Marcar el producto como inactivo
       const { error: updateError } = await supabase
         .from("products")
         .update({ status: "inactive" })
-        .eq("id", shopifyProduct.platform_product_id);
+        .eq("id", existingProduct.id);
 
       if (updateError) {
         throw new Error(
           `Error al marcar producto como inactivo: ${updateError.message}`
-        );
-      }
-
-      // Eliminar el registro de mapeo
-      const { error: deleteMapError } = await supabase
-        .from("shopify_products")
-        .delete()
-        .eq("id", shopifyProduct.id);
-
-      if (deleteMapError) {
-        throw new Error(
-          `Error al eliminar mapeo de producto: ${deleteMapError.message}`
         );
       }
 
@@ -143,9 +125,10 @@ async function handleProductDelete(
 
 async function updateProductCount(integrationId: string, supabase: any) {
   const { count } = await supabase
-    .from("shopify_products")
+    .from("products")
     .select("id", { count: "exact" })
-    .eq("integration_id", integrationId);
+    .eq("shopify_integration_id", integrationId)
+    .eq("status", "active");
 
   await supabase
     .from("shopify_integrations")

@@ -74,6 +74,8 @@ async function startBackgroundSync(
       .update({
         sync_status: "in_progress",
         sync_started_at: new Date().toISOString(),
+        sync_progress: 0,
+        sync_error: null,
       })
       .eq("id", integrationId);
 
@@ -200,11 +202,22 @@ async function syncProductsInBatches(
         sync_progress: 100,
         product_count: totalProducts,
         last_synced: new Date().toISOString(),
-        sync_stats: {
-          total: totalProducts,
-          created: totalCreated,
-          updated: totalUpdated,
-          errors: totalErrors,
+        webhooks: {
+          ...(await supabase
+            .from("shopify_integrations")
+            .select("webhooks")
+            .eq("id", integrationId)
+            .single()
+            .then(
+              (res: { data: { webhooks: any } }) => res.data?.webhooks || {}
+            )),
+          sync_stats: {
+            total: totalProducts,
+            created: totalCreated,
+            updated: totalUpdated,
+            errors: totalErrors,
+            last_sync: new Date().toISOString(),
+          },
         },
       })
       .eq("id", integrationId);
@@ -316,126 +329,30 @@ async function processProduct(
   supabase: any
 ) {
   try {
-    // Primero verificar si el producto ya existe directamente en la tabla products
-    const { data: existingDirectProduct } = await supabase
+    // Verificar si el producto ya existe en la tabla products por shopify_product_id
+    const { data: existingProduct } = await supabase
       .from("products")
       .select("id")
       .eq("shopify_product_id", shopifyProduct.id.toString())
+      .eq("shopify_integration_id", integration.id)
       .single();
 
-    if (existingDirectProduct) {
-      // El producto existe directamente en la tabla products
+    if (existingProduct) {
+      // El producto existe, actualizarlo
       await updateExistingProduct(
-        existingDirectProduct.id,
+        existingProduct.id,
         shopifyProduct,
         integration,
         supabase
       );
-
-      // Verificar si existe en la tabla de mapeo
-      const { data: existingMapping } = await supabase
-        .from("shopify_products")
-        .select("id")
-        .eq("integration_id", integration.id)
-        .eq("shopify_product_id", shopifyProduct.id.toString())
-        .single();
-
-      if (existingMapping) {
-        // Actualizar registro de sincronización
-        await supabase
-          .from("shopify_products")
-          .update({
-            title: shopifyProduct.title,
-            platform_product_id: existingDirectProduct.id,
-            synced_at: new Date().toISOString(),
-            shopify_updated_at: shopifyProduct.updated_at,
-          })
-          .eq("id", existingMapping.id);
-      } else {
-        // Crear registro de mapeo si no existe
-        await supabase.from("shopify_products").insert({
-          integration_id: integration.id,
-          business_id: integration.business_id,
-          shopify_id: shopifyProduct.id.toString(),
-          shopify_product_id: shopifyProduct.id.toString(),
-          title: shopifyProduct.title,
-          platform_product_id: existingDirectProduct.id,
-          shopify_created_at: shopifyProduct.created_at,
-          shopify_updated_at: shopifyProduct.updated_at,
-          synced_at: new Date().toISOString(),
-        });
-      }
-
-      return { action: "updated", id: existingDirectProduct.id };
-    }
-
-    // Si no existe directamente, verificar en la tabla de mapeo
-    const { data: existingProduct } = await supabase
-      .from("shopify_products")
-      .select("id, platform_product_id")
-      .eq("integration_id", integration.id)
-      .eq("shopify_id", shopifyProduct.id.toString())
-      .single();
-
-    if (existingProduct && existingProduct.platform_product_id) {
-      // Actualizar producto existente en la plataforma
-      await updateExistingProduct(
-        existingProduct.platform_product_id,
-        shopifyProduct,
-        integration,
-        supabase
-      );
-
-      // Actualizar el shopify_product_id en la tabla products si no está establecido
-      await supabase
-        .from("products")
-        .update({ shopify_product_id: shopifyProduct.id.toString() })
-        .eq("id", existingProduct.platform_product_id)
-        .is("shopify_product_id", null);
-
-      // Actualizar registro de sincronización
-      await supabase
-        .from("shopify_products")
-        .update({
-          title: shopifyProduct.title,
-          synced_at: new Date().toISOString(),
-          shopify_updated_at: shopifyProduct.updated_at,
-        })
-        .eq("id", existingProduct.id);
-
-      return { action: "updated", id: existingProduct.platform_product_id };
+      return { action: "updated", id: existingProduct.id };
     } else {
-      // Crear nuevo producto en la plataforma
+      // El producto no existe, crearlo
       const productId = await createNewProduct(
         shopifyProduct,
         integration,
         supabase
       );
-
-      // Guardar o actualizar en la tabla de mapeo
-      if (existingProduct) {
-        await supabase
-          .from("shopify_products")
-          .update({
-            platform_product_id: productId,
-            shopify_updated_at: shopifyProduct.updated_at,
-            synced_at: new Date().toISOString(),
-          })
-          .eq("id", existingProduct.id);
-      } else {
-        await supabase.from("shopify_products").insert({
-          integration_id: integration.id,
-          business_id: integration.business_id,
-          shopify_id: shopifyProduct.id.toString(),
-          shopify_product_id: shopifyProduct.id.toString(),
-          title: shopifyProduct.title,
-          platform_product_id: productId,
-          shopify_created_at: shopifyProduct.created_at,
-          shopify_updated_at: shopifyProduct.updated_at,
-          synced_at: new Date().toISOString(),
-        });
-      }
-
       return { action: "created", id: productId };
     }
   } catch (error) {
@@ -523,10 +440,17 @@ async function createNewProduct(
       status: shopifyProduct.published_at ? "active" : "draft",
       keywords: shopifyProduct.tags ? shopifyProduct.tags.split(", ") : [],
       specs: {
-        shopify_id: shopifyProduct.id.toString(),
         shopify_handle: shopifyProduct.handle,
+        shopify_tags: shopifyProduct.tags,
+        shopify_vendor: shopifyProduct.vendor,
+        shopify_product_type: shopifyProduct.product_type,
       },
-      shopify_product_id: shopifyProduct.id.toString(), // Añadir el ID de Shopify directamente
+      // Campos específicos de Shopify
+      shopify_product_id: shopifyProduct.id.toString(),
+      shopify_integration_id: integration.id,
+      shopify_created_at: shopifyProduct.created_at,
+      shopify_updated_at: shopifyProduct.updated_at,
+      shopify_synced_at: new Date().toISOString(),
     })
     .select("id")
     .single();
@@ -661,11 +585,14 @@ async function updateExistingProduct(
         status: shopifyProduct.published_at ? "active" : "draft",
         keywords: shopifyProduct.tags ? shopifyProduct.tags.split(", ") : [],
         specs: {
-          ...shopifyProduct.specs,
-          shopify_id: shopifyProduct.id.toString(),
           shopify_handle: shopifyProduct.handle,
+          shopify_tags: shopifyProduct.tags,
+          shopify_vendor: shopifyProduct.vendor,
+          shopify_product_type: shopifyProduct.product_type,
         },
-        shopify_product_id: shopifyProduct.id.toString(), // Asegurar que el ID de Shopify esté actualizado
+        // Actualizar campos específicos de Shopify
+        shopify_updated_at: shopifyProduct.updated_at,
+        shopify_synced_at: new Date().toISOString(),
       })
       .eq("id", productId);
 
@@ -904,11 +831,11 @@ export async function GET(request: NextRequest) {
         status: "active",
         connected_at: new Date().toISOString(),
         sync_status: "pending",
-        webhook_status: webhookResults,
+        webhooks: {
+          registration: webhookResults,
+        },
       })
       .eq("id", pendingConnection.id);
-
-      console.log(error);
 
     if (error) {
       console.error("Error al actualizar la conexión:", error);
@@ -934,7 +861,7 @@ export async function GET(request: NextRequest) {
     // Redirigir al usuario a la página de integración con un mensaje de éxito
     return NextResponse.redirect(
       new URL(
-        `/dashboard/${pendingConnection.business_id}/products/shopify?success=true`,
+        `/dashboard/${pendingConnection.business_id}/products/shopify/${pendingConnection.id}?success=true`,
         request.url
       )
     );
