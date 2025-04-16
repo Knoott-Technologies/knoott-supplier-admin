@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import crypto from "crypto";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     // Parsear el cuerpo JSON después de verificar HMAC
     const data = JSON.parse(body);
-    const supabase = createClient(cookies());
+    const supabase = createAdminClient();
 
     // Obtener la integración correspondiente a esta tienda
     const { data: integration, error: integrationError } = await supabase
