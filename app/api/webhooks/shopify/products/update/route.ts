@@ -41,17 +41,10 @@ export async function POST(request: NextRequest) {
 
     // Parsear el cuerpo JSON después de verificar HMAC
     let data;
+
     try {
       data = JSON.parse(body);
-      console.log("Datos del producto recibidos:", {
-        id: data.id,
-        title: data.title,
-        status: data.status,
-        hasVariants: data.variants?.length > 0,
-        variantCount: data.variants?.length,
-        hasImages: data.images?.length > 0,
-        imageCount: data.images?.length,
-      });
+      console.log("Cuerpo JSON parseado:", data);
     } catch (parseError) {
       console.error("Error al parsear el cuerpo JSON:", parseError);
       console.log(
