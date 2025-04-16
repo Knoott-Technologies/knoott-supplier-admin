@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 // Configurar como Edge Function con un tiempo de ejecución más largo
@@ -24,10 +23,24 @@ export async function POST(request: NextRequest) {
 
     // Verificar la autenticidad del webhook
     if (process.env.SHOPIFY_API_SECRET) {
-      const hmac = crypto
-        .createHmac("sha256", process.env.SHOPIFY_API_SECRET)
-        .update(body)
-        .digest("base64");
+      // Usar Web Crypto API en lugar de Node.js crypto
+      const encoder = new TextEncoder();
+      const key = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(process.env.SHOPIFY_API_SECRET),
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"]
+      );
+
+      const signature = await crypto.subtle.sign(
+        "HMAC",
+        key,
+        encoder.encode(body)
+      );
+
+      // Convertir el ArrayBuffer a Base64
+      const hmac = btoa(Array.from(new Uint8Array(signature)).map(byte => String.fromCharCode(byte)).join(''));
 
       if (hmac !== hmacHeader) {
         console.error("Webhook inválido: firma HMAC no coincide", {

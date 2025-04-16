@@ -4,10 +4,9 @@ import { cookies } from "next/headers";
 import { columns } from "./_components/columns";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ChevronRight, Plus, Webhook } from "lucide-react";
+import { Plus } from "lucide-react";
 import { DataTable } from "./_components/products-table";
 import { FilterBar } from "./_components/filter-bar";
-import { ProductCrawler } from "./_components/product-crawler";
 import { Shopify } from "@/components/svgs/icons";
 
 const ProductsPage = async ({
@@ -116,6 +115,14 @@ const ProductsPage = async ({
     .order("name")
     .eq("level", 2);
 
+  // Fetch all integrations
+  const { data: integrations } = await supabase
+    .from("shopify_integrations")
+    .select("*")
+    .eq("business_id", params.businessId)
+    .neq("status", "disconnected")
+    .order("created_at", { ascending: false });
+
   return (
     <>
       <main className="h-fit w-full md:max-w-[95%] px-3 md:px-0 py-5 pb-14 lg:py-7 mx-auto no-scrollbar">
@@ -131,7 +138,7 @@ const ProductsPage = async ({
               asChild
             >
               <Link href={`/dashboard/${params.businessId}/products/shopify`}>
-                Integrar Shopify <Shopify className="size-4" />
+                {integrations && integrations.length > 0 ? "Ver integración" : "Integración con Shopify"} <Shopify className="size-4" />
               </Link>
             </Button>
             <Button
