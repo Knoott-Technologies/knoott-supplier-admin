@@ -63,7 +63,7 @@ export async function POST(request: Request) {
         // Otros campos
         reference: data.reference,
         is_verified: false,
-        commission_percentage: 0.085, // Valor por defecto
+        commission_percentage: 0.058, // Valor por defecto
       })
       .select()
       .single();
