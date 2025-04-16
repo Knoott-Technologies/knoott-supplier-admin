@@ -228,6 +228,8 @@ async function handleProductUpdate(
         .select("id")
         .single();
 
+        console.log("insertError", insertError)
+
       if (insertError || !newProduct) {
         throw new Error(`Error al insertar producto: ${insertError?.message}`);
       }
