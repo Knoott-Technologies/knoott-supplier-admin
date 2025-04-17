@@ -861,7 +861,7 @@ export async function GET(request: NextRequest) {
     // Redirigir al usuario a la página de integración con un mensaje de éxito
     return NextResponse.redirect(
       new URL(
-        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/${pendingConnection.business_id}/products/shopify/${pendingConnection.id}?success=true`,
+        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/${pendingConnection.business_id}/products/shopify`,
         request.url
       )
     );
