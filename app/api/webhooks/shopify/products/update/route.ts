@@ -235,9 +235,9 @@ async function handleProductUpdate(
           images_url: imageUrl,
           keywords: product.tags ? product.tags.split(", ") : [],
           status:
-            product.status === "active"
+            existingProduct.status === "active"
               ? "active"
-              : product.status === "draft"
+              : existingProduct.status === "draft"
               ? "draft"
               : "requires_verification",
           specs: {
