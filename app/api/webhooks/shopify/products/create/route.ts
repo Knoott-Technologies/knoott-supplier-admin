@@ -358,7 +358,7 @@ async function convertShopifyProductToPlatformFormat(
     images_url: imagesUrl.length > 0 ? imagesUrl : [""],
     subcategory_id: subcategoryId,
     provider_business_id: integration.business_id,
-    status: shopifyProduct.status === "active" ? "active" : "draft",
+    status: "requires_verification",
     specs: {
       shopify_handle: shopifyProduct.handle,
       shopify_tags: shopifyProduct.tags,
@@ -582,7 +582,7 @@ async function syncProductVariants(
             const { error: updateError } = await supabase
               .from("products_variant_options")
               .update({
-                price: Number.parseFloat(variant.price),
+                price: Number.parseFloat(variant.price) * 100,
                 stock: variant.inventory_quantity,
                 sku: variant.sku,
               })
