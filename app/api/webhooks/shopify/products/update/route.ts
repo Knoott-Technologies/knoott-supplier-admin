@@ -233,7 +233,6 @@ async function handleProductUpdate(
           description: product.body_html || "",
           short_description: shortDescription,
           images_url: imageUrl,
-          status: product.published_at ? "active" : "draft",
           keywords: product.tags ? product.tags.split(", ") : [],
           specs: {
             shopify_handle: product.handle,
