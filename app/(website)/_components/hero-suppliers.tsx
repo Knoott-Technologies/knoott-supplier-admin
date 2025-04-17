@@ -21,7 +21,7 @@ export const HeroSuppliers = ({
   userBusiness: UserBusinessType[] | null;
 }) => {
   return (
-    <section className="w-full h-fit items-start justify-start flex flex-col relative overflow-hidden">
+    <section className="w-full h-fit items-center justify-center flex flex-col relative overflow-hidden min-h-[80vh]">
       <div className="absolute inset-0 after:absolute after:inset-0 after:z-[1]">
         <Video
           src="/shipping-knoott.mp4"
@@ -40,18 +40,18 @@ export const HeroSuppliers = ({
           <span className="w-full h-fit items-start justify-start flex flex-col gap-y-3">
             <h1
               className={cn(
-                "text-5xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold text-background",
+                "text-5xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-semibold text-background text-balance",
                 libre.className
               )}
             >
-              Vende tus productos en Knoott...
+              Impulsa tu marca dentro de Knoott
             </h1>
             <p className="text-base lg:text-lg text-background opacity-80">
-              En Knoott nos apasiona impulsar el crecimiento de nuestros socios.
-              Por eso, ofrecemos un soporte personalizado, herramientas de
-              vanguardia y oportunidades únicas para que tu negocio alcance
-              nuevas metas. Únete a nuestra red de proveedores y descubre todo
-              lo que podemos lograr juntos.
+              En Knoott creemos en el potencial de cada partner. Te conectamos
+              con nuevas audiencias, te damos herramientas inteligentes para
+              administrar tus productos y te acompañamos con soporte
+              personalizado en cada paso. Únete hoy a la comunidad de Knoott
+              Partners y transforma tu negocio con nosotros.
             </p>
           </span>
           {(user && !userBusiness && (
@@ -69,24 +69,37 @@ export const HeroSuppliers = ({
               <div className="w-full h-fit items-start lg:items-center justify-start flex flex-col lg:flex-row gap-2">
                 <Button
                   variant={"defaultBlack"}
-                  size={"lg"}
+                  size={"default"}
                   className="w-full md:w-auto"
                   asChild
                 >
                   <Link href={`/dashboard/`}>
+                    Entrar a mi dashboard
                     <span className="flex -space-x-[0.45rem]">
                       {userBusiness.map((business) => (
-                        <span key={business.id} className="ring-background rounded-full ring-1 overflow-hidden">
+                        <span
+                          key={business.id}
+                          className="ring-background rounded-full ring-1 overflow-hidden"
+                        >
                           <Image
                             src={business.business.business_logo_url}
-                            width={18}
-                            height={18}
+                            width={16}
+                            height={16}
                             alt="Avatar 01"
                           />
                         </span>
                       ))}
                     </span>
-                    Entrar a mi dashboard
+                  </Link>
+                </Button>
+                <Button
+                  variant={"ghost"}
+                  size={"default"}
+                  className="w-full md:w-auto bg-transparent text-background"
+                  asChild
+                >
+                  <Link href="/docs">
+                    Ver documentación <ArrowRight />
                   </Link>
                 </Button>
               </div>
@@ -94,14 +107,14 @@ export const HeroSuppliers = ({
               <div className="w-full h-fit items-start lg:items-center justify-start flex flex-col lg:flex-row gap-2">
                 <Button
                   variant={"defaultBlack"}
-                  size={"lg"}
+                  size={"default"}
                   className="w-full md:w-auto"
                 >
                   Comienza ahora
                 </Button>
                 <Button
                   variant={"ghost"}
-                  size={"lg"}
+                  size={"default"}
                   className="w-full md:w-auto bg-transparent text-background"
                   asChild
                 >

@@ -1,9 +1,12 @@
 import Link from "next/link";
-import { Headphones, LucideIcon } from "lucide-react";
+import { Headphones, LucideIcon, User2 } from "lucide-react";
 import React from "react";
 import { User } from "@supabase/supabase-js";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Logo } from "@/components/universal/logo";
+import { Database } from "@/database.types";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface NavProps {
   name: string;
@@ -18,7 +21,13 @@ interface NavProps {
   icon: LucideIcon;
 }
 
-export const HeaderPlatform = ({ user }: { user: User }) => {
+export const HeaderPlatform = ({
+  user,
+  role,
+}: {
+  user: User;
+  role: Database["public"]["Enums"]["provider_businees_user_roles"];
+}) => {
   const nav: NavProps[] = [
     {
       name: "Soporte",
@@ -39,7 +48,75 @@ export const HeaderPlatform = ({ user }: { user: User }) => {
           <Logo variant={"black"} />
         </Link>
       </div>
-      <div className="w-fit h-full items-center justify-end gap-1 flex"></div>
+      <div className="w-fit h-full items-center justify-end gap-1 flex lg:hidden">
+        <Button
+          variant={"ghost"}
+          size={"icon"}
+          className={cn(
+            "size-7 pointer-events-none",
+            role === "admin"
+              ? "text-contrast bg-contrast/10 hover:text-contrast hover:bg-contrast/10"
+              : role === "supervisor"
+              ? "text-contrast2 bg-contrast2/10 hover:text-contrast2 hover:bg-contrast2/10"
+              : "text-tertiary bg-tertiary/10 hover:text-tertiary hover:bg-tertiary/10"
+          )}
+        >
+          <User2 />
+        </Button>
+        {nav.map((item, index) => (
+          <Button
+            variant={"outline"}
+            key={index}
+            size={"icon"}
+            className="size-7"
+            asChild
+          >
+            <Link
+              href={item.href}
+              className="h-full flex items-center justify-center"
+            >
+              <item.icon className="h-6 w-6" />
+            </Link>
+          </Button>
+        ))}
+      </div>
+      <div className="w-fit h-full items-center justify-end gap-1 lg:flex hidden">
+        <Button
+          variant={"ghost"}
+          size={"sm"}
+          className={cn(
+            "h-7 pointer-events-none",
+            role === "admin"
+              ? "text-contrast bg-contrast/10 hover:text-contrast hover:bg-contrast/10"
+              : role === "supervisor"
+              ? "text-contrast2 bg-contrast2/10 hover:text-contrast2 hover:bg-contrast2/10"
+              : "text-tertiary bg-tertiary/10 hover:text-tertiary hover:bg-tertiary/10"
+          )}
+        >
+          {role === "admin"
+            ? "Administrador"
+            : role === "supervisor"
+            ? "Supervisor"
+            : "Staff"}
+        </Button>
+        {nav.map((item, index) => (
+          <Button
+            variant={"outline"}
+            key={index}
+            size={"sm"}
+            className="h-7"
+            asChild
+          >
+            <Link
+              href={item.href}
+              className="h-full flex items-center justify-center"
+            >
+              {item.name}
+              <item.icon className="h-6 w-6" />
+            </Link>
+          </Button>
+        ))}
+      </div>
     </header>
   );
 };

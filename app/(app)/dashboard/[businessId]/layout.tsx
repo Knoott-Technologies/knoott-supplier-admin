@@ -1,21 +1,16 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { createClient } from "@/utils/supabase/server";
-import { Viewport } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { AppSidebar } from "./_components/app-sidebar";
-import { SidebarBox } from "./_components/sidebar-box";
-import { HeaderPlatform } from "./_components/header-platform";
 
-export const viewport: Viewport = {
-  themeColor: "#fafafa",
-};
-
-const PlatformLayout = async ({
-  children,
+const LayoutPlatformBusiness = async ({
+  admin,
+  staff,
+  supervisor,
   params,
 }: {
-  children: React.ReactNode;
+  admin: React.ReactNode;
+  staff: React.ReactNode;
+  supervisor: React.ReactNode;
   params: { businessId: string };
 }) => {
   const supabase = createClient(cookies());
@@ -28,36 +23,27 @@ const PlatformLayout = async ({
     redirect("/");
   }
 
-  const { data: business, error } = await supabase
-    .from("provider_business")
-    .select("*")
-    .eq("id", params.businessId)
+  const { data: role, error } = await supabase
+    .from("provider_business_users")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("business_id", params.businessId)
     .single();
 
-  if (!business || error) {
+  if (error || !role) {
     redirect("/");
   }
 
-  const { data: userBusinesses } = await supabase
-    .from("provider_business_users")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("business_id", business.id)
-    .single();
-
-  if (!userBusinesses) {
-    redirect("/dashboard");
+  switch (role.role) {
+    case "admin":
+      return admin;
+    case "staff":
+      return staff;
+    case "supervisor":
+      return supervisor;
+    default:
+      return staff;
   }
-
-  return (
-    <SidebarProvider>
-      <AppSidebar business={business} user={user} />
-      <SidebarBox>
-        <HeaderPlatform user={user} />
-        {children}
-      </SidebarBox>
-    </SidebarProvider>
-  );
 };
 
-export default PlatformLayout;
+export default LayoutPlatformBusiness;

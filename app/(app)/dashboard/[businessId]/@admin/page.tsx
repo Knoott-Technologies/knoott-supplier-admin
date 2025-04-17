@@ -3,13 +3,14 @@ import { createClient } from "@/utils/supabase/server";
 import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import TransactionChart from "./_components/transaction-chart";
-import DateRangeSelector from "./_components/date-range-selector";
 import { startOfWeek, endOfWeek, format, parse } from "date-fns";
 import { es } from "date-fns/locale";
-import { TotalTransactionsCard } from "./_components/total-received-card";
-import { TotalTransactionsNumber } from "./_components/total-transactions";
-import { TotalProductsCard } from "./_components/total-products-card";
+import DateRangeSelector from "../_components/date-range-selector";
+import { TotalTransactionsCard } from "../_components/total-received-card";
+import { TotalTransactionsNumber } from "../_components/total-transactions";
+import { TotalProductsCard } from "../_components/total-products-card";
+import TransactionChart from "../_components/transaction-chart";
+import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = {
   title: "Vista general",

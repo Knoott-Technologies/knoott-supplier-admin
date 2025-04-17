@@ -24,23 +24,35 @@ export const NavigationMenuMobile = ({
   user,
   isScrolled,
   userBusinesses,
+  theme = "dynamic",
 }: {
   user: User | null;
   userBusinesses: UserBusinessType[] | null;
   isScrolled: boolean;
+  theme?: "dynamic" | "black" | "white";
 }) => {
+  const getTextColor = () => {
+    if (isScrolled) {
+      return "text-foreground"; // Always dark text when scrolled
+    }
+
+    // When not scrolled
+    if (theme === "black") {
+      return "text-foreground"; // Black text for black theme
+    }
+
+    return "text-background"; // White text for white theme or dynamic
+  };
+
   return (
     <Sheet>
       <SheetTrigger asChild>
         <Button
-          variant={isScrolled ? "secondary" : "ghost"}
-          className={cn(
-            "text-background border border-transparent",
-            isScrolled && "text-foreground border-border bg-background"
-          )}
-          size="icon"
+          variant={"ghost"}
+          size={"icon"}
+          className={cn("lg:hidden", getTextColor())}
         >
-          <Menu />
+          <Menu className="size-4" />
         </Button>
       </SheetTrigger>
       <SheetContent className="[&>button]:hidden p-0 bg-sidebar w-full">
@@ -80,8 +92,8 @@ export const NavigationMenuMobile = ({
                   asChild
                   size={"lg"}
                 >
-                  <Link href="/about">
-                    Acerca <ArrowRight />
+                  <Link href="/product">
+                    Producto <ArrowRight />
                   </Link>
                 </Button>
               </SheetClose>
@@ -92,32 +104,8 @@ export const NavigationMenuMobile = ({
                   asChild
                   size={"lg"}
                 >
-                  <Link href="/platform">
-                    Plataforma <ArrowRight />
-                  </Link>
-                </Button>
-              </SheetClose>
-              <SheetClose asChild>
-                <Button
-                  variant="ghost"
-                  className="px-3 w-full flex items-center justify-between text-muted-foreground"
-                  asChild
-                  size={"lg"}
-                >
-                  <Link href="/solutions">
-                    Soluciones <ArrowRight />
-                  </Link>
-                </Button>
-              </SheetClose>
-              <SheetClose asChild>
-                <Button
-                  variant="ghost"
-                  className="px-3 w-full flex items-center justify-between text-muted-foreground"
-                  asChild
-                  size={"lg"}
-                >
-                  <Link href="/contact">
-                    Contáctanos <ArrowRight />
+                  <Link href="/docs">
+                    Documentación <ArrowRight />
                   </Link>
                 </Button>
               </SheetClose>

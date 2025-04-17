@@ -136,6 +136,14 @@ const config: Config = {
             "background-position": "calc(100% + var(--shiny-width)) 0",
           },
         },
+        marquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(calc(-50% - 1rem))" },
+        },
+        "marquee-reverse": {
+          "0%": { transform: "translateX(calc(-50% - 1rem))" },
+          "100%": { transform: "translateX(0)" },
+        },
       },
       animation: {
         thinking:
@@ -145,6 +153,9 @@ const config: Config = {
         "collapsible-down": "collapsible-down 0.3s ease-out",
         "collapsible-up": "collapsible-up 0.3s ease-out",
         "shiny-text": "shiny-text 8s infinite",
+        marquee: "marquee 25s linear infinite",
+        "marquee-reverse": "marquee-reverse 30s linear infinite",
+        "marquee-slow": "marquee 40s linear infinite",
       },
     },
   },

@@ -8,7 +8,6 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -21,17 +20,8 @@ import { Database } from "@/database.types";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { formatInTimeZone } from "date-fns-tz";
-import { es } from "date-fns/locale";
 import { useState } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  ChevronDown,
-  LayoutDashboard,
-  LogOut,
-  X,
-} from "lucide-react";
+import { ArrowRight, ChevronDown, LayoutDashboard, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -39,9 +29,11 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 export const SidebarProfile = ({
   user,
   business,
+  role = "admin",
 }: {
   user: User;
   business: Database["public"]["Tables"]["provider_business"]["Row"];
+  role: Database["public"]["Enums"]["provider_businees_user_roles"];
 }) => {
   const { state, isMobile } = useSidebar();
   const isCollapsed = !isMobile && state === "collapsed";
@@ -180,9 +172,7 @@ export const SidebarProfile = ({
                 className="flex items-center gap-2"
                 variant={"outline"}
               >
-                <Avatar
-                  className={cn("size-6 rounded-none")}
-                >
+                <Avatar className={cn("size-6 rounded-none")}>
                   <AvatarImage
                     src={business.business_logo_url}
                     alt={business.business_name}

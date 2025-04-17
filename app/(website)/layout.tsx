@@ -1,5 +1,4 @@
 import type React from "react";
-import { HeaderWebsite } from "@/components/universal/website/header-website";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 
@@ -17,7 +16,6 @@ const MarketingLayout = async ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="w-full h-fit items-start justify-start flex flex-col">
-      <HeaderWebsite userBusinesses={userBusinesses} user={user} />
       {children}
     </div>
   );
