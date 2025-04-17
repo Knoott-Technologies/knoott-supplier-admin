@@ -359,7 +359,7 @@ async function updateExistingProduct(
       description: shopifyProduct.body_html || "",
       short_description: shortDescription,
       images_url: imageUrl,
-      status: shopifyProduct.published_at ? "active" : "draft",
+      status: "requires_verification",
       keywords: shopifyProduct.tags ? shopifyProduct.tags.split(", ") : [],
       specs: {
         shopify_handle: shopifyProduct.handle,
