@@ -27,7 +27,9 @@ const steps = [
     step: 3,
     title: "En tránsito",
     description: "La órden está en camino a la dirección del cliente.",
-    icon: <Loader2 className="size-3.5 text-muted-foreground group-hover:animate-spin" />,
+    icon: (
+      <Loader2 className="size-3.5 text-muted-foreground group-hover:animate-spin" />
+    ),
     loading: true,
   },
 ];
@@ -36,12 +38,12 @@ export const OrdersSection2 = () => {
   return (
     <div className="w-full h-full flex items-center justify-center relative overflow-hidden bg-sidebar group-hover:bg-contrast2/5">
       {/* Main content */}
-      <div className="flex w-full relative max-w-[80%] h-auto aspect-[3/4] translate-y-[15%] items-center justify-center z-10 p-3 bg-background border">
-        <Stepper
-          defaultValue={3}
-          orientation="vertical"
-          className="w-full h-full"
-        >
+      <div className="flex flex-col w-full relative max-w-[80%] h-fit translate-y-[15%] items-center justify-center z-10 bg-background border shadow-md group-hover:shadow-lg ease-in-out duration-300">
+        <div className="w-full h-fit border-b p-3 flex-col">
+          <p className="text-sm font-semibold">Estado de la órden</p>
+          <p className="text-muted-foreground text-xs">Revisa las actualizaciones de la órden en tiempo real.</p>
+        </div>
+        <Stepper defaultValue={3} orientation="vertical" className="w-full p-3">
           {steps.map(({ step, title, description, icon, loading }) => (
             <StepperItem
               key={step}
@@ -50,11 +52,7 @@ export const OrdersSection2 = () => {
               className="relative items-start not-last:flex-1"
             >
               <div className="items-start pb-12 last:pb-0 w-full flex">
-                <StepperIndicator
-                  asChild
-                >
-                  {icon}
-                </StepperIndicator>
+                <StepperIndicator asChild>{icon}</StepperIndicator>
                 <div className="mt-0.5 space-y-0.5 px-2 text-left">
                   <StepperTitle>{title}</StepperTitle>
                   <StepperDescription>{description}</StepperDescription>
