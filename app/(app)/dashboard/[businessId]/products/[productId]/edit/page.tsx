@@ -36,17 +36,17 @@ export default async function ProductEditPage({
     .order("name")
     .eq("status", "active");
 
-  // Fetch product variants
+  // Fetch product variants - Corregido el nombre de la tabla
   const { data: variants } = await supabase
-    .from("product_variants")
+    .from("products_variants") // Corregido: product_variants → products_variants
     .select("*")
     .eq("product_id", params.productId);
 
-  // Fetch variant options
+  // Fetch variant options - Corregido el nombre de la tabla y la consulta
   const { data: variantOptions } = await supabase
-    .from("product_variant_options")
+    .from("products_variant_options") // Corregido: product_variant_options → products_variant_options
     .select("*")
-    .eq("product_id", params.productId);
+    .in("variant_id", variants?.map((v) => v.id) || []); // Corregido: consulta por variant_id en lugar de product_id
 
   const { data: commision } = await supabase
     .from("provider_business")
@@ -63,7 +63,7 @@ export default async function ProductEditPage({
         />
       </div>
       <ProductFormEdit
-        commision={commision?.accorded_commission || 0.085}
+        commision={commision?.accorded_commission || 0.058}
         product={product}
         variants={variants || []}
         variantOptions={variantOptions || []}

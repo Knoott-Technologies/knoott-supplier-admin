@@ -50,7 +50,7 @@ export async function POST(
             name: option.name,
             display_name: option.display_name,
             price: option.price || null,
-            accorded_commision: option.accorded_commision || 0,
+            accorded_commision: option.accorded_commision || 0.058,
             stock: option.stock || null,
             position: index,
             is_default: option.is_default || false,
