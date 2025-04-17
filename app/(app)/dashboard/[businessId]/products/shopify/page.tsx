@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { ShopifyIntegrationForm } from "./_components/shopify-integration-form";
 import { ShopifyConnectedStores } from "./_components/shopify-connected-stores";
 import { ToastHandler } from "./_components/toast-handler";
+import { ShopifySyncProducts } from "./_components/shopify-sync-products";
 
 const ShopifyIntegration = async ({
   params,
@@ -15,12 +16,13 @@ const ShopifyIntegration = async ({
   const supabase = createClient(cookies());
 
   // Obtener las integraciones existentes
-  const { data: integrations } = await supabase
+  const { data: integrations, error } = await supabase
     .from("shopify_integrations")
     .select("*")
     .eq("business_id", params.businessId)
     .neq("status", "disconnected")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .single();
 
   return (
     <main className="h-fit w-full md:max-w-[95%] px-3 md:px-0 py-5 pb-14 lg:py-7 mx-auto no-scrollbar">
@@ -37,21 +39,20 @@ const ShopifyIntegration = async ({
         />
 
         <div className="w-full flex flex-col">
-          {(integrations && integrations.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-xl font-semibold mb-4">Tiendas conectadas</h2>
+          {(integrations && (
+            <div className="flex flex-col gap-y-5 lg:gap-y-7 items-center justify-center">
               <ShopifyConnectedStores
-                integrations={integrations}
+                integration={integrations}
                 businessId={params.businessId}
+              />
+              <ShopifySyncProducts
+                businessId={params.businessId}
+                data={integrations}
               />
             </div>
           )) || (
-            <div className="flex flex-col gap-y-2 items-center justify-center">
+            <div className="flex flex-col gap-y-5 lg:gap-y-7 items-center justify-center">
               <ShopifyIntegrationForm businessId={params.businessId} />
-              <p className="text-xs text-muted-foreground max-w-md mx-auto text-center">
-                Al conectar tu tienda, podrás sincronizar automáticamente tus
-                productos de Shopify con nuestra plataforma.
-              </p>
             </div>
           )}
         </div>

@@ -12,15 +12,6 @@ export async function POST(request: NextRequest) {
     const hmacHeader = request.headers.get("x-shopify-hmac-sha256");
     const shopDomain = request.headers.get("x-shopify-shop-domain");
 
-    console.log("Webhook recibido (products/update):", {
-      shop: shopDomain,
-      hmac: hmacHeader?.substring(0, 10) + "...", // Truncar para seguridad
-      webhookId: request.headers.get("x-shopify-webhook-id"),
-      eventId: request.headers.get("x-shopify-event-id"),
-      contentType: request.headers.get("content-type"),
-      bodyLength: body.length,
-    });
-
     // Verificar la autenticidad del webhook
     if (process.env.SHOPIFY_API_SECRET) {
       // Usar Web Crypto API en lugar de Node.js crypto
@@ -53,7 +44,6 @@ export async function POST(request: NextRequest) {
         });
         return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
       }
-      console.log("Verificación HMAC exitosa");
     } else {
       console.warn(
         "SHOPIFY_API_SECRET no está configurado, omitiendo verificación HMAC"
@@ -64,21 +54,8 @@ export async function POST(request: NextRequest) {
     let data;
     try {
       data = JSON.parse(body);
-      console.log("Datos del producto recibidos:", {
-        id: data.id,
-        title: data.title,
-        status: data.status,
-        hasVariants: data.variants?.length > 0,
-        variantCount: data.variants?.length,
-        hasImages: data.images?.length > 0,
-        imageCount: data.images?.length,
-      });
     } catch (parseError) {
       console.error("Error al parsear el cuerpo JSON:", parseError);
-      console.log(
-        "Primeros 200 caracteres del cuerpo:",
-        body.substring(0, 200)
-      );
       return NextResponse.json(
         { message: "Invalid JSON body" },
         { status: 400 }
@@ -86,10 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient();
-    console.log("Cliente Supabase Admin creado");
 
-    // Obtener la integración correspondiente a esta tienda
-    console.log(`Buscando integración para la tienda ${shopDomain}`);
     const { data: integration, error: integrationError } = await supabase
       .from("shopify_integrations")
       .select("id, business_id, access_token")
@@ -112,19 +86,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(
-      `Integración encontrada: ${integration.id} para el negocio ${integration.business_id}`
-    );
-
-    // IMPORTANTE: En lugar de procesar en segundo plano, procesamos directamente
-    // ya que estamos en Edge Runtime con un tiempo de ejecución más largo
-    console.log(`Iniciando procesamiento para el producto ${data.id}`);
-
     try {
       await handleProductUpdate(data, integration, supabase);
-      console.log(
-        `Procesamiento completado exitosamente para el producto ${data.id}`
-      );
       return NextResponse.json({
         success: true,
         message: "Producto procesado correctamente",
@@ -160,14 +123,6 @@ async function handleProductUpdate(
   supabase: any
 ) {
   try {
-    console.log(
-      `[INICIO] Procesando actualización del producto ${product.id} para la integración ${integration.id}`
-    );
-
-    // Verificar si el producto ya existe en la plataforma por shopify_product_id
-    console.log(
-      `Buscando producto existente con shopify_product_id=${product.id}`
-    );
     const { data: existingProduct, error: queryError } = await supabase
       .from("products")
       .select("id")
@@ -184,26 +139,12 @@ async function handleProductUpdate(
       });
     }
 
-    console.log("Resultado de búsqueda de producto existente:", {
-      encontrado: !!existingProduct,
-      id: existingProduct?.id,
-      error: queryError
-        ? { code: queryError.code, message: queryError.message }
-        : null,
-    });
-
     if (existingProduct) {
-      // El producto existe, actualizarlo
-      console.log(
-        `Actualizando producto existente con ID: ${existingProduct.id}`
-      );
-
       // Obtener imágenes
       const imageUrl =
         product.images && product.images.length > 0
           ? product.images.map((img: any) => img.src)
           : [""];
-      console.log(`Imágenes del producto: ${imageUrl.length} encontradas`);
 
       // Extraer descripción corta (primeros 150 caracteres sin HTML)
       let shortDescription = "";
@@ -212,18 +153,8 @@ async function handleProductUpdate(
           .replace(/<[^>]*>/g, "") // Eliminar etiquetas HTML
           .substring(0, 150)
           .trim();
-        console.log(
-          `Descripción corta generada: "${shortDescription.substring(
-            0,
-            30
-          )}..."`
-        );
       }
 
-      // Actualizar el producto en la tabla products
-      console.log(
-        `Actualizando datos del producto ${existingProduct.id} en la base de datos`
-      );
       const { error: updateError } = await supabase
         .from("products")
         .update({
@@ -259,29 +190,14 @@ async function handleProductUpdate(
         });
         throw new Error(`Error al actualizar producto: ${updateError.message}`);
       }
-      console.log(
-        `Producto ${existingProduct.id} actualizado correctamente en la tabla products`
-      );
 
-      // Actualizar variantes y opciones
-      console.log(
-        `Sincronizando variantes para el producto ${existingProduct.id}`
-      );
       await syncProductVariants(product, existingProduct.id, supabase);
-
-      console.log(
-        `[FIN] Producto ${product.id} actualizado correctamente (ID: ${existingProduct.id})`
-      );
     } else {
-      // El producto no existe, crearlo
-      console.log(`Creando nuevo producto desde Shopify ID: ${product.id}`);
-
       // Obtener imágenes
       const imageUrl =
         product.images && product.images.length > 0
           ? product.images.map((img: any) => img.src)
           : [""];
-      console.log(`Imágenes del producto: ${imageUrl.length} encontradas`);
 
       // Extraer descripción corta (primeros 150 caracteres sin HTML)
       let shortDescription = "";
@@ -290,18 +206,11 @@ async function handleProductUpdate(
           .replace(/<[^>]*>/g, "") // Eliminar etiquetas HTML
           .substring(0, 150)
           .trim();
-        console.log(
-          `Descripción corta generada: "${shortDescription.substring(
-            0,
-            30
-          )}..."`
-        );
       }
 
       // Buscar o crear la marca
       let brandId = null;
       if (product.vendor) {
-        console.log(`Buscando marca existente: "${product.vendor}"`);
         const { data: existingBrand, error: brandQueryError } = await supabase
           .from("catalog_brands")
           .select("id")
@@ -317,9 +226,7 @@ async function handleProductUpdate(
 
         if (existingBrand) {
           brandId = existingBrand.id;
-          console.log(`Marca encontrada con ID: ${brandId}`);
         } else {
-          console.log(`Creando nueva marca: "${product.vendor}"`);
           const { data: newBrand, error: brandInsertError } = await supabase
             .from("catalog_brands")
             .insert({ name: product.vendor, status: "active" })
@@ -335,7 +242,6 @@ async function handleProductUpdate(
 
           if (newBrand) {
             brandId = newBrand.id;
-            console.log(`Nueva marca creada con ID: ${brandId}`);
           }
         }
       }
@@ -343,7 +249,6 @@ async function handleProductUpdate(
       // Buscar o asignar categoría
       let subcategoryId = 1; // Categoría por defecto
       if (product.product_type) {
-        console.log(`Buscando categoría existente: "${product.product_type}"`);
         const { data: existingCategory, error: categoryQueryError } =
           await supabase
             .from("catalog_collections")
@@ -363,16 +268,11 @@ async function handleProductUpdate(
 
         if (existingCategory) {
           subcategoryId = existingCategory.id;
-          console.log(`Categoría encontrada con ID: ${subcategoryId}`);
         } else {
-          console.log(`Usando categoría por defecto ID: ${subcategoryId}`);
         }
       }
 
       // Insertar el nuevo producto
-      console.log(
-        `Insertando nuevo producto en la base de datos: "${product.title}"`
-      );
       const { data: newProduct, error: insertError } = await supabase
         .from("products")
         .insert({
@@ -421,23 +321,9 @@ async function handleProductUpdate(
         throw new Error("Error al crear el producto: no se devolvió ID");
       }
 
-      console.log(`Nuevo producto creado con ID: ${newProduct.id}`);
-
-      // Crear variantes y opciones
-      console.log(
-        `Sincronizando variantes para el nuevo producto ${newProduct.id}`
-      );
       await syncProductVariants(product, newProduct.id, supabase);
-
-      console.log(
-        `[FIN] Nuevo producto ${product.id} creado correctamente (ID: ${newProduct.id})`
-      );
     }
 
-    // Actualizar contador de productos en la integración
-    console.log(
-      `Actualizando contador de productos para la integración ${integration.id}`
-    );
     await updateProductCount(integration.id, supabase);
   } catch (error: any) {
     console.error(`Error procesando producto ${product.id}:`, {
@@ -456,14 +342,6 @@ async function syncProductVariants(
   supabase: any
 ) {
   try {
-    console.log(
-      `[INICIO] Sincronizando variantes para el producto ${productId}`
-    );
-
-    // Primero, obtener las variantes existentes
-    console.log(
-      `Obteniendo variantes existentes para el producto ${productId}`
-    );
     const { data: existingVariants, error: variantsQueryError } = await supabase
       .from("products_variants")
       .select("id, name")
@@ -479,41 +357,23 @@ async function syncProductVariants(
       );
     }
 
-    console.log(
-      `Variantes existentes encontradas: ${existingVariants?.length || 0}`
-    );
-
     const existingVariantMap = new Map();
     if (existingVariants) {
       existingVariants.forEach((v: any) =>
         existingVariantMap.set(v.name, v.id)
       );
-      console.log(
-        `Mapa de variantes existentes creado con ${existingVariantMap.size} entradas`
-      );
     }
 
     // Si el producto tiene opciones (como talla, color, etc.)
     if (shopifyProduct.options && shopifyProduct.options.length > 0) {
-      console.log(
-        `El producto tiene ${shopifyProduct.options.length} tipos de opciones`
-      );
-
       for (const option of shopifyProduct.options) {
-        console.log(
-          `Procesando opción: "${option.name}" con ${option.values.length} valores`
-        );
         let variantId;
 
         // Verificar si la variante ya existe
         if (existingVariantMap.has(option.name)) {
           variantId = existingVariantMap.get(option.name);
-          console.log(
-            `Variante "${option.name}" ya existe con ID: ${variantId}`
-          );
         } else {
           // Crear nueva variante
-          console.log(`Creando nueva variante: "${option.name}"`);
           const { data: newVariant, error: variantInsertError } = await supabase
             .from("products_variants")
             .insert({
@@ -534,7 +394,6 @@ async function syncProductVariants(
 
           if (newVariant) {
             variantId = newVariant.id;
-            console.log(`Nueva variante creada con ID: ${variantId}`);
           } else {
             console.warn(`No se pudo crear la variante "${option.name}"`);
           }
@@ -542,9 +401,6 @@ async function syncProductVariants(
 
         if (variantId) {
           // Obtener opciones existentes para esta variante
-          console.log(
-            `Obteniendo opciones existentes para la variante ${variantId}`
-          );
           const { data: existingOptions, error: optionsQueryError } =
             await supabase
               .from("products_variant_options")
@@ -561,10 +417,6 @@ async function syncProductVariants(
             );
           }
 
-          console.log(
-            `Opciones existentes encontradas: ${existingOptions?.length || 0}`
-          );
-
           const existingOptionMap = new Map();
           if (existingOptions) {
             existingOptions.forEach((o: any) =>
@@ -575,17 +427,8 @@ async function syncProductVariants(
           // Sincronizar opciones de variante
           for (const value of option.values) {
             if (existingOptionMap.has(value)) {
-              console.log(
-                `Opción "${value}" ya existe con ID: ${existingOptionMap.get(
-                  value
-                )}`
-              );
-              // La opción ya existe, podríamos actualizarla si es necesario
             } else {
               // Crear nueva opción
-              console.log(
-                `Creando nueva opción: "${value}" para variante ${variantId}`
-              );
               const { error: optionInsertError } = await supabase
                 .from("products_variant_options")
                 .insert({
@@ -601,40 +444,21 @@ async function syncProductVariants(
                   error: optionInsertError.message,
                   code: optionInsertError.code,
                 });
-              } else {
-                console.log(`Opción "${value}" creada correctamente`);
               }
             }
           }
         }
       }
-    } else {
-      console.log(`El producto no tiene opciones definidas`);
     }
 
     // Sincronizar precios y stock desde las variantes de Shopify
     if (shopifyProduct.variants && shopifyProduct.variants.length > 0) {
-      console.log(
-        `Sincronizando precios y stock para ${shopifyProduct.variants.length} variantes de Shopify`
-      );
-
       for (const variant of shopifyProduct.variants) {
-        console.log(
-          `Procesando variante Shopify: "${variant.title}" (ID: ${variant.id})`
-        );
-
-        // Aquí necesitarías lógica para mapear las variantes de Shopify
-        // a tus opciones de variante específicas
-        // Este es un ejemplo simplificado
         const optionValues = variant.title.split(" / ");
-        console.log(
-          `Valores de opción extraídos: ${JSON.stringify(optionValues)}`
-        );
 
         // Buscar la opción de variante correspondiente
         // Nota: Esta lógica puede necesitar ajustes según tu estructura de datos
         for (const optionValue of optionValues) {
-          console.log(`Buscando opción de variante: "${optionValue}"`);
           const { data: variantOptions, error: optionsQueryError } =
             await supabase
               .from("products_variant_options")
@@ -650,9 +474,6 @@ async function syncProductVariants(
           }
 
           if (variantOptions && variantOptions.length > 0) {
-            console.log(
-              `Opción "${optionValue}" encontrada, actualizando precio y stock`
-            );
             // Actualizar precio y stock
             const { error: updateError } = await supabase
               .from("products_variant_options")
@@ -668,25 +489,11 @@ async function syncProductVariants(
                 error: updateError.message,
                 code: updateError.code,
               });
-            } else {
-              console.log(
-                `Precio y stock actualizados para opción "${optionValue}"`
-              );
             }
-          } else {
-            console.log(
-              `No se encontró la opción "${optionValue}" para actualizar`
-            );
           }
         }
       }
-    } else {
-      console.log(`El producto no tiene variantes de Shopify`);
     }
-
-    console.log(
-      `[FIN] Sincronización de variantes completada para el producto ${productId}`
-    );
   } catch (error: any) {
     console.error(
       `Error sincronizando variantes para el producto ${productId}:`,
@@ -701,10 +508,6 @@ async function syncProductVariants(
 
 async function updateProductCount(integrationId: string, supabase: any) {
   try {
-    console.log(
-      `[INICIO] Actualizando contador de productos para integración ${integrationId}`
-    );
-
     const { count, error: countError } = await supabase
       .from("products")
       .select("id", { count: "exact" })
@@ -720,8 +523,6 @@ async function updateProductCount(integrationId: string, supabase: any) {
         }
       );
     }
-
-    console.log(`Productos activos encontrados: ${count || 0}`);
 
     const { error: updateError } = await supabase
       .from("shopify_integrations")
@@ -739,15 +540,7 @@ async function updateProductCount(integrationId: string, supabase: any) {
           code: updateError.code,
         }
       );
-    } else {
-      console.log(
-        `Contador de productos actualizado a ${
-          count || 0
-        } para integración ${integrationId}`
-      );
     }
-
-    console.log(`[FIN] Actualización de contador completada`);
   } catch (error: any) {
     console.error(`Error al actualizar contador de productos:`, {
       message: error.message,

@@ -98,7 +98,6 @@ export const ShopifyIntegrationForm = ({
             </>
           ) : (
             <>
-              <Shopify className="mr-2 h-4 w-4" />
               Conectar con Shopify
             </>
           )}

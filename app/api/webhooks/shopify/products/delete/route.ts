@@ -12,15 +12,6 @@ export async function POST(request: NextRequest) {
     const hmacHeader = request.headers.get("x-shopify-hmac-sha256");
     const shopDomain = request.headers.get("x-shopify-shop-domain");
 
-    console.log("Webhook recibido (products/delete):", {
-      shop: shopDomain,
-      hmac: hmacHeader?.substring(0, 10) + "...", // Truncar para seguridad
-      webhookId: request.headers.get("x-shopify-webhook-id"),
-      eventId: request.headers.get("x-shopify-event-id"),
-      contentType: request.headers.get("content-type"),
-      bodyLength: body.length,
-    });
-
     // Verificar la autenticidad del webhook
     if (process.env.SHOPIFY_API_SECRET) {
       // Usar Web Crypto API en lugar de Node.js crypto
@@ -40,7 +31,9 @@ export async function POST(request: NextRequest) {
       );
 
       // Convertir el ArrayBuffer a Base64
-      const hmac = btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(signature))));
+      const hmac = btoa(
+        String.fromCharCode.apply(null, Array.from(new Uint8Array(signature)))
+      );
 
       if (hmac !== hmacHeader) {
         console.error("Webhook inválido: firma HMAC no coincide", {
@@ -49,7 +42,6 @@ export async function POST(request: NextRequest) {
         });
         return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
       }
-      console.log("Verificación HMAC exitosa");
     } else {
       console.warn(
         "SHOPIFY_API_SECRET no está configurado, omitiendo verificación HMAC"
@@ -60,16 +52,8 @@ export async function POST(request: NextRequest) {
     let data;
     try {
       data = JSON.parse(body);
-      console.log("Datos del producto recibidos:", {
-        id: data.id,
-        title: data.title || "Sin título", // Puede no tener título en eliminación
-      });
     } catch (parseError) {
       console.error("Error al parsear el cuerpo JSON:", parseError);
-      console.log(
-        "Primeros 200 caracteres del cuerpo:",
-        body.substring(0, 200)
-      );
       return NextResponse.json(
         { message: "Invalid JSON body" },
         { status: 400 }
@@ -77,10 +61,8 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient();
-    console.log("Cliente Supabase Admin creado");
 
     // Obtener la integración correspondiente a esta tienda
-    console.log(`Buscando integración para la tienda ${shopDomain}`);
     const { data: integration, error: integrationError } = await supabase
       .from("shopify_integrations")
       .select("id, business_id")
@@ -103,19 +85,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(
-      `Integración encontrada: ${integration.id} para el negocio ${integration.business_id}`
-    );
-
-    // IMPORTANTE: En lugar de procesar en segundo plano, procesamos directamente
-    // ya que estamos en Edge Runtime con un tiempo de ejecución más largo
-    console.log(`Iniciando procesamiento para el producto ${data.id}`);
-
     try {
       await handleProductDelete(data, integration, supabase);
-      console.log(
-        `Procesamiento completado exitosamente para el producto ${data.id}`
-      );
       return NextResponse.json({
         success: true,
         message: "Producto procesado correctamente",
@@ -151,14 +122,6 @@ async function handleProductDelete(
   supabase: any
 ) {
   try {
-    console.log(
-      `[INICIO] Procesando eliminación del producto ${product.id} para la integración ${integration.id}`
-    );
-
-    // Buscar el producto directamente en la tabla products por shopify_product_id
-    console.log(
-      `Buscando producto existente con shopify_product_id=${product.id}`
-    );
     const { data: existingProduct, error: queryError } = await supabase
       .from("products")
       .select("id")
@@ -175,19 +138,7 @@ async function handleProductDelete(
       });
     }
 
-    console.log("Resultado de búsqueda de producto existente:", {
-      encontrado: !!existingProduct,
-      id: existingProduct?.id,
-      error: queryError
-        ? { code: queryError.code, message: queryError.message }
-        : null,
-    });
-
     if (existingProduct) {
-      console.log(
-        `Producto encontrado, ID en plataforma: ${existingProduct.id}`
-      );
-
       // Marcar el producto como inactivo
       const { error: updateError } = await supabase
         .from("products")
@@ -207,21 +158,9 @@ async function handleProductDelete(
           `Error al marcar producto como inactivo: ${updateError.message}`
         );
       }
-
-      console.log(`Producto ${product.id} marcado como inactivo correctamente`);
-    } else {
-      console.log(`No se encontró el producto ${product.id} en la plataforma`);
     }
 
-    // Actualizar contador de productos
-    console.log(
-      `Actualizando contador de productos para la integración ${integration.id}`
-    );
     await updateProductCount(integration.id, supabase);
-
-    console.log(
-      `[FIN] Procesamiento de eliminación completado para el producto ${product.id}`
-    );
   } catch (error: any) {
     console.error(`Error procesando eliminación del producto ${product.id}:`, {
       message: error.message,
@@ -233,10 +172,6 @@ async function handleProductDelete(
 
 async function updateProductCount(integrationId: string, supabase: any) {
   try {
-    console.log(
-      `[INICIO] Actualizando contador de productos para integración ${integrationId}`
-    );
-
     const { count, error: countError } = await supabase
       .from("products")
       .select("id", { count: "exact" })
@@ -252,8 +187,6 @@ async function updateProductCount(integrationId: string, supabase: any) {
         }
       );
     }
-
-    console.log(`Productos activos encontrados: ${count || 0}`);
 
     const { error: updateError } = await supabase
       .from("shopify_integrations")
@@ -271,15 +204,7 @@ async function updateProductCount(integrationId: string, supabase: any) {
           code: updateError.code,
         }
       );
-    } else {
-      console.log(
-        `Contador de productos actualizado a ${
-          count || 0
-        } para integración ${integrationId}`
-      );
     }
-
-    console.log(`[FIN] Actualización de contador completada`);
   } catch (error: any) {
     console.error(`Error al actualizar contador de productos:`, {
       message: error.message,

@@ -615,10 +615,6 @@ async function updateExistingProduct(
 
 async function updateProductCount(integrationId: string, supabase: any) {
   try {
-    console.log(
-      `[INICIO] Actualizando contador de productos para integración ${integrationId}`
-    );
-
     // Contar productos con shopify_integration_id, independientemente del estado
     // Esto nos da el número total de productos sincronizados
     const { count, error: countError } = await supabase
@@ -637,8 +633,6 @@ async function updateProductCount(integrationId: string, supabase: any) {
       );
     }
 
-    console.log(`Productos sincronizados encontrados: ${count || 0}`);
-
     const { error: updateError } = await supabase
       .from("shopify_integrations")
       .update({
@@ -655,15 +649,8 @@ async function updateProductCount(integrationId: string, supabase: any) {
           code: updateError.code,
         }
       );
-    } else {
-      console.log(
-        `Contador de productos actualizado a ${
-          count || 0
-        } para integración ${integrationId}`
-      );
     }
 
-    console.log(`[FIN] Actualización de contador completada`);
   } catch (error: any) {
     console.error(`Error al actualizar contador de productos:`, {
       message: error.message,

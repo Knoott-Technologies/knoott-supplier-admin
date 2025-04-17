@@ -10,10 +10,6 @@ export async function POST(request: NextRequest) {
     const hmacHeader = request.headers.get("x-shopify-hmac-sha256");
     const shopDomain = request.headers.get("x-shopify-shop-domain");
 
-    console.log("Webhook recibido (shop/redact):", {
-      shop: shopDomain,
-      hmac: hmacHeader,
-    });
 
     // Verificar la autenticidad del webhook
     if (process.env.SHOPIFY_API_SECRET) {
@@ -32,11 +28,6 @@ export async function POST(request: NextRequest) {
     const data = JSON.parse(body);
     const supabase = createClient(cookies());
 
-    // Registrar la solicitud de supresión de datos de tienda
-    console.log("Solicitud de supresión de datos de tienda recibida:", {
-      shop_id: data.shop_id,
-      shop_domain: data.shop_domain,
-    });
 
     // Aquí implementarías la lógica para eliminar o anonimizar todos los datos
     // relacionados con esta tienda en tu aplicación

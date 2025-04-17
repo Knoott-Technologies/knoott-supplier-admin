@@ -45,7 +45,6 @@ async function registerShopifyWebhooks(shop: string, accessToken: string) {
         );
         results.push({ topic: webhook.topic, success: false });
       } else {
-        console.log(`Webhook ${webhook.topic} registrado correctamente`);
         results.push({ topic: webhook.topic, success: true });
       }
     } catch (error) {

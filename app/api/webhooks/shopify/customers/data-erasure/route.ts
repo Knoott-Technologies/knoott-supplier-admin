@@ -8,12 +8,6 @@ export async function POST(request: NextRequest) {
     // Obtener el cuerpo de la solicitud como texto para verificar HMAC
     const body = await request.text();
     const hmacHeader = request.headers.get("x-shopify-hmac-sha256");
-    const shopDomain = request.headers.get("x-shopify-shop-domain");
-
-    console.log("Webhook recibido (customers/data-erasure):", {
-      shop: shopDomain,
-      hmac: hmacHeader,
-    });
 
     // Verificar la autenticidad del webhook
     if (process.env.SHOPIFY_API_SECRET) {
@@ -32,13 +26,6 @@ export async function POST(request: NextRequest) {
     const data = JSON.parse(body);
     const supabase = createClient(cookies());
 
-    // Registrar la solicitud de eliminación de datos
-    console.log("Solicitud de eliminación de datos del cliente recibida:", {
-      shop_id: data.shop_id,
-      shop_domain: data.shop_domain,
-      customer: data.customer,
-      orders_to_redact: data.orders_to_redact,
-    });
 
     // Aquí implementarías la lógica para eliminar los datos del cliente
     // Por ejemplo:
