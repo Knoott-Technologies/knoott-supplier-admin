@@ -50,11 +50,15 @@ export async function POST(
     );
 
     // Actualizar la información de la última sincronización
+    // Ahora usamos el total de productos creados y actualizados para el contador
+    // en lugar de contar todos los productos activos
+    const productCount = syncResults.created + syncResults.updated;
+
     const { error: updateError } = await supabase
       .from("shopify_integrations")
       .update({
         last_synced: new Date().toISOString(),
-        product_count: syncResults.totalProducts,
+        product_count: productCount,
       })
       .eq("id", integrationId);
 
@@ -62,10 +66,18 @@ export async function POST(
       console.error("Error al actualizar la integración:", updateError);
     }
 
+    // Devolver información detallada para el toast
     return NextResponse.json({
       success: true,
       message: "Productos sincronizados correctamente",
-      stats: syncResults,
+      stats: {
+        totalProducts: productCount,
+        created: syncResults.created,
+        updated: syncResults.updated,
+        skipped: syncResults.skipped,
+        errors: syncResults.errors,
+        timestamp: new Date().toISOString(),
+      },
     });
   } catch (error) {
     console.error("Error al sincronizar productos:", error);
@@ -106,6 +118,9 @@ async function syncProductsToDatabase(
   const skipped = 0;
   let errors = 0;
 
+  // Mantener un registro de productos procesados correctamente
+  const successfulProducts: string[] = [];
+
   // Procesar productos en lotes para evitar tiempos de espera en Edge
   const batchSize = 10;
   const batches = [];
@@ -141,10 +156,14 @@ async function syncProductsToDatabase(
               supabase
             );
             updated++;
+            // Añadir a la lista de productos procesados correctamente
+            successfulProducts.push(shopifyProduct.id.toString());
           } else {
             // Crear nuevo producto en la plataforma
             await createNewProduct(shopifyProduct, integration, supabase);
             created++;
+            // Añadir a la lista de productos procesados correctamente
+            successfulProducts.push(shopifyProduct.id.toString());
           }
         } catch (error) {
           console.error(
@@ -157,23 +176,13 @@ async function syncProductsToDatabase(
     );
   }
 
-  // Actualizar el contador de productos activos
-  const { count, error: countError } = await supabase
-    .from("products")
-    .select("id", { count: "exact", head: false })
-    .eq("shopify_integration_id", integration.id)
-    .eq("status", "active");
-
-  if (countError) {
-    console.error("Error al contar productos:", countError);
-  }
-
   return {
-    totalProducts: count || 0,
+    totalProducts: created + updated, // Solo contamos los productos procesados correctamente
     created,
     updated,
     skipped,
     errors,
+    successfulProducts,
   };
 }
 
@@ -334,7 +343,9 @@ async function createNewProduct(
             variant_id: newVariant.id,
             name: optionValue,
             display_name: optionValue,
-            price: firstMatch ? Number.parseFloat(firstMatch.price) * 100 : null,
+            price: firstMatch
+              ? Number.parseFloat(firstMatch.price) * 100
+              : null,
             stock: firstMatch ? firstMatch.inventory_quantity : null,
             position: j,
             is_default: j === 0,
@@ -369,6 +380,8 @@ async function createNewProduct(
     if (defaultVariant) {
       // Usar la primera variante de Shopify para el precio y stock
       const firstVariant = shopifyProduct.variants[0];
+      // Declare firstMatch here
+      const firstMatch = shopifyProduct.variants[0];
 
       const { error: optionError } = await supabase
         .from("products_variant_options")
@@ -376,7 +389,7 @@ async function createNewProduct(
           variant_id: defaultVariant.id,
           name: "Default",
           display_name: "Default",
-          price: firstVariant ? Number.parseFloat(firstVariant.price) * 100 : null,
+          price: firstMatch ? Number.parseFloat(firstMatch.price) * 100 : null,
           stock: firstVariant ? firstVariant.inventory_quantity : null,
           position: 0,
           is_default: true,
@@ -532,7 +545,9 @@ async function updateExistingProduct(
               .from("products_variant_options")
               .update({
                 display_name: optionValue,
-                price: firstMatch ? Number.parseFloat(firstMatch.price) * 100 : null,
+                price: firstMatch
+                  ? Number.parseFloat(firstMatch.price) * 100
+                  : null,
                 stock: firstMatch ? firstMatch.inventory_quantity : null,
                 sku: firstMatch ? firstMatch.sku : null,
                 metadata: {
@@ -554,7 +569,9 @@ async function updateExistingProduct(
                 variant_id: variantId,
                 name: optionValue,
                 display_name: optionValue,
-                price: firstMatch ? Number.parseFloat(firstMatch.price) * 100 : null,
+                price: firstMatch
+                  ? Number.parseFloat(firstMatch.price) * 100
+                  : null,
                 stock: firstMatch ? firstMatch.inventory_quantity : null,
                 position: j,
                 is_default: j === 0,

@@ -23,10 +23,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { Database } from "@/database.types";
+import type { Database } from "@/database.types";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -45,6 +47,7 @@ export const ShopifyConnectedStores = ({
   const [disconnectingStores, setDisconnectingStores] = useState<
     Record<string, boolean>
   >({});
+  const router = useRouter();
 
   const handleSync = async (integrationId: string) => {
     setSyncingStores((prev) => ({ ...prev, [integrationId]: true }));
@@ -60,15 +63,25 @@ export const ShopifyConnectedStores = ({
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Error al sincronizar productos");
+        throw new Error(data.message || "Error al sincronizar productos");
       }
 
+      // Mostrar mensaje de éxito con detalles
+      toast.success("Productos sincronizados correctamente", {
+        description: `Se han sincronizado ${data.stats.totalProducts} productos (${data.stats.created} nuevos, ${data.stats.updated} actualizados, ${data.stats.errors} errores)`,
+      });
+
       // Recargar la página para mostrar los productos actualizados
-      window.location.reload();
+      router.refresh();
     } catch (error) {
       console.error("Error al sincronizar productos:", error);
-      alert("Error al sincronizar productos. Por favor intenta de nuevo.");
+      toast.error("Error al sincronizar productos", {
+        description:
+          error instanceof Error ? error.message : "Por favor intenta de nuevo",
+      });
     } finally {
       setSyncingStores((prev) => ({ ...prev, [integrationId]: false }));
     }
@@ -89,14 +102,20 @@ export const ShopifyConnectedStores = ({
       );
 
       if (!response.ok) {
-        throw new Error("Error al desconectar tienda");
+        const data = await response.json();
+        throw new Error(data.message || "Error al desconectar tienda");
       }
 
+      toast.success("Tienda desconectada correctamente");
+
       // Recargar la página para actualizar la lista de tiendas
-      window.location.reload();
+      router.refresh();
     } catch (error) {
       console.error("Error al desconectar tienda:", error);
-      alert("Error al desconectar tienda. Por favor intenta de nuevo.");
+      toast.error("Error al desconectar tienda", {
+        description:
+          error instanceof Error ? error.message : "Por favor intenta de nuevo",
+      });
     } finally {
       setDisconnectingStores((prev) => ({ ...prev, [integrationId]: false }));
     }
@@ -157,7 +176,9 @@ export const ShopifyConnectedStores = ({
                           new Date(integration.last_synced),
                           timeZone,
                           "PPP 'a las' hh:mm:ss a",
-                          { locale: es }
+                          {
+                            locale: es,
+                          }
                         )
                       : "Nunca"}
                   </TableCell>
@@ -172,7 +193,9 @@ export const ShopifyConnectedStores = ({
                           new Date(integration.connected_at),
                           timeZone,
                           "PPP 'a las' hh:mm:ss a",
-                          { locale: es }
+                          {
+                            locale: es,
+                          }
                         )
                       : "Pendiente"}
                   </TableCell>
@@ -233,7 +256,7 @@ export const ShopifyConnectedStores = ({
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction
+                  <AlertDialogAction className="bg-destructive/10 text-destructive hover:bg-destructive hover:text-background"
                     onClick={() => handleDisconnect(integration.id)}
                   >
                     Desconectar

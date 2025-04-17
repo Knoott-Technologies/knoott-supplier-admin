@@ -380,7 +380,6 @@ async function handleProductUpdate(
           images_url: imageUrl,
           subcategory_id: subcategoryId,
           provider_business_id: integration.business_id,
-          status: product.published_at ? "active" : "draft",
           keywords: product.tags ? product.tags.split(", ") : [],
           specs: {
             shopify_handle: product.handle,
