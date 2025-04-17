@@ -25,6 +25,10 @@ import {
 import { cn } from "@/lib/utils";
 import { Database } from "@/database.types";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { formatInTimeZone } from "date-fns-tz";
+import { es } from "date-fns/locale";
+
+const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 interface ShopifyConnectedStoresProps {
   integrations: Database["public"]["Tables"]["shopify_integrations"]["Row"][];
@@ -149,7 +153,12 @@ export const ShopifyConnectedStores = ({
                   </TableCell>
                   <TableCell className="py-2">
                     {integration.last_synced
-                      ? new Date(integration.last_synced).toLocaleString()
+                      ? formatInTimeZone(
+                          new Date(integration.last_synced),
+                          timeZone,
+                          "PPP 'a las' hh:mm:ss a",
+                          { locale: es }
+                        )
                       : "Nunca"}
                   </TableCell>
                 </TableRow>
@@ -159,7 +168,12 @@ export const ShopifyConnectedStores = ({
                   </TableCell>
                   <TableCell className="py-2">
                     {integration.connected_at
-                      ? new Date(integration.connected_at).toLocaleString()
+                      ? formatInTimeZone(
+                          new Date(integration.connected_at),
+                          timeZone,
+                          "PPP 'a las' hh:mm:ss a",
+                          { locale: es }
+                        )
                       : "Pendiente"}
                   </TableCell>
                 </TableRow>
