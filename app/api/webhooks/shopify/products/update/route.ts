@@ -40,7 +40,11 @@ export async function POST(request: NextRequest) {
       );
 
       // Convertir el ArrayBuffer a Base64
-      const hmac = btoa(Array.from(new Uint8Array(signature)).map(byte => String.fromCharCode(byte)).join(''));
+      const hmac = btoa(
+        Array.from(new Uint8Array(signature))
+          .map((byte) => String.fromCharCode(byte))
+          .join("")
+      );
 
       if (hmac !== hmacHeader) {
         console.error("Webhook inválido: firma HMAC no coincide", {
@@ -224,6 +228,7 @@ async function handleProductUpdate(
         .from("products")
         .update({
           name: product.title,
+          updated_at: product.updated_at,
           short_name: product.title.substring(0, 50),
           description: product.body_html || "",
           short_description: shortDescription,
@@ -368,6 +373,7 @@ async function handleProductUpdate(
         .insert({
           name: product.title,
           short_name: product.title.substring(0, 50),
+          updated_at: product.updated_at,
           description: product.body_html || "",
           short_description: shortDescription,
           brand_id: brandId,
@@ -646,7 +652,7 @@ async function syncProductVariants(
             const { error: updateError } = await supabase
               .from("products_variant_options")
               .update({
-                price: Number.parseFloat(variant.price),
+                price: Number.parseFloat(variant.price) * 100,
                 stock: variant.inventory_quantity,
                 sku: variant.sku,
               })
