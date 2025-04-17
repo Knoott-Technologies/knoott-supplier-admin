@@ -867,6 +867,38 @@ export type Database = {
           },
         ]
       }
+      shopify_auth_states: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          state: string
+          user_id: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          state: string
+          user_id: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          state?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopify_auth_states_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "provider_business"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shopify_integrations: {
         Row: {
           access_token: string | null
@@ -1623,6 +1655,10 @@ export type Database = {
       }
     }
     Functions: {
+      cleanup_old_shopify_auth_states: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_user_provider_ids: {
         Args: { user_uuid: string }
         Returns: string[]

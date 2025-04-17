@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AppBridgeProvider } from "@/components/universal/shopify-provider";
 
 export const metadata: Metadata = {
   title: {
@@ -34,48 +35,50 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body
-        className={cn(
-          "antialiased text-pretty selection:text-[#886F2E] selection:bg-primary/20",
-          source.className
-        )}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          disableTransitionOnChange
+      <AppBridgeProvider>
+        <body
+          className={cn(
+            "antialiased text-pretty selection:text-[#886F2E] selection:bg-primary/20",
+            source.className
+          )}
         >
-          <TooltipProvider delayDuration={300}>
-            {children}
-            <Toaster
-              position="top-right"
-              containerAriaLabel="Notificaciones"
-              className="z-[999]"
-              theme="light"
-              richColors
-              toastOptions={{
-                unstyled: false,
-                classNames: {
-                  toast: "!rounded-none bg-background !shadow-lg !border-0",
-                  content: "!rounded-none",
-                  default: "!rounded-none shadow-lg border-0",
-                  title: cn("!font-semibold !text-foreground"),
-                  description:
-                    "!text-muted-foreground !text-[13px] !font-medium !tracking-tight",
-                },
-              }}
-              icons={{
-                warning: <TriangleAlert className="size-4" />,
-                error: <AlertOctagon className="size-4" />,
-                success: <CheckCheck className="size-4 !text-success" />,
-                close: <X className="size-4" />,
-                info: <Info className="size-4" />,
-                loading: <Loader2 className="size-4 animate-spin" />,
-              }}
-            />
-          </TooltipProvider>
-        </ThemeProvider>
-      </body>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            disableTransitionOnChange
+          >
+            <TooltipProvider delayDuration={300}>
+              {children}
+              <Toaster
+                position="top-right"
+                containerAriaLabel="Notificaciones"
+                className="z-[999]"
+                theme="light"
+                richColors
+                toastOptions={{
+                  unstyled: false,
+                  classNames: {
+                    toast: "!rounded-none bg-background !shadow-lg !border-0",
+                    content: "!rounded-none",
+                    default: "!rounded-none shadow-lg border-0",
+                    title: cn("!font-semibold !text-foreground"),
+                    description:
+                      "!text-muted-foreground !text-[13px] !font-medium !tracking-tight",
+                  },
+                }}
+                icons={{
+                  warning: <TriangleAlert className="size-4" />,
+                  error: <AlertOctagon className="size-4" />,
+                  success: <CheckCheck className="size-4 !text-success" />,
+                  close: <X className="size-4" />,
+                  info: <Info className="size-4" />,
+                  loading: <Loader2 className="size-4 animate-spin" />,
+                }}
+              />
+            </TooltipProvider>
+          </ThemeProvider>
+        </body>
+      </AppBridgeProvider>
     </html>
   );
 }
