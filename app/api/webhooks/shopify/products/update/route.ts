@@ -234,6 +234,7 @@ async function handleProductUpdate(
           short_description: shortDescription,
           images_url: imageUrl,
           keywords: product.tags ? product.tags.split(", ") : [],
+          status: product.status === "active" ? "active" : product.status === "draft" ? "draft" : "requires_verification",
           specs: {
             shopify_handle: product.handle,
             shopify_tags: product.tags,
