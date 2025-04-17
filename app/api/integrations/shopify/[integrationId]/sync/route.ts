@@ -334,7 +334,7 @@ async function createNewProduct(
             variant_id: newVariant.id,
             name: optionValue,
             display_name: optionValue,
-            price: firstMatch ? Number.parseFloat(firstMatch.price) : null,
+            price: firstMatch ? Number.parseFloat(firstMatch.price) * 100 : null,
             stock: firstMatch ? firstMatch.inventory_quantity : null,
             position: j,
             is_default: j === 0,
@@ -376,7 +376,7 @@ async function createNewProduct(
           variant_id: defaultVariant.id,
           name: "Default",
           display_name: "Default",
-          price: firstVariant ? Number.parseFloat(firstVariant.price) : null,
+          price: firstVariant ? Number.parseFloat(firstVariant.price) * 100 : null,
           stock: firstVariant ? firstVariant.inventory_quantity : null,
           position: 0,
           is_default: true,
@@ -533,7 +533,7 @@ async function updateExistingProduct(
               .from("products_variant_options")
               .update({
                 display_name: optionValue,
-                price: firstMatch ? Number.parseFloat(firstMatch.price) : null,
+                price: firstMatch ? Number.parseFloat(firstMatch.price) * 100 : null,
                 stock: firstMatch ? firstMatch.inventory_quantity : null,
                 sku: firstMatch ? firstMatch.sku : null,
                 metadata: {
@@ -555,7 +555,7 @@ async function updateExistingProduct(
                 variant_id: variantId,
                 name: optionValue,
                 display_name: optionValue,
-                price: firstMatch ? Number.parseFloat(firstMatch.price) : null,
+                price: firstMatch ? Number.parseFloat(firstMatch.price) * 100 : null,
                 stock: firstMatch ? firstMatch.inventory_quantity : null,
                 position: j,
                 is_default: j === 0,
