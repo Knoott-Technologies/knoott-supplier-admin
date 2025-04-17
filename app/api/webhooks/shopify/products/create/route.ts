@@ -168,7 +168,7 @@ async function handleProductCreate(
     );
     const { data: existingProduct, error: queryError } = await supabase
       .from("products")
-      .select("id")
+      .select("id, status")
       .eq("shopify_product_id", product.id.toString())
       .eq("shopify_integration_id", integration.id)
       .single();
@@ -185,6 +185,7 @@ async function handleProductCreate(
     console.log("Resultado de búsqueda de producto existente:", {
       encontrado: !!existingProduct,
       id: existingProduct?.id,
+      status: existingProduct?.status,
       error: queryError
         ? { code: queryError.code, message: queryError.message }
         : null,
@@ -201,6 +202,10 @@ async function handleProductCreate(
         supabase
       );
 
+      // IMPORTANTE: Mantener el estado actual del producto para evitar duplicados con diferentes estados
+      // Esto evita que se creen duplicados con diferentes estados
+      platformProduct.status = existingProduct.status;
+
       // Actualizar el producto en la tabla products
       const { error: updateError } = await supabase
         .from("products")
@@ -216,7 +221,7 @@ async function handleProductCreate(
 
       console.log(`Producto ${product.id} actualizado correctamente`);
     } else {
-      // Crear nuevo producto
+      // Crear nuevo producto - siempre con estado "requires_verification"
       console.log(`Creando nuevo producto desde Shopify ID: ${product.id}`);
 
       // Convertir el producto de Shopify al formato de la plataforma
@@ -225,6 +230,9 @@ async function handleProductCreate(
         integration,
         supabase
       );
+
+      // Asegurar que el estado sea "requires_verification" para nuevos productos
+      platformProduct.status = "requires_verification";
 
       // Insertar el nuevo producto
       const { data: newProduct, error: insertError } = await supabase
@@ -289,7 +297,7 @@ async function convertShopifyProductToPlatformFormat(
       console.log(`Creando nueva marca: "${shopifyProduct.vendor}"`);
       const { data: newBrand, error: brandInsertError } = await supabase
         .from("catalog_brands")
-        .insert({ name: shopifyProduct.vendor, status: "active" })
+        .insert({ name: shopifyProduct.vendor, status: "on_revision" }) // Siempre "on_revision" para nuevas marcas
         .select("id")
         .single();
 
@@ -349,6 +357,9 @@ async function convertShopifyProductToPlatformFormat(
     );
   }
 
+  // Determinar el estado del producto - siempre "requires_verification" para nuevos productos
+  const productStatus = "requires_verification";
+
   return {
     name: shopifyProduct.title,
     short_name: shopifyProduct.title.substring(0, 50),
@@ -358,12 +369,13 @@ async function convertShopifyProductToPlatformFormat(
     images_url: imagesUrl.length > 0 ? imagesUrl : [""],
     subcategory_id: subcategoryId,
     provider_business_id: integration.business_id,
-    status: "requires_verification",
+    status: productStatus, // Siempre "requires_verification" para nuevos productos
     specs: {
       shopify_handle: shopifyProduct.handle,
       shopify_tags: shopifyProduct.tags,
       shopify_vendor: shopifyProduct.vendor,
       shopify_product_type: shopifyProduct.product_type,
+      shopify_status: shopifyProduct.status, // Guardar el estado original de Shopify
     },
     keywords: shopifyProduct.tags ? shopifyProduct.tags.split(", ") : null,
     // Campos específicos de Shopify
@@ -630,11 +642,12 @@ async function updateProductCount(integrationId: string, supabase: any) {
       `[INICIO] Actualizando contador de productos para integración ${integrationId}`
     );
 
+    // Contar solo productos activos y en revisión, no duplicados
     const { count, error: countError } = await supabase
       .from("products")
       .select("id", { count: "exact" })
       .eq("shopify_integration_id", integrationId)
-      .eq("status", "active");
+      .in("status", ["active", "requires_verification"]); // Solo contar productos activos o en revisión
 
     if (countError) {
       console.error(

@@ -54,6 +54,8 @@ export async function POST(
     // en lugar de contar todos los productos activos
     const productCount = syncResults.created + syncResults.updated;
 
+    // await updateProductCount(integrationId, supabase)
+
     const { error: updateError } = await supabase
       .from("shopify_integrations")
       .update({
@@ -217,7 +219,7 @@ async function createNewProduct(
         .from("catalog_brands")
         .insert({
           name: shopifyProduct.vendor,
-          status: "on_revision",
+          status: "on_revision", // Siempre "on_revision" para nuevas marcas
         })
         .select("id")
         .single();
@@ -272,13 +274,14 @@ async function createNewProduct(
       images_url: imageUrl,
       subcategory_id: subcategoryId,
       provider_business_id: integration.business_id,
-      status: "requires_verification",
+      status: "requires_verification", // Siempre "requires_verification" para nuevos productos
       keywords: shopifyProduct.tags ? shopifyProduct.tags.split(", ") : [],
       specs: {
         shopify_handle: shopifyProduct.handle,
         shopify_tags: shopifyProduct.tags,
         shopify_vendor: shopifyProduct.vendor,
         shopify_product_type: shopifyProduct.product_type,
+        shopify_status: shopifyProduct.status, // Guardar el estado original de Shopify
       },
       // Campos específicos de Shopify
       shopify_product_id: shopifyProduct.id.toString(),
@@ -435,6 +438,13 @@ async function updateExistingProduct(
         .trim();
     }
 
+    // Obtener el estado actual del producto para mantenerlo
+    const { data: currentProduct } = await supabase
+      .from("products")
+      .select("status")
+      .eq("id", productId)
+      .single();
+
     // Actualizar el producto principal
     const { error: updateError } = await supabase
       .from("products")
@@ -450,9 +460,11 @@ async function updateExistingProduct(
           shopify_tags: shopifyProduct.tags,
           shopify_vendor: shopifyProduct.vendor,
           shopify_product_type: shopifyProduct.product_type,
+          shopify_status: shopifyProduct.status, // Guardar el estado original de Shopify
         },
         shopify_updated_at: shopifyProduct.updated_at,
         shopify_synced_at: new Date().toISOString(),
+        // NO actualizamos el status para mantener el estado actual
       })
       .eq("id", productId);
 
@@ -597,6 +609,67 @@ async function updateExistingProduct(
       `Error en updateExistingProduct para producto ${productId}:`,
       error
     );
+    throw error;
+  }
+}
+
+async function updateProductCount(integrationId: string, supabase: any) {
+  try {
+    console.log(
+      `[INICIO] Actualizando contador de productos para integración ${integrationId}`
+    );
+
+    // Contar productos con shopify_integration_id, independientemente del estado
+    // Esto nos da el número total de productos sincronizados
+    const { count, error: countError } = await supabase
+      .from("products")
+      .select("id", { count: "exact" })
+      .eq("shopify_integration_id", integrationId)
+      .not("status", "eq", "deleted"); // Excluir productos eliminados
+
+    if (countError) {
+      console.error(
+        `Error al contar productos para integración ${integrationId}:`,
+        {
+          error: countError.message,
+          code: countError.code,
+        }
+      );
+    }
+
+    console.log(`Productos sincronizados encontrados: ${count || 0}`);
+
+    const { error: updateError } = await supabase
+      .from("shopify_integrations")
+      .update({
+        product_count: count || 0,
+        last_synced: new Date().toISOString(),
+      })
+      .eq("id", integrationId);
+
+    if (updateError) {
+      console.error(
+        `Error al actualizar contador de productos para integración ${integrationId}:`,
+        {
+          error: updateError.message,
+          code: updateError.code,
+        }
+      );
+    } else {
+      console.log(
+        `Contador de productos actualizado a ${
+          count || 0
+        } para integración ${integrationId}`
+      );
+    }
+
+    console.log(`[FIN] Actualización de contador completada`);
+  } catch (error: any) {
+    console.error(`Error al actualizar contador de productos:`, {
+      message: error.message,
+      stack: error.stack,
+      integrationId,
+    });
     throw error;
   }
 }
