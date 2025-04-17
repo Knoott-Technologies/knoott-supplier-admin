@@ -8,6 +8,8 @@ import { Database } from "@/database.types";
 import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import { ProductActions } from "./product-actions";
+import { Shopify } from "@/components/svgs/icons";
+import { Icon } from "@/components/universal/logo";
 
 // Definir el tipo Product basado en el esquema de la base de datos
 export type Product = Database["public"]["Tables"]["products"]["Row"] & {
@@ -48,7 +50,7 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       const imageUrl = row.original.images_url?.[0] || "";
       return (
-        <div className="flex items-center justify-center h-16 w-12 relative overflow-hidden aspect-[3/4]">
+        <div className="flex items-center justify-center w-10 border relative overflow-hidden aspect-[3/4]">
           {imageUrl && imageUrl !== "" ? (
             <Image
               src={imageUrl}
@@ -81,20 +83,24 @@ export const columns: ColumnDef<Product>[] = [
     enableHiding: false,
   },
   {
-    header: "Descripción",
-    accessorKey: "short_description",
+    header: "Origen",
+    accessorKey: "shopify_product_id",
     cell: ({ row }) => (
-      <div className="w-full" title={row.original.description}>
-        <p className="truncate">
-          {row.getValue("short_description") ||
-            row.original.description ||
-            "Sin descripción"}
-        </p>
+      <div className="flex flex-col min-w-0">
+        <div className="font-medium truncate">
+          {(row.original.shopify_product_id && (
+            <p className="flex items-center justify-start gap-x-1">
+              Shopify <Shopify className="size-3.5" />
+            </p>
+          )) || (
+            <p className="flex items-center justify-start gap-x-1">
+              Knoott <Icon variant={"black"} className="size-3.5" />
+            </p>
+          )}
+        </div>
       </div>
     ),
-    size: 300, // Ancho fijo para evitar compresión
-    minSize: 200,
-    maxSize: 400,
+    size: 100, // Ancho fijo para evitar compresión
   },
   {
     header: "Estado",
@@ -134,6 +140,20 @@ export const columns: ColumnDef<Product>[] = [
       return (
         <div>
           {formatInTimeZone(row.getValue("created_at"), timeZone, "PP h:mm a", {
+            locale: es,
+          })}
+        </div>
+      );
+    },
+    size: 140, // Ancho fijo para evitar compresión
+  },
+  {
+    header: "Última actualización",
+    accessorKey: "updated_at",
+    cell: ({ row }) => {
+      return (
+        <div>
+          {formatInTimeZone(row.getValue("updated_at"), timeZone, "PP h:mm a", {
             locale: es,
           })}
         </div>
