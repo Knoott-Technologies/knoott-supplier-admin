@@ -88,6 +88,25 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Verificar si ya existe una integración para esta tienda en CUALQUIER negocio
+    const { data: existingIntegrationAnyBusiness } = await supabase
+      .from("shopify_integrations")
+      .select("id, business_id")
+      .eq("shop_domain", shop)
+      .eq("status", "active")
+      .neq("business_id", authState.business_id)
+      .single();
+
+    // Si ya existe una integración con este dominio en otro negocio, redirigir con error
+    if (existingIntegrationAnyBusiness) {
+      return NextResponse.redirect(
+        new URL(
+          `/dashboard/${authState.business_id}/products/shopify?status=error&message=Esta tienda de Shopify ya está conectada a otro negocio.`,
+          request.url
+        )
+      );
+    }
+
     // Intercambiar el código de autorización por un token de acceso
     const accessTokenResponse = await fetch(
       `https://${shop}/admin/oauth/access_token`,
@@ -131,7 +150,7 @@ export async function GET(request: NextRequest) {
 
     const { shop: shopInfo } = await shopInfoResponse.json();
 
-    // Verificar si ya existe una integración para esta tienda
+    // Verificar si ya existe una integración para esta tienda en el negocio actual
     const { data: existingIntegration } = await supabase
       .from("shopify_integrations")
       .select("id, status")
@@ -188,12 +207,37 @@ export async function GET(request: NextRequest) {
     // Redirigir al usuario a la página de integración con un mensaje de éxito
     return NextResponse.redirect(
       new URL(
-        `/dashboard/${authState.business_id}/products/shopify?success=true`,
+        `/dashboard/${authState.business_id}/products/shopify?status=success&message=Tienda de Shopify conectada exitosamente.`,
         request.url
       )
     );
   } catch (error) {
     console.error("Error en el callback de Shopify:", error);
+
+    // Intentar obtener el business_id para la redirección
+    try {
+      const supabase = createClient(cookies());
+      const { data: authStateData } = await supabase
+        .from("shopify_auth_states")
+        .select("business_id")
+        .eq("state", state || "")
+        .single();
+
+      if (authStateData?.business_id) {
+        return NextResponse.redirect(
+          new URL(
+            `/dashboard/${authStateData.business_id}/products/shopify?status=error&message=Error al procesar la respuesta de Shopify.`,
+            request.url
+          )
+        );
+      }
+    } catch (redirectError) {
+      console.error(
+        "Error al intentar redirigir después de un error:",
+        redirectError
+      );
+    }
+
     return NextResponse.redirect(
       new URL(
         `/error?message=Error al procesar la respuesta de Shopify`,

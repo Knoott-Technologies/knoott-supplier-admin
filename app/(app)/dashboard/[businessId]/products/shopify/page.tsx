@@ -1,14 +1,16 @@
 import { PageHeaderBackButton } from "@/components/universal/headers";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { ShopifyIntegrationForm } from "./_components/shopify-integration-form";
 import { ShopifyConnectedStores } from "./_components/shopify-connected-stores";
+import { ToastHandler } from "./_components/toast-handler";
 
 const ShopifyIntegration = async ({
   params,
+  searchParams,
 }: {
   params: { businessId: string };
+  searchParams: { status?: string; message?: string };
 }) => {
   const supabase = createClient(cookies());
 
@@ -22,6 +24,12 @@ const ShopifyIntegration = async ({
 
   return (
     <main className="h-fit w-full md:max-w-[95%] px-3 md:px-0 py-5 pb-14 lg:py-7 mx-auto no-scrollbar">
+      {/* Toast handler component to display success/error messages */}
+      <ToastHandler
+        status={searchParams.status}
+        message={searchParams.message}
+      />
+
       <section className="mx-auto max-w-2xl">
         <PageHeaderBackButton
           title="Integración con Shopify"
