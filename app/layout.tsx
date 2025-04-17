@@ -13,7 +13,6 @@ import {
   X,
 } from "lucide-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AppBridgeProvider } from "@/components/universal/shopify-provider";
 
 export const metadata: Metadata = {
   title: {
@@ -35,7 +34,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <AppBridgeProvider>
         <body
           className={cn(
             "antialiased text-pretty selection:text-[#886F2E] selection:bg-primary/20",
@@ -78,7 +76,6 @@ export default function RootLayout({
             </TooltipProvider>
           </ThemeProvider>
         </body>
-      </AppBridgeProvider>
     </html>
   );
 }

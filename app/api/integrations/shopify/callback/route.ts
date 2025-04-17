@@ -188,7 +188,7 @@ export async function GET(request: NextRequest) {
     // Redirigir al usuario a la página de integración con un mensaje de éxito
     return NextResponse.redirect(
       new URL(
-        `/dashboard/${authState.business_id}/integrations/shopify?success=true`,
+        `/dashboard/${authState.business_id}/products/shopify?success=true`,
         request.url
       )
     );
