@@ -37,9 +37,9 @@ export const Section5 = ({ user }: { user: User | null }) => {
             </p>
           </BlurFade>
         </div>
-        <div className="w-full h-fit items-start justify-start flex flex-col overflow-hidden">
+        <div className="w-full h-fit items-start justify-start flex flex-col overflow-hidden lg:overflow-visible">
           <BlurFade inView delay={0.2} direction="up" className="w-full h-fit">
-            <div className="w-full bg-background border shadow-md p-3 lg:p-5 flex flex-col items-start justify-start gap-y-4 max-w-lg mx-auto relative">
+            <div className="w-full bg-background border shadow-lg p-3 lg:p-5 flex flex-col items-start justify-start gap-y-4 max-w-lg mx-auto relative">
               <div className="size-12 bg-success aspect-square items-center justify-center flex absolute top-3 right-3 lg:top-5 lg:right-5">
                 <Check className="text-background size-8" />
               </div>

@@ -2,6 +2,10 @@ import { cn } from "@/lib/utils";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import { User } from "@supabase/supabase-js";
 import { libre } from "@/components/fonts/font-def";
+import { Icon } from "@/components/universal/logo";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 export const Section7 = ({ user }: { user: User | null }) => {
   return (
@@ -28,8 +32,40 @@ export const Section7 = ({ user }: { user: User | null }) => {
             </p>
           </BlurFade>
         </div>
-        <div className="w-full h-fit items-start justify-start flex flex-col overflow-hidden">
-          <div className="w-full h-auto aspect-video bg-yellow-50"></div>
+        <div className="w-full h-fit items-start justify-start flex flex-col overflow-hidden lg:overflow-visible">
+          <BlurFade inView delay={0.2} direction="up" className="w-full h-fit">
+            <div className=" bg-background border shadow-lg p-7 lg:p-14 flex flex-col items-center justify-center gap-y-5 lg:gap-y-7 max-w-[90%] mx-auto relative overflow-hidden">
+              <div className="size-20 border bg-foreground rounded-[10px] relative overflow-hidden">
+                <Image
+                  src={"/logo-test.png"}
+                  className="object-cover"
+                  fill
+                  alt=""
+                />
+              </div>
+              <span className="flex flex-col items-center justify-center gap-y-2 w-full">
+                <p
+                  className={cn(
+                    "text-lg md:text-xl lg:text-2xl text-foreground text-center text-pretty font-semibold leading-tight tracking-tight",
+                    libre.className
+                  )}
+                >
+                  ¡Buenas noticias! Has recibido una orden en tu tienda.
+                </p>
+                <p className="text-sm lg:text-base text-muted-foreground text-center">
+                  Puedes ver los detalles en tu dashboard, recuerda que debes
+                  verificar la orden para recibir el pago.
+                </p>
+              </span>
+              <Button
+                variant={"secondary"}
+                size={"lg"}
+                className="pointer-events-none"
+              >
+                Aceptar orden <ArrowRight />
+              </Button>
+            </div>
+          </BlurFade>
         </div>
       </div>
     </section>

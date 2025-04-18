@@ -62,7 +62,7 @@ export const Section2 = ({ user }: { user: User | null }) => {
           </p>
         </BlurFade>
       </div>
-      <div className="w-full h-fit grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-7">
+      <div className="w-full h-fit grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-2 lg:gap-5 xl:gap-7">
         {cards.map((card, index) => {
           return (
             <BlurFade

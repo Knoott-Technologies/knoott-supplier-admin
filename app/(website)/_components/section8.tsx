@@ -26,7 +26,7 @@ export const Section8 = ({ user }: { user: User | null }) => {
           </p>
         </BlurFade>
       </div>
-      <div className="w-full h-fit items-start justify-start flex flex-col"></div>
+      <div className="w-full h-fit items-center justify-start flex flex-col"></div>
     </section>
   );
 };

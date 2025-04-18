@@ -11,7 +11,7 @@ import { Check, Loader2, Truck } from "lucide-react";
 const steps = [
   {
     step: 1,
-    title: "Órden verificada por el negocio",
+    title: "Orden verificada por el negocio",
     description: "Has verificado que puedes completar la orden.",
     icon: <Check className="size-3.5 text-background" />,
   },
@@ -19,14 +19,14 @@ const steps = [
     step: 2,
     title: "Procesamos el pago",
     description:
-      "Hemos procesado el pago del importe total de la órden, puedes ver el detalle en la sección de transacciones.",
+      "Hemos procesado el pago del importe total de la orden, puedes ver el detalle en la sección de transacciones.",
     icon: <Check className="size-3.5 text-background" />,
     loading: true,
   },
   {
     step: 3,
     title: "En tránsito",
-    description: "La órden está en camino a la dirección del cliente.",
+    description: "La orden está en camino a la dirección del cliente.",
     icon: (
       <Loader2 className="size-3.5 text-muted-foreground group-hover:animate-spin" />
     ),
@@ -40,8 +40,8 @@ export const OrdersSection2 = () => {
       {/* Main content */}
       <div className="flex flex-col w-full relative max-w-[80%] h-fit translate-y-[15%] items-center justify-center z-10 bg-background border shadow-md group-hover:shadow-lg ease-in-out duration-300">
         <div className="w-full h-fit border-b p-3 flex-col">
-          <p className="text-sm font-semibold">Estado de la órden</p>
-          <p className="text-muted-foreground text-xs">Revisa las actualizaciones de la órden en tiempo real.</p>
+          <p className="text-sm font-semibold">Estado de la orden</p>
+          <p className="text-muted-foreground text-xs">Revisa las actualizaciones de la orden en tiempo real.</p>
         </div>
         <Stepper defaultValue={3} orientation="vertical" className="w-full p-3">
           {steps.map(({ step, title, description, icon, loading }) => (
