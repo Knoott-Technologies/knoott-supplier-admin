@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { AnimatedBeam } from "@/components/magicui/animated-beam";
 import { Icon } from "@/components/universal/logo";
 import { Shopify } from "@/components/svgs/icons";
-import { Check, RefreshCcw, User2 } from "lucide-react";
+import { Box, Check, RefreshCcw, User2 } from "lucide-react";
 import Image from "next/image";
 
 const IconWrapper = forwardRef<
@@ -47,20 +47,20 @@ export function PaymentAnimation() {
     >
       <div className="flex w-full flex-row items-stretch justify-between gap-10">
         <div className="flex flex-col justify-center gap-2">
-          <IconWrapper className="p-2 lg:p-3" ref={div1Ref}>
-            <User2 className="size-4" />
+          <IconWrapper className="p-2 lg:p-3 bg-sidebar" ref={div1Ref}>
+            <Box className="size-4 text-muted-foreground" />
           </IconWrapper>
-          <IconWrapper className="p-2 lg:p-3" ref={div2Ref}>
-            <User2 className="size-4" />
+          <IconWrapper className="p-2 lg:p-3 bg-sidebar" ref={div2Ref}>
+            <Box className="size-4 text-muted-foreground" />
           </IconWrapper>
-          <IconWrapper className="p-2 lg:p-3" ref={div3Ref}>
-            <User2 className="size-4" />
+          <IconWrapper className="p-2 lg:p-3 bg-sidebar" ref={div3Ref}>
+            <Box className="size-4 text-muted-foreground" />
           </IconWrapper>
-          <IconWrapper className="p-2 lg:p-3" ref={div4Ref}>
-            <User2 className="size-4" />
+          <IconWrapper className="p-2 lg:p-3 bg-sidebar" ref={div4Ref}>
+            <Box className="size-4 text-muted-foreground" />
           </IconWrapper>
-          <IconWrapper className="p-2 lg:p-3" ref={div5Ref}>
-            <User2 className="size-4" />
+          <IconWrapper className="p-2 lg:p-3 bg-sidebar" ref={div5Ref}>
+            <Box className="size-4 text-muted-foreground" />
           </IconWrapper>
         </div>
         <div className="flex flex-col justify-center">
@@ -85,36 +85,46 @@ export function PaymentAnimation() {
         containerRef={containerRef}
         fromRef={div1Ref}
         toRef={div6Ref}
-        gradientStartColor="#577F57"
-        gradientStopColor="#2B652A"
+        gradientStartColor="#FFBD16"
+        gradientStopColor="#A88631"
       />
       <AnimatedBeam
         containerRef={containerRef}
         fromRef={div2Ref}
         toRef={div6Ref}
-        gradientStartColor="#577F57"
-        gradientStopColor="#2B652A"
+        gradientStartColor="#FFBD16"
+        gradientStopColor="#A88631"
       />
       <AnimatedBeam
         containerRef={containerRef}
         fromRef={div3Ref}
         toRef={div6Ref}
-        gradientStartColor="#577F57"
-        gradientStopColor="#2B652A"
+        gradientStartColor="#FFBD16"
+        gradientStopColor="#A88631"
       />
       <AnimatedBeam
         containerRef={containerRef}
         fromRef={div4Ref}
         toRef={div6Ref}
-        gradientStartColor="#577F57"
-        gradientStopColor="#2B652A"
+        gradientStartColor="#FFBD16"
+        gradientStopColor="#A88631"
       />
       <AnimatedBeam
         containerRef={containerRef}
         fromRef={div5Ref}
         toRef={div6Ref}
-        gradientStartColor="#577F57"
-        gradientStopColor="#2B652A"
+        gradientStartColor="#FFBD16"
+        gradientStopColor="#A88631"
+      />
+      <AnimatedBeam
+        containerRef={containerRef}
+        fromRef={div6Ref}
+        toRef={div7Ref}
+        gradientStartColor="#FFBD16"
+        gradientStopColor="#A88631"
+        startYOffset={-10}
+        endYOffset={-10}
+        reverse
       />
       <AnimatedBeam
         containerRef={containerRef}
@@ -122,6 +132,8 @@ export function PaymentAnimation() {
         toRef={div7Ref}
         gradientStartColor="#577F57"
         gradientStopColor="#2B652A"
+        startYOffset={10}
+        endYOffset={10}
       />
     </div>
   );
