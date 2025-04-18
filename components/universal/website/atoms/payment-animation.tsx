@@ -48,19 +48,19 @@ export function PaymentAnimation() {
       <div className="flex w-full flex-row items-stretch justify-between gap-10">
         <div className="flex flex-col justify-center gap-2">
           <IconWrapper className="p-2 lg:p-3" ref={div1Ref}>
-            <User2 className="size-4 lg:size-6" />
+            <User2 className="size-4" />
           </IconWrapper>
           <IconWrapper className="p-2 lg:p-3" ref={div2Ref}>
-            <User2 className="size-4 lg:size-6" />
+            <User2 className="size-4" />
           </IconWrapper>
           <IconWrapper className="p-2 lg:p-3" ref={div3Ref}>
-            <User2 className="size-4 lg:size-6" />
+            <User2 className="size-4" />
           </IconWrapper>
           <IconWrapper className="p-2 lg:p-3" ref={div4Ref}>
-            <User2 className="size-4 lg:size-6" />
+            <User2 className="size-4" />
           </IconWrapper>
           <IconWrapper className="p-2 lg:p-3" ref={div5Ref}>
-            <User2 className="size-4 lg:size-6" />
+            <User2 className="size-4" />
           </IconWrapper>
         </div>
         <div className="flex flex-col justify-center">
