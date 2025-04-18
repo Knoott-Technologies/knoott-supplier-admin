@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { DropdownMenuItem } from "../ui/dropdown-menu";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
-import { SidebarMenuButton } from "../ui/sidebar";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
 
 export const LogoutButton = ({ inSidebar }: { inSidebar?: boolean }) => {
   const router = useRouter();
@@ -19,12 +19,16 @@ export const LogoutButton = ({ inSidebar }: { inSidebar?: boolean }) => {
 
   if (inSidebar) {
     return (
-      <SidebarMenuButton
-        onClick={signOut}
-        className="cursor-pointer items-center justify-between text-destructive hover:text-destructive hover:bg-destructive/10"
-      >
-        Cerrar sesión <LogOut className="size-4" />
-      </SidebarMenuButton>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            onClick={signOut}
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            <LogOut /> <span>Cerrar sesión</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
     );
   }
 

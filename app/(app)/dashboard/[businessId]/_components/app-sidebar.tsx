@@ -14,6 +14,7 @@ import { SidebarContentProvider } from "./sidebar-content-provider";
 import { LogoutButton } from "@/components/universal/logout-button";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
+import { Announcement } from "@/components/ui/sidebar-news";
 
 export async function AppSidebar({
   user,
@@ -45,12 +46,17 @@ export async function AppSidebar({
           businessId={business.id}
         />
       </SidebarContent>
-      <SidebarFooter className="bg-background border-t p-2 pb-8 md:pb-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <LogoutButton inSidebar />
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarFooter className="p-0">
+        <div className="p-2 pb-0">
+          <Announcement
+            title="Ahora puedes crear banners"
+            description="Puedes crear y solicitar banners para el catálogo Knoott, aumenta tus ventas e impulsa tu negocio."
+            href={`/dashboard/${business.id}/banners`}
+          />
+        </div>
+        <div className="p-2 border-t bg-background pb-8 lg:pb-2">
+          <LogoutButton inSidebar />
+        </div>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

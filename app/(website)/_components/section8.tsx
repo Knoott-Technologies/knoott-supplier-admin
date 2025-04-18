@@ -6,7 +6,7 @@ import { PaymentAnimation } from "@/components/universal/website/atoms/payment-a
 
 export const Section8 = ({ user }: { user: User | null }) => {
   return (
-    <section className="w-full h-fit items-center justify-center grid grid-cols-1 lg:grid-cols-2  px-5 md:px-7 lg:px-14 xl:px-36 gap-10 lg:gap-14 2xl:px-56 py-20 md:py-28 lg:py-32 relative bg-background border-t">
+    <section className="w-full h-fit items-center justify-center grid grid-cols-1 lg:grid-cols-2  px-5 md:px-7 lg:px-14 xl:px-36 gap-10 lg:gap-14 2xl:px-56 py-20 md:py-28 lg:py-32 relative bg-background border-t lg:min-h-[60vh]">
       <div className="w-full h-fit items-start justify-start flex flex-col gap-y-3 max-w-2xl">
         <BlurFade direction="right" inView delay={0}>
           <h2

@@ -59,7 +59,7 @@ export const Section9 = ({ user }: { user: User | null }) => {
     <section
       ref={sectionRef}
       id="visibility"
-      className="w-full h-fit items-center justify-center grid grid-cols-1 lg:grid-cols-2 px-5 md:px-7 lg:px-14 xl:px-36 gap-10 lg:gap-14 2xl:px-56 py-20 md:py-28 lg:py-32 relative bg-sidebar border-t"
+      className="w-full h-fit items-center justify-center grid grid-cols-1 lg:grid-cols-2 px-5 md:px-7 lg:px-14 xl:px-36 gap-10 lg:gap-14 2xl:px-56 py-20 md:py-28 lg:py-32 relative bg-sidebar border-t lg:min-h-[60vh]"
     >
       <div className="w-full h-fit items-start justify-start flex flex-col gap-y-3 max-w-2xl">
         <BlurFade direction="right" inView delay={0}>
@@ -76,9 +76,9 @@ export const Section9 = ({ user }: { user: User | null }) => {
           <p className="text-sm lg:text-base text-muted-foreground">
             En Knoott Partners no cobramos por registrarte ni por subir tu
             catálogo. Solo ganamos cuando tú ganas. Por cada orden procesada,
-            aplicamos una comisión del 5.8%, una de las más bajas del mercado.
-            Sin cuotas ocultas, sin costos mensuales: solo crecimiento
-            compartido.
+            aplicamos una comisión del <span className="text-foreground font-medium">5.8%</span>, una de las más bajas
+            del mercado. Sin cuotas ocultas, sin costos mensuales: solo
+            crecimiento compartido.
           </p>
         </BlurFade>
       </div>
