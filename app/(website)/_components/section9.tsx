@@ -95,7 +95,7 @@ export const Section9 = ({ user }: { user: User | null }) => {
               onAnimationsStart={(e) => setFinish(true)}
               willChange
               className={cn(
-                "text-[clamp(10rem,10vw,15rem)] font-bold tracking-tighter leading-[0] ease-in-out duration-700",
+                "text-[clamp(8rem,10vw,15rem)] font-bold tracking-tighter leading-[0] ease-in-out duration-700",
                 finish && "text-success"
               )}
             />
