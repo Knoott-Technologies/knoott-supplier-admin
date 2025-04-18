@@ -82,9 +82,9 @@ export const Section9 = ({ user }: { user: User | null }) => {
           </p>
         </BlurFade>
       </div>
-      <div className="w-full h-fit items-start justify-start flex flex-col">
+      <div className="w-full h-fit items-start justify-start flex flex-col px-3 lg:px-0">
         <BlurFade inView delay={0.2} direction="up" className="w-full h-fit">
-          <div className="h-fit items-center justify-center mx-auto max-w-lg flex bg-background border shadow-md lg:rotate-[8deg]">
+          <div className="h-fit items-center justify-center mx-auto max-w-lg flex bg-background border shadow-md rotate-[6deg] lg:rotate-[10deg]">
             <NumberFlow
               value={numberValue}
               format={{
