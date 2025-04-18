@@ -68,7 +68,7 @@ export const FullpageScroll = ({
     <div
       ref={containerRef}
       className={`w-full relative h-fit ${className}`}
-      style={{ minHeight: `${childrenArray.length * 120}dvh` }}
+      style={{ minHeight: `${childrenArray.length * 120}vh` }}
     >
       <AnimatePresence mode="wait">
         <motion.div

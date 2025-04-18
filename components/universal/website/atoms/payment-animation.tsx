@@ -46,27 +46,47 @@ export function PaymentAnimation() {
       ref={containerRef}
     >
       <div className="flex w-full flex-row items-stretch justify-between gap-10">
-        <div className="flex flex-col justify-center gap-2">
-          <IconWrapper className="p-2 lg:p-3 bg-sidebar" ref={div1Ref}>
-            <Box className="size-4 text-muted-foreground" />
+        <div className="flex flex-col justify-center gap-4">
+          <IconWrapper
+            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground rounded-[5px]"
+            ref={div1Ref}
+          >
+            <Box className="size-4" />
+            Orden
           </IconWrapper>
-          <IconWrapper className="p-2 lg:p-3 bg-sidebar" ref={div2Ref}>
-            <Box className="size-4 text-muted-foreground" />
+          <IconWrapper
+            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground rounded-[5px]"
+            ref={div2Ref}
+          >
+            <Box className="size-4" />
+            Orden
           </IconWrapper>
-          <IconWrapper className="p-2 lg:p-3 bg-sidebar" ref={div3Ref}>
-            <Box className="size-4 text-muted-foreground" />
+          <IconWrapper
+            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground rounded-[5px]"
+            ref={div3Ref}
+          >
+            <Box className="size-4" />
+            Orden
           </IconWrapper>
-          <IconWrapper className="p-2 lg:p-3 bg-sidebar" ref={div4Ref}>
-            <Box className="size-4 text-muted-foreground" />
+          <IconWrapper
+            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground rounded-[5px]"
+            ref={div4Ref}
+          >
+            <Box className="size-4" />
+            Orden
           </IconWrapper>
-          <IconWrapper className="p-2 lg:p-3 bg-sidebar" ref={div5Ref}>
-            <Box className="size-4 text-muted-foreground" />
+          <IconWrapper
+            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground rounded-[5px]"
+            ref={div5Ref}
+          >
+            <Box className="size-4" />
+            Orden
           </IconWrapper>
         </div>
         <div className="flex flex-col justify-center">
           <IconWrapper
             ref={div6Ref}
-            className="size-14 lg:size-20 bg-foreground p-2 lg:p-4"
+            className="size-16 lg:size-20 bg-foreground p-2 lg:p-4"
           >
             <Icon variant={"white"} className="size-full" />
           </IconWrapper>
@@ -74,7 +94,7 @@ export function PaymentAnimation() {
         <div className="flex flex-col justify-center">
           <IconWrapper
             ref={div7Ref}
-            className="size-16 lg:size-32 relative overflow-hidden"
+            className="size-20 lg:size-32 relative overflow-hidden"
           >
             <Image src="/logo-test.png" alt="credit cards" fill />
           </IconWrapper>
