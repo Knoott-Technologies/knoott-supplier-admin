@@ -69,7 +69,7 @@ export const FullpageScroll = ({
       ref={containerRef}
       className={`w-full relative h-fit ${className}`}
       // Set a minimum height to ensure the container is tall enough to scroll through
-      style={{ minHeight: `${childrenArray.length * 100}vh` }}
+      style={{ minHeight: `${childrenArray.length * 100}dvh` }}
     >
       <AnimatePresence mode="wait">
         <motion.div
