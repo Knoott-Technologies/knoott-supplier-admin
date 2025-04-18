@@ -105,7 +105,7 @@ export const HeaderWebsite = ({
       return "defaultBlack";
     }
 
-    return "ghost";
+    return "outline";
   };
 
   // Determine secondary button variant
