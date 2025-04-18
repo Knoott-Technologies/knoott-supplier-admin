@@ -68,7 +68,7 @@ export const HeroSuppliers = ({
             (userBusiness && (
               <div className="w-full h-fit items-start lg:items-center justify-start flex flex-col lg:flex-row gap-2">
                 <Button
-                  variant={"defaultBlack"}
+                  variant={"outline"}
                   size={"default"}
                   className="w-full md:w-auto"
                   asChild
