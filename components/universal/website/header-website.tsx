@@ -6,9 +6,8 @@ import Link from "next/link";
 import { Logo } from "../logo";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { UserDropdown } from "./user-dropdown";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowUpRight, LucideIcon } from "lucide-react";
+import { ArrowRight, type LucideIcon } from "lucide-react";
 import { NavigationMenuMobile } from "./navigation-menu-mobile";
 import Image from "next/image";
 
@@ -30,7 +29,7 @@ const nav: NavProps[] = [
     href: "/product",
   },
   {
-    label: "Documentación",
+    label: "Documentación",
     href: "/docs",
   },
 ];
@@ -126,12 +125,12 @@ export const HeaderWebsite = ({
     <div
       className={cn(
         "w-full items-center justify-between flex px-5 md:px-7 lg:px-14 xl:px-36 2xl:px-56 py-3 h-14 fixed top-0 left-0 z-20 border-b border-transparent ease-in-out duration-300",
-        isScrolled && "bg-sidebar border-border"
+        isScrolled && "bg-sidebar border-border shadow-md"
       )}
     >
       <div className="w-auto h-full items-center justify-start flex gap-x-10">
         <Link href="/" className="h-full">
-          <Logo variant={isScrolled ? "black" : "white"} />
+          <Logo variant={getLogoVariant()} />
         </Link>
         <div className="items-center justify-start gap-x-1 hidden lg:flex">
           {nav.map((item, index) => (
@@ -151,7 +150,7 @@ export const HeaderWebsite = ({
       </div>
       <div className="h-full items-center justify-end gap-2 hidden lg:flex">
         {(user && (
-          <Button variant={"defaultBlack"} size={"default"} asChild>
+          <Button variant={getButtonVariant()} size={"default"} asChild>
             <Link href={`/dashboard/`}>
               Entrar a mi dashboard
               <span className="flex -space-x-[0.45rem]">
@@ -164,7 +163,10 @@ export const HeaderWebsite = ({
                       className="rounded-full ring-1 overflow-hidden"
                     >
                       <Image
-                        src={business.business.business_logo_url}
+                        src={
+                          business.business.business_logo_url ||
+                          "/placeholder.svg"
+                        }
                         width={16}
                         height={16}
                         alt="Avatar 01"
@@ -176,20 +178,13 @@ export const HeaderWebsite = ({
           </Button>
         )) || (
           <>
-            <Button
-              variant={isScrolled ? "secondary" : "ghost"}
-              className={cn(
-                "text-background border border-transparent",
-                isScrolled && "text-foreground border-border bg-sidebar"
-              )}
-              asChild
-            >
-              <Link href="/login">
-                Ingresa a tu cuenta <ArrowRight />
-              </Link>
+            <Button variant={"ghost"} className={getTextColor()} asChild>
+              <Link href="/login">Ingresa a tu cuenta</Link>
             </Button>
             <Button variant={"defaultBlack"} asChild>
-              <Link href="/login">Comienza ahora</Link>
+              <Link href="/login">
+                Comienza ahora <ArrowRight />
+              </Link>
             </Button>
           </>
         )}

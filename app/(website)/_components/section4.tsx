@@ -2,6 +2,9 @@ import { cn } from "@/lib/utils";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import { User } from "@supabase/supabase-js";
 import { libre } from "@/components/fonts/font-def";
+import { ImagePlusIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Section4 = ({ user }: { user: User | null }) => {
   return (
@@ -28,7 +31,70 @@ export const Section4 = ({ user }: { user: User | null }) => {
           </BlurFade>
         </div>
         <div className="w-full h-fit items-start justify-start flex flex-col">
-          <div className="w-full h-auto aspect-video bg-blue-50"></div>
+          <BlurFade inView delay={0.2} direction="up" className="w-full h-fit">
+            <div className="w-full bg-background border shadow-md p-3 lg:p-5 flex flex-col items-start justify-start gap-y-4 max-w-lg mx-auto">
+              <span className="w-full flex flex-col items-start justify-start">
+                <p className="text-base font-semibold">
+                  Información de tu negocio
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Ingresa la información general de tu negocio
+                </p>
+              </span>
+              <div className="flex flex-col gap-y-2 items-start justify-start w-full">
+                <p className="text-sm font-semibold">Logotipo</p>
+                <div className="flex items-end justify-end gap-4">
+                  <div className="bg-sidebar aspect-square w-24 border items-center justify-center flex shrink-0">
+                    <ImagePlusIcon className="size-5 text-muted-foreground" />
+                  </div>
+                  <p className="text-xs text-muted-foreground text-balance">
+                    La imágen debe ser cuadrada, de 500px x 500px, no debe
+                    exceder los 5MB.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-y-2 items-start justify-start w-full">
+                <p className="text-sm font-semibold">Nombre de tu negocio</p>
+                <Input
+                  readOnly
+                  placeholder="Nombre de tu negocio"
+                  className="bg-sidebar pointer-events-none"
+                />
+              </div>
+              <div className="flex flex-col gap-y-2 items-start justify-start w-full">
+                <p className="text-sm font-semibold">Sector o giro</p>
+                <Select>
+                  <SelectTrigger className="bg-sidebar pointer-events-none">
+                    <SelectValue placeholder="Selecciona un sector" />
+                  </SelectTrigger>
+                </Select>
+              </div>
+              <span className="w-full flex flex-col items-start justify-start mt-2">
+                <p className="text-base font-semibold">Información bancaria</p>
+                <p className="text-xs text-muted-foreground">
+                  Aquí enviaremos los pagos de tus órdenes.
+                </p>
+              </span>
+              <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-y-2 items-start justify-start w-full">
+                  <p className="text-sm font-semibold">Cuenta CLABE</p>
+                  <Input
+                    readOnly
+                    placeholder="123456789123456789"
+                    className="bg-sidebar pointer-events-none"
+                  />
+                </div>
+                <div className="flex flex-col gap-y-2 items-start justify-start w-full">
+                  <p className="text-sm font-semibold">Banco</p>
+                  <Select>
+                    <SelectTrigger className="bg-sidebar pointer-events-none">
+                      <SelectValue placeholder="Selecciona un banco" />
+                    </SelectTrigger>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          </BlurFade>
         </div>
       </div>
     </section>

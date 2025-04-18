@@ -12,7 +12,7 @@ interface FullpageScrollProps {
 export const FullpageScroll = ({
   children,
   className = "",
-  transitionDuration = 0.5,
+  transitionDuration = 0.2,
 }: FullpageScrollProps) => {
   const childrenArray = Array.isArray(children) ? children : [children];
   const [activeIndex, setActiveIndex] = useState(0);

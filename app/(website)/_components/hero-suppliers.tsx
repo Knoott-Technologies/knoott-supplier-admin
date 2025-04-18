@@ -106,21 +106,19 @@ export const HeroSuppliers = ({
             )) || (
               <div className="w-full h-fit items-start lg:items-center justify-start flex flex-col lg:flex-row gap-2">
                 <Button
-                  variant={"defaultBlack"}
-                  size={"default"}
-                  className="w-full md:w-auto"
-                >
-                  Comienza ahora
-                </Button>
-                <Button
                   variant={"ghost"}
                   size={"default"}
                   className="w-full md:w-auto bg-transparent text-background"
                   asChild
                 >
-                  <Link href="/login">
-                    Ingresa a tu cuenta <ArrowRight />
-                  </Link>
+                  <Link href="/login">Ingresa a tu cuenta</Link>
+                </Button>
+                <Button
+                  variant={"defaultBlack"}
+                  size={"default"}
+                  className="w-full md:w-auto"
+                >
+                  Comienza ahora <ArrowRight />
                 </Button>
               </div>
             )}
