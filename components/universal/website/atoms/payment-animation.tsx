@@ -9,6 +9,7 @@ import { Icon } from "@/components/universal/logo";
 import { Shopify } from "@/components/svgs/icons";
 import { Box, Check, RefreshCcw, User2 } from "lucide-react";
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 
 const IconWrapper = forwardRef<
   HTMLDivElement,
@@ -92,12 +93,17 @@ export function PaymentAnimation() {
           </IconWrapper>
         </div>
         <div className="flex flex-col justify-center">
-          <IconWrapper
-            ref={div7Ref}
-            className="size-20 lg:size-32 relative overflow-hidden"
-          >
-            <Image src="/logo-test.png" alt="credit cards" fill />
-          </IconWrapper>
+          <div className="relative overflow-visible" ref={div7Ref}>
+            <IconWrapper className="size-20 lg:size-32 relative overflow-hidden">
+              <Image src="/logo-test.png" alt="credit cards" fill />
+            </IconWrapper>
+            <Badge
+              variant={"outline"}
+              className="absolute pointer-events-none -top-2 -right-1/4 z-10 font-normal bg-sidebar shadow-md text-muted-foreground"
+            >
+              Tu tienda
+            </Badge>
+          </div>
         </div>
       </div>
 

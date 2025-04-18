@@ -6,6 +6,7 @@ import { Icon } from "@/components/universal/logo";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 
 export const Section7 = ({ user }: { user: User | null }) => {
   return (
@@ -34,14 +35,22 @@ export const Section7 = ({ user }: { user: User | null }) => {
         </div>
         <div className="w-full h-fit items-start justify-start flex flex-col overflow-hidden lg:overflow-visible">
           <BlurFade inView delay={0.2} direction="up" className="w-full h-fit">
-            <div className=" bg-background border shadow-lg p-7 lg:p-14 flex flex-col items-center justify-center gap-y-5 lg:gap-y-7 max-w-[90%] mx-auto relative overflow-hidden">
-              <div className="size-20 border bg-foreground rounded-[10px] relative overflow-hidden">
-                <Image
-                  src={"/logo-test.png"}
-                  className="object-cover"
-                  fill
-                  alt=""
-                />
+            <div className="bg-background border shadow-lg p-7 lg:p-14 flex flex-col items-center justify-center gap-y-5 lg:gap-y-7 max-w-[90%] mx-auto relative overflow-hidden">
+              <div className="size-fit relative">
+                <div className="size-28 border bg-foreground rounded-[10px] relative overflow-hidden">
+                  <Image
+                    src={"/logo-test.png"}
+                    className="object-cover"
+                    fill
+                    alt=""
+                  />
+                </div>
+                <Badge
+                  variant={"outline"}
+                  className="absolute pointer-events-none -top-2 -right-1/4 z-10 font-normal bg-sidebar shadow-md text-muted-foreground"
+                >
+                  Tu tienda
+                </Badge>
               </div>
               <span className="flex flex-col items-center justify-center gap-y-2 w-full">
                 <p

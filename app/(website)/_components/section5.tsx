@@ -11,7 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Image from "next/image";
-import { Badge, Check } from "lucide-react";
+import { Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export const Section5 = ({ user }: { user: User | null }) => {
   return (
@@ -54,8 +55,16 @@ export const Section5 = ({ user }: { user: User | null }) => {
               <div className="flex flex-col gap-y-2 items-start justify-start w-full">
                 <p className="text-sm font-semibold text-success">Logotipo</p>
                 <div className="flex items-end justify-end gap-4">
-                  <div className="aspect-square w-24 border border-success bg-success/10 items-center justify-center flex shrink-0 relative overflow-hidden">
-                    <Image src={"/logo-test.png"} alt="logo" fill />
+                  <div className="relative size-fit">
+                    <div className="aspect-square w-24 border border-success bg-success/10 items-center justify-center flex shrink-0 relative overflow-hidden">
+                      <Image src={"/logo-test.png"} alt="logo" fill />
+                    </div>
+                    <Badge
+                      variant={"outline"}
+                      className="absolute pointer-events-none -top-2 -right-1/4 z-10 font-normal bg-sidebar shadow-md text-muted-foreground"
+                    >
+                      Tu tienda
+                    </Badge>
                   </div>
                 </div>
               </div>
@@ -79,7 +88,9 @@ export const Section5 = ({ user }: { user: User | null }) => {
                     <SelectValue placeholder="Selecciona un sector" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="muebles">Tienda departamental</SelectItem>
+                    <SelectItem value="muebles">
+                      Tienda departamental
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
