@@ -55,11 +55,11 @@ export const Section6 = ({ user }: { user: User | null }) => {
         <div className="w-full h-fit items-start justify-start flex flex-col overflow-hidden lg:overflow-visible">
           <BlurFade inView delay={0.2} direction="up" className="w-full h-fit">
             <div className="w-full bg-background border shadow-lg p-3 lg:p-5 flex flex-col items-start justify-start gap-y-4 max-w-[90%] mx-auto relative overflow-hidden">
-              <div className="w-full flex gap-x-2 items-start justify-start">
+              <div className="w-full flex gap-x-2 items-stretch justify-start">
                 {sampleGifts.map((gift) => (
                   <div
                     key={gift.name}
-                    className="w-full flex-1 items-start flex flex-col gap-y-2 min-w-[250px]"
+                    className="w-full flex-1 items-start flex flex-col gap-y-2 min-w-[150px] lg:min-w-[250px]"
                   >
                     <div className="w-full aspect-[3/4] relative">
                       <Image
