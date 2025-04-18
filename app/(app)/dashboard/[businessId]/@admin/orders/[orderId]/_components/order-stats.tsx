@@ -3,7 +3,6 @@
 import React from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";

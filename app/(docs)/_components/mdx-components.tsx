@@ -1,9 +1,19 @@
 import type { MDXComponents } from "mdx/types";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { libre } from "@/components/fonts/font-def";
 import { Table, TableCell, TableHead, TableRow } from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card";
+import { ArrowRight } from "lucide-react";
 
 export function useMDXComponents(
   components: MDXComponents = {}
@@ -68,13 +78,19 @@ export function useMDXComponents(
     ),
     a: ({ className, ...props }) => (
       <a
-        className={cn("font-medium underline underline-offset-4 text-sm lg:text-base text-contrast", className)}
+        className={cn(
+          "font-medium underline underline-offset-4 text-sm lg:text-base text-contrast",
+          className
+        )}
         {...props}
       />
     ),
     p: ({ className, ...props }) => (
       <p
-        className={cn("[&:not(:first-child)]:mt-4 text-muted-foreground text-sm lg:text-base", className)}
+        className={cn(
+          "[&:not(:first-child)]:mt-4 text-muted-foreground text-sm lg:text-base tracking-wide",
+          className
+        )}
         {...props}
       />
     ),
@@ -85,7 +101,10 @@ export function useMDXComponents(
       <ol className={cn("ml-6 list-decimal", className)} {...props} />
     ),
     li: ({ className, ...props }) => (
-      <li className={cn("text-sm text-muted-foreground lg:text-base", className)} {...props} />
+      <li
+        className={cn("text-sm text-muted-foreground lg:text-base", className)}
+        {...props}
+      />
     ),
     blockquote: ({ className, ...props }) => (
       <blockquote
@@ -152,8 +171,24 @@ export function useMDXComponents(
         {...props}
       />
     ),
+
+    strong: ({ className, ...props }) => (
+      <strong
+        className={cn("font-medium text-foreground", className)}
+        {...props}
+      />
+    ),
+
     Image,
     Link,
+    Button,
+    ArrowRight,
+    Card,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+    CardContent,
+    CardFooter,
     ...components,
   };
 }

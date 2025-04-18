@@ -49,6 +49,7 @@
     "@supabase/supabase-js": "^2.49.1",
     "@tanstack/react-table": "^8.21.2",
     "@types/geojson": "^7946.0.10",
+    "@types/mdx": "^2.0.13",
     "@types/react-simple-maps": "^3.0.0",
     "@types/topojson-client": "^3.1.1",
     "@uiw/react-md-editor": "^4.0.5",
