@@ -79,7 +79,7 @@ export const Section5 = ({ user }: { user: User | null }) => {
                     <SelectValue placeholder="Selecciona un sector" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="muebles">Tienda de muebles</SelectItem>
+                    <SelectItem value="muebles">Tienda departamental</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

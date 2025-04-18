@@ -11,6 +11,7 @@ import { Section7 } from "./_components/section7";
 import { Section8 } from "./_components/section8";
 import { HeaderWebsite } from "@/components/universal/website/header-website";
 import FooterWebsite from "@/components/universal/website/footer";
+import { Section9 } from "./_components/section9";
 
 const MarketingPage = async () => {
   const supabase = createClient(cookies());
@@ -37,6 +38,7 @@ const MarketingPage = async () => {
         <Section7 user={user} />
       </FullpageScroll>
       <Section8 user={user} />
+      <Section9 user={user} />
       <FooterWebsite />
     </main>
   );

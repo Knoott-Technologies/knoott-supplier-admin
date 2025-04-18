@@ -27,9 +27,11 @@ export const Section8 = ({ user }: { user: User | null }) => {
           </p>
         </BlurFade>
       </div>
-      <div className="w-full h-fit items-center justify-start flex flex-col max-w-md mx-auto">
+      <div className="w-full h-fit items-start justify-start flex flex-col">
         <BlurFade inView delay={0.2} direction="up" className="w-full h-fit">
-          <PaymentAnimation />
+          <div className="w-full h-fit items-center justify-center mx-auto max-w-lg">
+            <PaymentAnimation />
+          </div>
         </BlurFade>
       </div>
     </section>
