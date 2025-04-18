@@ -76,9 +76,13 @@ export const Section9 = ({ user }: { user: User | null }) => {
           <p className="text-sm lg:text-base text-muted-foreground">
             En Knoott Partners no cobramos por registrarte ni por subir tu
             catálogo. Solo ganamos cuando tú ganas. Por cada orden procesada,
-            aplicamos una comisión del <span className="text-foreground font-medium">5.8%</span>, una de las más bajas
-            del mercado. Sin cuotas ocultas, sin costos mensuales: solo
-            crecimiento compartido.
+            aplicamos una comisión del{" "}
+            <span className="text-foreground font-medium">5.8%</span>, una de
+            las más bajas del mercado.{" "}
+            <span className="text-foreground font-medium">
+              Sin cuotas ocultas, sin costos mensuales: solo crecimiento
+              compartido.
+            </span>
           </p>
         </BlurFade>
       </div>
