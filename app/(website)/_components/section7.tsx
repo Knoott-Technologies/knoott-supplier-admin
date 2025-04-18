@@ -5,9 +5,9 @@ import { libre } from "@/components/fonts/font-def";
 
 export const Section7 = ({ user }: { user: User | null }) => {
   return (
-    <section className="w-full items-center justify-center flex flex-col px-5 md:px-7 lg:px-14 xl:px-36 2xl:px-56 py-20 md:py-28 lg:py-32 relative bg-sidebar h-[calc(100dvh_-_56px)]">
+    <section className="w-full items-start lg:items-center justify-start lg:justify-center flex flex-col px-5 md:px-7 lg:px-14 xl:px-36 2xl:px-56 py-20 pb-0 md:py-28 md:pb-0 lg:py-32 relative bg-sidebar h-[calc(100dvh_-_56px)]">
       <div className="w-full grid grid-cols-1 lg:grid-cols-2 items-center justify-center gap-10 lg:gap-14">
-        <div className="w-full h-fit items-start justify-start flex flex-col gap-y-3">
+        <div className="w-full h-fit items-start justify-start flex flex-col gap-y-3 shrink-0">
           <BlurFade direction="right" inView delay={0}>
             <h2
               className={cn(
@@ -28,7 +28,7 @@ export const Section7 = ({ user }: { user: User | null }) => {
             </p>
           </BlurFade>
         </div>
-        <div className="w-full h-fit items-start justify-start flex flex-col">
+        <div className="w-full h-fit items-start justify-start flex flex-col overflow-hidden">
           <div className="w-full h-auto aspect-video bg-yellow-50"></div>
         </div>
       </div>

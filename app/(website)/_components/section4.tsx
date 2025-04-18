@@ -2,15 +2,17 @@ import { cn } from "@/lib/utils";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import { User } from "@supabase/supabase-js";
 import { libre } from "@/components/fonts/font-def";
-import { ImagePlusIcon } from "lucide-react";
+import { ArrowRight, ImagePlusIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 export const Section4 = ({ user }: { user: User | null }) => {
   return (
-    <section className="w-full items-center justify-center flex flex-col px-5 md:px-7 lg:px-14 xl:px-36 2xl:px-56 py-20 md:py-28 lg:py-32 relative bg-sidebar h-[calc(100dvh_-_56px)]">
+    <section className="w-full items-start lg:items-center justify-start lg:justify-center flex flex-col px-5 md:px-7 lg:px-14 xl:px-36 2xl:px-56 py-20 pb-0 md:py-28 md:pb-0 lg:py-32 relative bg-sidebar h-[calc(100dvh_-_56px)]">
       <div className="w-full grid grid-cols-1 lg:grid-cols-2 items-center justify-center gap-10 lg:gap-14">
-        <div className="w-full h-fit items-start justify-start flex flex-col gap-y-3">
+        <div className="w-full h-fit items-start justify-start flex flex-col gap-y-3 shrink-0">
           <BlurFade direction="right" inView delay={0}>
             <h2
               className={cn(
@@ -30,7 +32,7 @@ export const Section4 = ({ user }: { user: User | null }) => {
             </p>
           </BlurFade>
         </div>
-        <div className="w-full h-fit items-start justify-start flex flex-col">
+        <div className="w-full h-fit items-start justify-start flex flex-col overflow-hidden">
           <BlurFade inView delay={0.2} direction="up" className="w-full h-fit">
             <div className="w-full bg-background border shadow-md p-3 lg:p-5 flex flex-col items-start justify-start gap-y-4 max-w-lg mx-auto">
               <span className="w-full flex flex-col items-start justify-start">
@@ -93,6 +95,10 @@ export const Section4 = ({ user }: { user: User | null }) => {
                   </Select>
                 </div>
               </div>
+              <Separator className="w-full" />
+              <Button className="w-full" variant={"defaultBlack"}>
+                Enviar a revisión <ArrowRight />
+              </Button>
             </div>
           </BlurFade>
         </div>
