@@ -2,10 +2,11 @@ import { cn } from "@/lib/utils";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import { User } from "@supabase/supabase-js";
 import { libre } from "@/components/fonts/font-def";
+import { PaymentAnimation } from "@/components/universal/website/atoms/payment-animation";
 
 export const Section8 = ({ user }: { user: User | null }) => {
   return (
-    <section className="w-full h-fit items-start justify-start flex flex-col px-5 md:px-7 lg:px-14 xl:px-36 gap-10 lg:gap-14 2xl:px-56 py-20 md:py-28 lg:py-32 relative bg-background border-t">
+    <section className="w-full h-fit items-center justify-center grid grid-cols-1 lg:grid-cols-2  px-5 md:px-7 lg:px-14 xl:px-36 gap-10 lg:gap-14 2xl:px-56 py-20 md:py-28 lg:py-32 relative bg-background border-t">
       <div className="w-full h-fit items-start justify-start flex flex-col gap-y-3 max-w-2xl">
         <BlurFade direction="right" inView delay={0}>
           <h2
@@ -26,7 +27,9 @@ export const Section8 = ({ user }: { user: User | null }) => {
           </p>
         </BlurFade>
       </div>
-      <div className="w-full h-fit items-center justify-start flex flex-col"></div>
+      <div className="w-full h-fit items-center justify-start flex flex-col max-w-xl mx-auto">
+        <PaymentAnimation />
+      </div>
     </section>
   );
 };
