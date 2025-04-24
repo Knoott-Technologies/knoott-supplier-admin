@@ -1,4 +1,3 @@
-import { createAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
@@ -9,7 +8,6 @@ export async function POST(request: Request) {
 
     // Create Supabase client
     const supabase = createClient(cookies());
-    const admin = createAdminClient();
 
     // Get current user
     const {

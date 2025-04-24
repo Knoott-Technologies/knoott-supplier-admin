@@ -172,7 +172,7 @@ export function DocumentUpload({
       {!value ? (
         <div
           {...getRootProps()}
-          className={`border rounded-md px-5 py-4 hover:bg-background/50 text-center bg-background cursor-pointer transition-colors ${
+          className={`border rounded-md px-5 py-7 hover:bg-background/50 text-center bg-background cursor-pointer transition-colors ${
             isDragActive
               ? "border-primary bg-primary/10"
               : "border-muted-foreground/20"
@@ -180,7 +180,6 @@ export function DocumentUpload({
         >
           <input {...getInputProps()} />
           <div className="flex flex-col items-center justify-center gap-2">
-            <Upload className="h-6 w-6 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
               {isDragActive
                 ? "Suelta el documento aquí"

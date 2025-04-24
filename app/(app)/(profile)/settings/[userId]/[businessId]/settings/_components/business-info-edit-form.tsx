@@ -1,13 +1,11 @@
 "use client";
 
 import type React from "react";
-import type { FeatureCollection } from "geojson";
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -15,7 +13,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -30,10 +27,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { generateReferenceFromName } from "@/lib/utils";
-import { ImageUpload } from "./image-upload";
-import { PhoneInputWithCountry } from "@/components/universal/phone-input-country";
-import { Facebook, Instagram, Twitter, Youtube, Linkedin } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -41,10 +35,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DeliveryMapWrapper } from "./delivery-map-wrapper";
-import { Tiktok } from "@/components/svgs/icons";
 import { DocumentUpload } from "@/components/file-upload";
-import { Separator } from "@/components/ui/separator";
+import { PhoneInputWithCountry } from "@/components/universal/phone-input-country";
+import { Facebook, Instagram, Twitter, Youtube, Linkedin } from "lucide-react";
+import { Tiktok } from "@/components/svgs/icons";
+import type { FeatureCollection } from "geojson";
+import { ImageUpload } from "@/app/(onboarding)/onboarding/_components/image-upload";
+import { DeliveryMapWrapper } from "@/app/(onboarding)/onboarding/_components/delivery-map-wrapper";
 
 // Lista de bancos en México
 const MEXICAN_BANKS = [
@@ -84,6 +81,30 @@ const MEXICAN_BANKS = [
   "JP Morgan",
   "Mizuho Bank",
   "MUFG Bank",
+];
+
+// Lista de sectores de negocio
+const BUSINESS_SECTORS = [
+  "Mueblería",
+  "Tienda departamental",
+  "Tienda de decoración",
+  "Electrónica",
+  "Ropa y accesorios",
+  "Alimentos y bebidas",
+  "Artículos para el hogar",
+  "Ferretería",
+  "Papelería",
+  "Juguetería",
+  "Deportes",
+  "Tecnología",
+  "Joyería",
+  "Farmacia",
+  "Librería",
+  "Artesanías",
+  "Mascotas",
+  "Belleza y cuidado personal",
+  "Floristería",
+  "Otro",
 ];
 
 // Definición de redes sociales disponibles
@@ -151,7 +172,7 @@ const businessFormSchema = z.object({
   business_logo_url: z.string().min(1, {
     message: "El logo del negocio es obligatorio.",
   }),
-  tax_situation_url: z.string().optional(),
+  tax_situation_url: z.string().optional().nullable(),
   main_phone_number: z.string().optional(),
   contact_phone_number: z.string().min(10, {
     message: "El número de teléfono debe tener al menos 10 dígitos.",
@@ -180,8 +201,7 @@ const businessFormSchema = z.object({
     })
     .refine((val) => val === "" || /^\d+$/.test(val), {
       message: "La cuenta CLABE solo debe contener números.",
-    })
-    .optional(),
+    }),
   bank_name: z.string().min(1, {
     message: "El banco es obligatorio.",
   }),
@@ -191,7 +211,7 @@ const businessFormSchema = z.object({
   external_number: z.string().min(1, {
     message: "El número exterior es obligatorio.",
   }),
-  internal_number: z.string().optional(),
+  internal_number: z.string().optional().nullable(),
   neighborhood: z.string().min(1, {
     message: "La colonia es obligatoria.",
   }),
@@ -205,70 +225,77 @@ const businessFormSchema = z.object({
     message: "El estado es obligatorio.",
   }),
   country: z.string().default("México"),
-  delivery_zones: z.array(z.string()).min(1, {
-    message: "Debes seleccionar al menos una zona de entrega.",
-  }),
-  facebook_username: z.string().optional(),
-  instagram_username: z.string().optional(),
-  twitter_username: z.string().optional(),
-  youtube_username: z.string().optional(),
-  linkedin_username: z.string().optional(),
-  tiktok_username: z.string().optional(),
+  delivery_zones: z
+    .array(
+      z.object({
+        city: z.string(),
+        state: z.string(),
+      })
+    )
+    .min(1, {
+      message: "Debes seleccionar al menos una zona de entrega.",
+    }),
+  social_media: z
+    .object({
+      facebook: z.string().optional(),
+      instagram: z.string().optional(),
+      twitter: z.string().optional(),
+      youtube: z.string().optional(),
+      linkedin: z.string().optional(),
+      tiktok: z.string().optional(),
+    })
+    .optional(),
+  commission_percentage: z.number().optional(),
 });
 
 type BusinessFormValues = z.infer<typeof businessFormSchema>;
 
-interface BusinessFormProps {
-  initialStates?: string[];
-  initialCities?: Record<string, string[]>;
-  initialSectors?: string[];
-  geoJsonData?: FeatureCollection | null;
+interface BusinessInfoEditFormProps {
+  business: any;
 }
 
-export function BusinessForm({
-  initialStates = [],
-  initialCities = {},
-  initialSectors = [],
-  geoJsonData = null,
-}: BusinessFormProps) {
+export function BusinessInfoEditForm({ business }: BusinessInfoEditFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const [states, setStates] = useState<string[]>(initialStates);
-  const [cities, setCities] = useState<string[]>([]);
-  const [sectors, setSectors] = useState<string[]>(initialSectors);
-  const [selectedState, setSelectedState] = useState<string>("");
+  const [geoJsonData, setGeoJsonData] = useState<FeatureCollection | null>(
+    null
+  );
   const [mapCities, setMapCities] = useState<any[]>([]);
   const [mapStates, setMapStates] = useState<any[]>([]);
+  const [deliveryZonesFormatted, setDeliveryZonesFormatted] = useState<
+    string[]
+  >([]);
 
-  // Valores por defecto del formulario
+  // Extraer usernames de las URLs de redes sociales
+  const extractUsername = (url: string, baseUrl: string): string => {
+    if (!url) return "";
+    return url.replace(baseUrl, "");
+  };
+
+  // Valores por defecto del formulario basados en el negocio existente
   const defaultValues: Partial<BusinessFormValues> = {
-    business_name: "",
-    business_legal_name: "",
-    business_logo_url: "",
-    tax_situation_url: "",
-    main_phone_number: "",
-    contact_phone_number: "",
-    main_email: "",
-    business_sector: "",
-    website_url: "",
-    description: "",
-    bank_account_number: "",
-    bank_name: "",
-    street: "",
-    external_number: "",
-    internal_number: "",
-    neighborhood: "",
-    postal_code: "",
-    city: "",
-    state: "",
-    country: "México",
-    delivery_zones: [],
-    facebook_username: "",
-    instagram_username: "",
-    twitter_username: "",
-    youtube_username: "",
-    linkedin_username: "",
-    tiktok_username: "",
+    business_name: business.business_name || "",
+    business_legal_name: business.business_legal_name || "",
+    business_logo_url: business.business_logo_url || "",
+    tax_situation_url: business.tax_situation_url || "",
+    main_phone_number: business.main_phone_number || "",
+    contact_phone_number: business.contact_phone_number || "",
+    main_email: business.main_email || "",
+    business_sector: business.business_sector || "",
+    website_url: business.website_url || "",
+    description: business.description || "",
+    bank_account_number: business.bank_account_number || "",
+    bank_name: business.bank_name || "",
+    street: business.street || "",
+    external_number: business.external_number || "",
+    internal_number: business.internal_number || "",
+    neighborhood: business.neighborhood || "",
+    postal_code: business.postal_code || "",
+    city: business.city || "",
+    state: business.state || "",
+    country: business.country || "México",
+    delivery_zones: business.delivery_zones || [],
+    social_media: business.social_media || {},
+    commission_percentage: business.commission_percentage || 0,
   };
 
   const form = useForm<BusinessFormValues>({
@@ -276,151 +303,111 @@ export function BusinessForm({
     defaultValues,
   });
 
-  // Preparar datos para el mapa
+  // Cargar datos GeoJSON para el mapa
   useEffect(() => {
-    if (initialStates.length > 0) {
-      // Convertir estados a formato para el mapa
-      const statesForMap = initialStates.map((state) => ({
-        name: state,
-        value: state,
-      }));
-      setMapStates(statesForMap);
+    const fetchGeoData = async () => {
+      try {
+        const response = await fetch(
+          "https://raw.githubusercontent.com/angelnmara/geojson/refs/heads/master/MunicipiosMexico.json"
+        );
+        const data = await response.json();
+        setGeoJsonData(data);
 
-      // Preparar ciudades para el mapa
-      const allCities: any[] = [];
-      Object.entries(initialCities).forEach(([state, stateCities]) => {
-        stateCities.forEach((city) => {
-          allCities.push({
-            name: city,
-            state: state,
-            value: `${city}|${state}`,
+        // Extraer estados y ciudades del GeoJSON
+        const statesMap = new Map<string, string>();
+        const citiesArray: any[] = [];
+
+        if (data && data.features) {
+          data.features.forEach((feature: any) => {
+            if (feature.properties) {
+              const municipio = feature.properties.NAME_2 || "";
+              const estado = feature.properties.NAME_1 || "";
+
+              if (!municipio || !estado) return;
+
+              statesMap.set(estado, estado);
+
+              citiesArray.push({
+                name: municipio,
+                state: estado,
+                value: `${municipio}|${estado}`,
+              });
+            }
           });
-        });
-      });
-      setMapCities(allCities);
-    }
+        }
 
-    // Usar los sectores proporcionados directamente
-    if (initialSectors.length > 0) {
-      setSectors(initialSectors);
-    }
-  }, [initialStates, initialCities, initialSectors]);
+        // Convertir estados a formato para el mapa
+        const statesArray = Array.from(statesMap.entries()).map(([name]) => ({
+          name,
+          value: name,
+        }));
 
-  // Cargar ciudades cuando cambia el estado seleccionado
+        setMapStates(statesArray);
+        setMapCities(citiesArray);
+
+        // Formatear zonas de entrega para el componente de mapa
+        if (business.delivery_zones && business.delivery_zones.length > 0) {
+          const formattedZones = business.delivery_zones.map(
+            (zone: { city: string; state: string }) =>
+              `${zone.city}|${zone.state}`
+          );
+          setDeliveryZonesFormatted(formattedZones);
+        }
+      } catch (error) {
+        console.error("Error loading GeoJSON data:", error);
+        toast.error("Error al cargar datos geográficos");
+      }
+    };
+
+    fetchGeoData();
+  }, [business.delivery_zones]);
+
+  // Manejar cambio en las zonas de entrega
+  const handleDeliveryZonesChange = (zones: string[]) => {
+    // Convertir de formato "city|state" a objetos { city, state }
+    const formattedZones = zones.map((zone) => {
+      const [city, state] = zone.split("|");
+      return { city, state };
+    });
+
+    form.setValue("delivery_zones", formattedZones);
+  };
+
+  // Inicializar valores de redes sociales
   useEffect(() => {
-    if (!selectedState) {
-      setCities([]);
-      return;
+    if (business.social_media) {
+      const socialMedia = business.social_media;
+
+      // Establecer los valores directamente en el formulario
+      form.setValue("social_media", socialMedia);
     }
-
-    // Si tenemos ciudades precargadas para este estado, usarlas
-    if (initialCities && initialCities[selectedState]) {
-      setCities(initialCities[selectedState]);
-      return;
-    }
-
-    // Si no hay ciudades precargadas, mostrar un mensaje
-    toast.error(`No se encontraron ciudades para ${selectedState}`);
-    setCities([]);
-  }, [selectedState, initialCities]);
-
-  // Manejar cambio de estado en el formulario
-  const handleStateChange = (state: string) => {
-    setSelectedState(state);
-    form.setValue("state", state);
-    form.setValue("city", ""); // Resetear ciudad al cambiar estado
-  };
-
-  // Obtener la URL completa de una red social
-  const getSocialNetworkUrl = (networkId: string, username: string): string => {
-    const network = SOCIAL_NETWORKS.find((n) => n.id === networkId);
-    if (!network || !username) return "";
-    return `${network.baseUrl}${username}`;
-  };
+  }, [business.social_media, form]);
 
   async function onSubmit(data: BusinessFormValues) {
     try {
       setIsLoading(true);
 
-      // Generar referencia a partir del nombre del negocio
-      const reference = generateReferenceFromName(data.business_name);
-
-      // Convertir redes sociales a formato para guardar
-      const socialMedia: Record<string, string> = {};
-
-      // Agregar cada red social si tiene un username
-      if (data.facebook_username) {
-        socialMedia.facebook = getSocialNetworkUrl(
-          "facebook",
-          data.facebook_username
-        );
-      }
-      if (data.instagram_username) {
-        socialMedia.instagram = getSocialNetworkUrl(
-          "instagram",
-          data.instagram_username
-        );
-      }
-      if (data.twitter_username) {
-        socialMedia.twitter = getSocialNetworkUrl(
-          "twitter",
-          data.twitter_username
-        );
-      }
-      if (data.youtube_username) {
-        socialMedia.youtube = getSocialNetworkUrl(
-          "youtube",
-          data.youtube_username
-        );
-      }
-      if (data.linkedin_username) {
-        socialMedia.linkedin = getSocialNetworkUrl(
-          "linkedin",
-          data.linkedin_username
-        );
-      }
-      if (data.tiktok_username) {
-        socialMedia.tiktok = getSocialNetworkUrl(
-          "tiktok",
-          data.tiktok_username
-        );
-      }
-
-      // Enviar datos al servidor
-      const response = await fetch("/api/businesses/create", {
-        method: "POST",
+      // Enviar datos al servidor usando la nueva ruta
+      const response = await fetch(`/api/businesses/${business.id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...data,
-          reference,
-          // Asegurarse de que delivery_zones sea un array de objetos para Supabase
-          delivery_zones: data.delivery_zones.map((zone) => {
-            const [city, state] = zone.split("|");
-            return { city: city.trim(), state: state.trim() };
-          }),
-          // Convertir redes sociales a formato para guardar
-          social_media: socialMedia,
-        }),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Error al crear el negocio");
+        throw new Error(errorData.error || "Error al actualizar el negocio");
       }
 
-      const business = await response.json();
-
-      toast.success("Negocio creado correctamente", {
-        description: "Tu negocio ha sido registrado exitosamente.",
+      toast.success("Negocio actualizado correctamente", {
+        description:
+          "La información de tu negocio ha sido actualizada exitosamente.",
       });
-
-      // Redirigir al dashboard
-      router.push(`/dashboard`);
     } catch (error) {
-      console.error("Error al crear el negocio:", error);
-      toast.error("Error al crear el negocio", {
+      console.error("Error al actualizar el negocio:", error);
+      toast.error("Error al actualizar el negocio", {
         description:
           error instanceof Error
             ? error.message
@@ -592,7 +579,7 @@ export function BusinessForm({
                           <SelectValue placeholder="Selecciona un sector" />
                         </SelectTrigger>
                         <SelectContent>
-                          {sectors.map((sector) => (
+                          {BUSINESS_SECTORS.map((sector) => (
                             <SelectItem key={sector} value={sector}>
                               {sector}
                             </SelectItem>
@@ -750,6 +737,7 @@ export function BusinessForm({
                             className="bg-background"
                             placeholder="Núm. int. (opcional)"
                             {...field}
+                            value={field.value || ""}
                           />
                         </FormControl>
                         <FormMessage />
@@ -806,21 +794,11 @@ export function BusinessForm({
                     <FormItem>
                       <FormLabel>Estado</FormLabel>
                       <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={handleStateChange}
-                        >
-                          <SelectTrigger className="bg-background">
-                            <SelectValue placeholder="Selecciona un estado" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {states.map((state) => (
-                              <SelectItem key={state} value={state}>
-                                {state}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Input
+                          className="bg-background"
+                          placeholder="Estado"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -834,22 +812,11 @@ export function BusinessForm({
                     <FormItem>
                       <FormLabel>Ciudad</FormLabel>
                       <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          disabled={!selectedState}
-                        >
-                          <SelectTrigger className="bg-background">
-                            <SelectValue placeholder="Selecciona una ciudad" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {cities.map((city) => (
-                              <SelectItem key={city} value={city}>
-                                {city}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Input
+                          className="bg-background"
+                          placeholder="Ciudad"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -884,28 +851,34 @@ export function BusinessForm({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 bg-sidebar">
-              <FormField
-                control={form.control}
-                name="delivery_zones"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Selecciona las zonas donde entregas</FormLabel>
-                    <FormControl>
-                      <DeliveryMapWrapper
-                        value={field.value}
-                        onChange={field.onChange}
-                        initialCities={mapCities}
-                        initialStates={mapStates}
-                        geoJsonData={geoJsonData}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Busca y selecciona las ciudades donde realizas entregas.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
+              <FormItem>
+                <FormLabel>Selecciona las zonas donde entregas</FormLabel>
+                <FormControl>
+                  {geoJsonData &&
+                  mapCities.length > 0 &&
+                  mapStates.length > 0 ? (
+                    <DeliveryMapWrapper
+                      value={deliveryZonesFormatted}
+                      onChange={handleDeliveryZonesChange}
+                      initialCities={mapCities}
+                      initialStates={mapStates}
+                      geoJsonData={geoJsonData}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-40 border rounded-md">
+                      <p className="text-muted-foreground">Cargando mapa...</p>
+                    </div>
+                  )}
+                </FormControl>
+                <FormDescription>
+                  Busca y selecciona las ciudades donde realizas entregas.
+                </FormDescription>
+                {form.formState.errors.delivery_zones && (
+                  <p className="text-sm font-medium text-destructive mt-2">
+                    {form.formState.errors.delivery_zones.message}
+                  </p>
                 )}
-              />
+              </FormItem>
             </CardContent>
           </Card>
 
@@ -941,7 +914,7 @@ export function BusinessForm({
                 {/* Facebook */}
                 <FormField
                   control={form.control}
-                  name="facebook_username"
+                  name="social_media.facebook"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -969,7 +942,7 @@ export function BusinessForm({
                 {/* Instagram */}
                 <FormField
                   control={form.control}
-                  name="instagram_username"
+                  name="social_media.instagram"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -997,7 +970,7 @@ export function BusinessForm({
                 {/* Twitter */}
                 <FormField
                   control={form.control}
-                  name="twitter_username"
+                  name="social_media.twitter"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -1025,7 +998,7 @@ export function BusinessForm({
                 {/* YouTube */}
                 <FormField
                   control={form.control}
-                  name="youtube_username"
+                  name="social_media.youtube"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -1053,7 +1026,7 @@ export function BusinessForm({
                 {/* LinkedIn */}
                 <FormField
                   control={form.control}
-                  name="linkedin_username"
+                  name="social_media.linkedin"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -1081,7 +1054,7 @@ export function BusinessForm({
                 {/* TikTok */}
                 <FormField
                   control={form.control}
-                  name="tiktok_username"
+                  name="social_media.tiktok"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -1109,8 +1082,6 @@ export function BusinessForm({
             </CardContent>
           </Card>
 
-          <Separator />
-
           {/* Botón de envío */}
           <Button
             variant={"defaultBlack"}
@@ -1119,7 +1090,7 @@ export function BusinessForm({
             disabled={isLoading}
             className="w-full"
           >
-            {isLoading ? "Guardando información..." : "Guardar negocio"}
+            {isLoading ? "Guardando cambios..." : "Guardar cambios"}
           </Button>
         </form>
       </Form>

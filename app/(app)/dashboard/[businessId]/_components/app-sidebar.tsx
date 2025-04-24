@@ -47,13 +47,13 @@ export async function AppSidebar({
         />
       </SidebarContent>
       <SidebarFooter className="p-0">
-        <div className="p-2 pb-0">
+        {/* <div className="p-2 pb-0">
           <Announcement
             title="Ahora puedes crear banners"
             description="Puedes crear y solicitar banners para el catálogo Knoott, aumenta tus ventas e impulsa tu negocio."
             href={`/dashboard/${business.id}/banners`}
           />
-        </div>
+        </div> */}
         <div className="p-2 border-t bg-background pb-8 lg:pb-2">
           <LogoutButton inSidebar />
         </div>

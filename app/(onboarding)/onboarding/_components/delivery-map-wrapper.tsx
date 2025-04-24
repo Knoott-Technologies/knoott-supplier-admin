@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2, X } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Command,
   CommandEmpty,
@@ -52,209 +52,46 @@ interface State {
 
 interface DeliveryMapWrapperProps
   extends Omit<DeliveryMapProps, "geoJsonData"> {
-  initialCities?: City[];
-  initialStates?: State[];
-  geoJsonData?: FeatureCollection | null;
+  initialCities: City[];
+  initialStates: State[];
+  geoJsonData: FeatureCollection | null;
 }
-
-// Función para extraer el nombre del estado del código
-const getEstadoName = (cveEnt: string): string => {
-  const estados: Record<string, string> = {
-    "01": "Aguascalientes",
-    "02": "Baja California",
-    "03": "Baja California Sur",
-    "04": "Campeche",
-    "05": "Coahuila",
-    "06": "Colima",
-    "07": "Chiapas",
-    "08": "Chihuahua",
-    "09": "Ciudad de México",
-    "10": "Durango",
-    "11": "Guanajuato",
-    "12": "Guerrero",
-    "13": "Hidalgo",
-    "14": "Jalisco",
-    "15": "Estado de México",
-    "16": "Michoacán",
-    "17": "Morelos",
-    "18": "Nayarit",
-    "19": "Nuevo León",
-    "20": "Oaxaca",
-    "21": "Puebla",
-    "22": "Querétaro",
-    "23": "Quintana Roo",
-    "24": "San Luis Potosí",
-    "25": "Sinaloa",
-    "26": "Sonora",
-    "27": "Tabasco",
-    "28": "Tamaulipas",
-    "29": "Tlaxcala",
-    "30": "Veracruz",
-    "31": "Yucatán",
-    "32": "Zacatecas",
-  };
-  return estados[cveEnt] || cveEnt;
-};
 
 export function DeliveryMapWrapper({
   value,
   onChange,
-  initialCities = [],
-  initialStates = [],
-  geoJsonData = null,
+  initialCities,
+  initialStates,
+  geoJsonData,
 }: DeliveryMapWrapperProps) {
   const [selectedRegions, setSelectedRegions] = useState<string[]>(value || []);
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [cities, setCities] = useState<City[]>(initialCities);
-  const [states, setStates] = useState<State[]>(initialStates);
-  const [loading, setLoading] = useState(
-    initialCities.length === 0 || initialStates.length === 0
-  );
   const [filteredCities, setFilteredCities] = useState<City[]>(initialCities);
   const [filteredStates, setFilteredStates] = useState<State[]>(initialStates);
-  const [geoJsonDataState, setGeoJsonData] = useState<FeatureCollection | null>(
-    geoJsonData
-  );
+  const [isDataAvailable, setIsDataAvailable] = useState(false);
 
-  // Load GeoJSON data and extract cities and states if not provided
+  // Check if data is available
   useEffect(() => {
-    // If we already have data, skip fetching
-    if (initialCities.length > 0 && initialStates.length > 0 && geoJsonData) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchGeoData = async () => {
-      try {
-        setLoading(true);
-        // Fetch from the GitHub URL
-        const response = await fetch(
-          "https://raw.githubusercontent.com/angelnmara/geojson/refs/heads/master/MunicipiosMexico.json"
-        );
-        const data = await response.json();
-        setGeoJsonData(data);
-
-        // Only extract states and cities if not provided
-        if (initialCities.length === 0 || initialStates.length === 0) {
-          // Extract unique states and cities from GeoJSON
-          const statesMap = new Map<string, string>();
-          const citiesArray: City[] = [];
-
-          // Process features to extract states and cities
-          if (data && data.features) {
-            data.features.forEach((feature: any) => {
-              if (feature.properties) {
-                const municipio =
-                  feature.properties.NAME_2 || feature.properties.NOMGEO || "";
-                let estado = "";
-
-                // Get state name
-                if (feature.properties.NAME_1) {
-                  estado = feature.properties.NAME_1;
-                } else if (feature.properties.CVE_ENT) {
-                  estado = getEstadoName(feature.properties.CVE_ENT);
-                }
-
-                // Skip if missing data
-                if (!municipio || !estado) return;
-
-                // Add state to map
-                statesMap.set(estado, estado);
-
-                // Add city to array
-                citiesArray.push({
-                  name: municipio,
-                  state: estado,
-                  value: `${municipio}|${estado}`,
-                });
-              }
-            });
-          }
-
-          // Convert states map to array
-          const statesArray: State[] = Array.from(statesMap.entries()).map(
-            ([name]) => ({
-              name,
-              value: name,
-            })
-          );
-
-          setStates(statesArray);
-          setFilteredStates(statesArray);
-          setCities(citiesArray);
-          setFilteredCities(citiesArray);
-        }
-      } catch (error) {
-        console.error("Error loading GeoJSON data:", error);
-
-        // Fallback to API if GeoJSON fails
-        fetchStatesAndCitiesFromAPI();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Fallback method to fetch from API
-    const fetchStatesAndCitiesFromAPI = async () => {
-      try {
-        // Fetch states
-        const statesResponse = await fetch("/api/states-cities?type=states");
-        const statesData = await statesResponse.json();
-        const statesList = statesData.states || [];
-
-        // Create states array
-        const statesArray: State[] = statesList.map((state: string) => ({
-          name: state,
-          value: state,
-        }));
-
-        setStates(statesArray);
-        setFilteredStates(statesArray);
-
-        // Fetch cities for each state
-        const allCities: City[] = [];
-        for (const state of statesList) {
-          const citiesResponse = await fetch(
-            `/api/states-cities?type=cities&state=${encodeURIComponent(state)}`
-          );
-          const citiesData = await citiesResponse.json();
-          const stateCities = citiesData.cities || [];
-
-          // Add cities to the list
-          stateCities.forEach((city: string) => {
-            allCities.push({
-              name: city,
-              state: state,
-              value: `${city}|${state}`,
-            });
-          });
-        }
-
-        setCities(allCities);
-        setFilteredCities(allCities);
-      } catch (error) {
-        console.error("Error loading data from API:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGeoData();
+    setIsDataAvailable(
+      initialCities.length > 0 &&
+        initialStates.length > 0 &&
+        geoJsonData !== null
+    );
   }, [initialCities, initialStates, geoJsonData]);
 
   // Filter cities and states based on search term
   useEffect(() => {
     if (!searchTerm) {
-      setFilteredCities(cities);
-      setFilteredStates(states);
+      setFilteredCities(initialCities);
+      setFilteredStates(initialStates);
       return;
     }
 
     const lowerSearchTerm = searchTerm.toLowerCase();
 
     // Filter cities
-    const filteredCities = cities.filter(
+    const filteredCities = initialCities.filter(
       (city) =>
         city.name.toLowerCase().includes(lowerSearchTerm) ||
         city.state.toLowerCase().includes(lowerSearchTerm)
@@ -262,11 +99,11 @@ export function DeliveryMapWrapper({
     setFilteredCities(filteredCities);
 
     // Filter states
-    const filteredStates = states.filter((state) =>
+    const filteredStates = initialStates.filter((state) =>
       state.name.toLowerCase().includes(lowerSearchTerm)
     );
     setFilteredStates(filteredStates);
-  }, [searchTerm, cities, states]);
+  }, [searchTerm, initialCities, initialStates]);
 
   // Update parent form when selections change
   useEffect(() => {
@@ -293,7 +130,9 @@ export function DeliveryMapWrapper({
   // Add all cities from a state
   const addEntireState = (stateName: string) => {
     // Get all cities from this state
-    const stateCities = cities.filter((city) => city.state === stateName);
+    const stateCities = initialCities.filter(
+      (city) => city.state === stateName
+    );
 
     // Add all cities that aren't already selected
     const newRegions = [...selectedRegions];
@@ -325,7 +164,9 @@ export function DeliveryMapWrapper({
 
   // Check if all cities of a state are selected
   const isEntireStateSelected = (stateName: string) => {
-    const stateCities = cities.filter((city) => city.state === stateName);
+    const stateCities = initialCities.filter(
+      (city) => city.state === stateName
+    );
     return stateCities.every((city) => selectedRegions.includes(city.value));
   };
 
@@ -358,15 +199,21 @@ export function DeliveryMapWrapper({
   return (
     <div className="space-y-4">
       {/* Search box for cities and states */}
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover
+        open={open && isDataAvailable}
+        onOpenChange={(o) => isDataAvailable && setOpen(o)}
+      >
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
             aria-expanded={open}
             className="w-full justify-between"
+            disabled={!isDataAvailable}
           >
-            {loading ? "Cargando datos..." : "Buscar ciudad o estado..."}
+            {!isDataAvailable
+              ? "Cargando datos geográficos..."
+              : "Buscar ciudad o estado..."}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -389,7 +236,7 @@ export function DeliveryMapWrapper({
                     {filteredStates.map((state) => {
                       const stateSelected = isEntireStateSelected(state.name);
                       const selectedCount = getSelectedCitiesCount(state.name);
-                      const totalCities = cities.filter(
+                      const totalCities = initialCities.filter(
                         (city) => city.state === state.name
                       ).length;
 
@@ -464,51 +311,65 @@ export function DeliveryMapWrapper({
       </Popover>
 
       {/* Interactive map */}
-      <DeliveryMapClient
-        value={selectedRegions}
-        onChange={handleMapSelectionChange}
-        geoJsonData={geoJsonDataState}
-      />
+      {isDataAvailable ? (
+        <DeliveryMapClient
+          value={selectedRegions}
+          onChange={handleMapSelectionChange}
+          geoJsonData={geoJsonData}
+        />
+      ) : (
+        <Card className="border">
+          <CardContent className="p-0 overflow-hidden">
+            <Skeleton className="h-auto aspect-square w-full" />
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Selected regions display */}
-      <div className="space-y-4">
-        {Object.entries(groupedSelections).map(([state, regions]) => (
-          <div key={state} className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium">{state}</h4>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10 h-fit py-1.5"
-                onClick={() => removeEntireState(state)}
-              >
-                Eliminar todas
-                <Trash2 className="!size-3" />
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {regions.map((region) => {
-                const [city] = region.split("|");
-                return (
+      {/* Selected regions display with horizontal scroll */}
+      <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
+        {Object.keys(groupedSelections).length > 0 ? (
+          Object.entries(groupedSelections).map(([state, regions]) => (
+            <Card key={state} className="w-full border-t-0">
+              <CardHeader className="sticky top-0 bg-background border-t">
+                <span className="w-full flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium">{state}</CardTitle>
                   <Button
-                    key={region}
                     variant="ghost"
                     size="sm"
-                    className="text-xs text-muted-foreground h-fit py-1.5 hover:text-destructive"
-                    onClick={() => removeRegion(region)}
+                    className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10 h-fit py-1.5"
+                    onClick={() => removeEntireState(state)}
                   >
-                    {city}
-                    <X className="!size-3" />
+                    Eliminar todas
+                    <Trash2 className="ml-1 !size-3" />
                   </Button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-        {selectedRegions.length === 0 && (
+                </span>
+              </CardHeader>
+              <CardContent className="w-full bg-sidebar">
+                <div className="flex flex-wrap gap-1 no-scrollbar">
+                  {regions.map((region) => {
+                    const [city] = region.split("|");
+                    return (
+                      <Button
+                        key={region}
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-fit py-1.5 flex-shrink-0"
+                        onClick={() => removeRegion(region)}
+                      >
+                        {city}
+                        <X className="ml-1 !size-3" />
+                      </Button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
           <p className="text-sm text-muted-foreground">
-            Busca ciudades o estados, o haz clic en las regiones del mapa para
-            seleccionar zonas de entrega
+            {isDataAvailable
+              ? "Busca ciudades o estados, o haz clic en las regiones del mapa para seleccionar zonas de entrega"
+              : "Cargando datos geográficos..."}
           </p>
         )}
       </div>

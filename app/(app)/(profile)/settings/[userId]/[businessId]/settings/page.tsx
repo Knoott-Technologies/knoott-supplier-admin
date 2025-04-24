@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { DeleteTableCard } from "./_components/delete-table-card";
 import { PageHeader } from "@/components/universal/headers";
 import { BusinessUsersCard } from "./_components/business-users-card";
+import { BusinessInfoEditForm } from "./_components/business-info-edit-form";
 
 const BusinessSettings = async ({
   params,
@@ -53,10 +54,7 @@ const BusinessSettings = async ({
         description={`Configura tu negocio ${business.business_name}.`}
       />
       <section className="w-full h-fit items-start justify-start flex flex-col gap-y-6">
-        <BusinessUsersCard
-          businessUsers={businessUsers || []}
-          business={business}
-        />
+        <BusinessInfoEditForm business={business} />
         <DeleteTableCard user={user} business={business} />
       </section>
     </main>

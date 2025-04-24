@@ -67,6 +67,7 @@ export function ImageUpload({
 
   const currentImage = imagesToProcess[currentImageIndex];
   const remainingSlots = maxFiles - value.length;
+  const hasImages = value.length > 0;
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -358,53 +359,36 @@ export function ImageUpload({
         </Alert>
       )}
 
-      <div className="border rounded-md overflow-hidden">
-        <div
-          {...getRootProps()}
-          className={`px-5 py-7 hover:bg-background/50 text-center bg-background cursor-pointer transition-colors ${
-            isDragActive
-              ? "border-primary bg-primary/10"
-              : "border-muted-foreground/20"
-          } ${remainingSlots <= 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-        >
-          <input {...getInputProps()} disabled={remainingSlots <= 0} />
-          <div className="flex flex-col items-center justify-center gap-2">
-            {remainingSlots <= 0 ? (
+      {/* Mostrar dropzone solo cuando no hay imágenes */}
+      {!hasImages && (
+        <div className="border rounded-md overflow-hidden">
+          <div
+            {...getRootProps()}
+            className={`px-4 py-7 hover:bg-background/50 text-center bg-background cursor-pointer transition-colors relative ${
+              isDragActive
+                ? "border-primary bg-primary/10"
+                : "border-muted-foreground/20"
+            }`}
+          >
+            <input {...getInputProps()} />
+            <div className="flex flex-col items-center justify-center gap-2">
               <p className="text-sm text-muted-foreground">
-                Ya has subido una imagen
+                Arrastra y suelta una imagen aquí, o haz clic para seleccionar
               </p>
-            ) : (
-              <>
-                <p className="text-sm text-muted-foreground">
-                  Arrastra y suelta una imagen aquí, o haz clic para seleccionar
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  La imagen debe ser cuadrada
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Tamaño máximo: 5MB
-                </p>
-              </>
-            )}
+              <p className="text-xs text-muted-foreground">
+                La imagen debe ser cuadrada
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Tamaño máximo: 5MB
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {value.length > 0 && (
+      {/* Mostrar la vista previa cuando hay imágenes */}
+      {hasImages && (
         <div className="w-full h-fit flex flex-col gap-y-4">
-          <div className="flex items-center justify-between">
-            <p className="font-medium">Logo del negocio</p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                onChange([]);
-                toast("Logo eliminado");
-              }}
-            >
-              Eliminar
-            </Button>
-          </div>
           <div className="relative group aspect-square w-full max-w-[200px] bg-background overflow-hidden rounded-md border">
             <Image
               src={value[0] || "/placeholder.svg"}
