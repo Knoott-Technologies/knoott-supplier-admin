@@ -49,12 +49,14 @@ interface MenuItem {
   action?: ActionProps;
   subItems?: SubMenuItem[];
   badge?: number;
+  disabled?: boolean;
 }
 
 interface SubMenuItem {
   title: string;
   icon: LucideIcon;
   href: string;
+  disabled?: boolean;
 }
 
 interface ActionProps {
@@ -138,45 +140,45 @@ export const SidebarContentProvider = ({
           icon: ArrowLeftRight,
           href: `${startUrl}/transactions`,
         },
-        {
-          title: "Reportes",
-          icon: FileChartLine,
-          href: `${startUrl}/reports`,
-        },
+        // {
+        //   title: "Reportes",
+        //   icon: FileChartLine,
+        //   href: `${startUrl}/reports`,
+        // },
       ],
     },
-    {
-      label: "Mercadotecnia",
-      visibleTo: ["admin", "supervisor", "staff"],
-      items: [
-        {
-          title: "Banners",
-          icon: RectangleHorizontalIcon,
-          href: `${startUrl}/banners`,
-        },
-        {
-          title: "Potenciadores",
-          icon: ChevronsUp,
-          href: `${startUrl}/reports`,
-        },
-      ],
-    },
-    {
-      label: "Analítica",
-      visibleTo: ["admin", "supervisor"],
-      items: [
-        {
-          title: "Productos",
-          icon: ChartPie,
-          href: `${startUrl}/product-analitics`,
-        },
-        {
-          title: "Ventas",
-          icon: ChartNoAxesCombined,
-          href: `${startUrl}/sales-analitics`,
-        },
-      ],
-    },
+    // {
+    //   label: "Mercadotecnia",
+    //   visibleTo: ["admin", "supervisor", "staff"],
+    //   items: [
+    //     {
+    //       title: "Banners",
+    //       icon: RectangleHorizontalIcon,
+    //       href: `${startUrl}/banners`,
+    //     },
+    //     {
+    //       title: "Potenciadores",
+    //       icon: ChevronsUp,
+    //       href: `${startUrl}/reports`,
+    //     },
+    //   ],
+    // },
+    // {
+    //   label: "Analítica",
+    //   visibleTo: ["admin", "supervisor"],
+    //   items: [
+    //     {
+    //       title: "Productos",
+    //       icon: ChartPie,
+    //       href: `${startUrl}/product-analitics`,
+    //     },
+    //     {
+    //       title: "Ventas",
+    //       icon: ChartNoAxesCombined,
+    //       href: `${startUrl}/sales-analitics`,
+    //     },
+    //   ],
+    // },
     {
       label: "Gestión",
       visibleTo: ["admin"],
