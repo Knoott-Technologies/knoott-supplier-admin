@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Image from "next/image";
-import { Check } from "lucide-react";
+import { Check, Store } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export const Section5 = ({ user }: { user: User | null }) => {
@@ -56,8 +56,11 @@ export const Section5 = ({ user }: { user: User | null }) => {
                 <p className="text-sm font-semibold text-success">Logotipo</p>
                 <div className="flex items-end justify-end gap-4">
                   <div className="relative size-fit">
-                    <div className="aspect-square w-24 border border-success bg-success/10 items-center justify-center flex shrink-0 relative overflow-hidden">
-                      <Image src={"/logo-test.png"} alt="logo" fill />
+                    <div className="aspect-square w-24 border border-success bg-muted items-center justify-center flex shrink-0 relative overflow-hidden">
+                      <Store
+                        className="text-muted-foreground size-12"
+                        strokeWidth={1.5}
+                      />
                     </div>
                     <Badge
                       variant={"outline"}

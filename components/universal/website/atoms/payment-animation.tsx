@@ -6,9 +6,7 @@ import { forwardRef, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { AnimatedBeam } from "@/components/magicui/animated-beam";
 import { Icon } from "@/components/universal/logo";
-import { Shopify } from "@/components/svgs/icons";
-import { Box, Check, RefreshCcw, User2 } from "lucide-react";
-import Image from "next/image";
+import { Box, Store } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const IconWrapper = forwardRef<
@@ -19,7 +17,7 @@ const IconWrapper = forwardRef<
     <div
       ref={ref}
       className={cn(
-        "z-10 flex items-center justify-center border bg-background shadow-md rounded-[10px]",
+        "z-10 flex items-center justify-center border bg-background shadow-md",
         className
       )}
     >
@@ -49,35 +47,35 @@ export function PaymentAnimation() {
       <div className="flex w-full flex-row items-stretch justify-between gap-10">
         <div className="flex flex-col justify-center gap-4">
           <IconWrapper
-            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground rounded-[5px]"
+            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground"
             ref={div1Ref}
           >
             <Box className="size-4" />
             Orden
           </IconWrapper>
           <IconWrapper
-            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground rounded-[5px]"
+            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground"
             ref={div2Ref}
           >
             <Box className="size-4" />
             Orden
           </IconWrapper>
           <IconWrapper
-            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground rounded-[5px]"
+            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground"
             ref={div3Ref}
           >
             <Box className="size-4" />
             Orden
           </IconWrapper>
           <IconWrapper
-            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground rounded-[5px]"
+            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground"
             ref={div4Ref}
           >
             <Box className="size-4" />
             Orden
           </IconWrapper>
           <IconWrapper
-            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground rounded-[5px]"
+            className="px-2 py-1 bg-sidebar gap-x-1 items-center flex text-sm text-muted-foreground"
             ref={div5Ref}
           >
             <Box className="size-4" />
@@ -94,8 +92,8 @@ export function PaymentAnimation() {
         </div>
         <div className="flex flex-col justify-center">
           <div className="relative overflow-visible" ref={div7Ref}>
-            <IconWrapper className="size-20 lg:size-32 relative overflow-hidden">
-              <Image src="/logo-test.png" alt="credit cards" fill />
+            <IconWrapper className="size-20 lg:size-32 relative overflow-hidden bg-muted">
+              <Store className="size-14 text-muted-foreground" strokeWidth={1.5} />
             </IconWrapper>
             <Badge
               variant={"outline"}

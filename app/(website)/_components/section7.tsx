@@ -4,7 +4,7 @@ import { User } from "@supabase/supabase-js";
 import { libre } from "@/components/fonts/font-def";
 import { Icon } from "@/components/universal/logo";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Store } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 
@@ -37,13 +37,8 @@ export const Section7 = ({ user }: { user: User | null }) => {
           <BlurFade inView delay={0.2} direction="up" className="w-full h-fit">
             <div className="bg-background border shadow-lg p-7 lg:p-14 flex flex-col items-center justify-center gap-y-5 lg:gap-y-7 max-w-[90%] mx-auto relative overflow-hidden">
               <div className="size-fit relative">
-                <div className="size-28 border bg-foreground rounded-[10px] relative overflow-hidden">
-                  <Image
-                    src={"/logo-test.png"}
-                    className="object-cover"
-                    fill
-                    alt=""
-                  />
+                <div className="aspect-square w-28 border bg-muted items-center justify-center flex shrink-0 relative overflow-hidden">
+                  <Store className="text-muted-foreground size-14" strokeWidth={1.5} />
                 </div>
                 <Badge
                   variant={"outline"}
