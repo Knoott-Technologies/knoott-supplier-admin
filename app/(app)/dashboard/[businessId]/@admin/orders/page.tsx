@@ -5,6 +5,8 @@ import { OrdersSummary } from "./_components/orders-summary";
 import { OrdersTable } from "./_components/orders-table";
 import { OrdersAlerts } from "./_components/orders-alert";
 import { Database } from "@/database.types";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -43,7 +45,7 @@ const OrdersPage = async ({
     showTrash?: string;
   };
 }) => {
-  const supabase = createAdminClient();
+  const supabase = createClient(cookies());
 
   // Get URL parameters with default values
   const page = Number.parseInt(searchParams.page || "1", 10);
