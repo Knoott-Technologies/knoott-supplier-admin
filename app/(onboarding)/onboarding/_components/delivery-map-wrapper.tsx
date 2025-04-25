@@ -178,6 +178,14 @@ export function DeliveryMapWrapper({
     }).length;
   };
 
+  // Select all cities in Mexico
+  const selectAllMexico = () => {
+    // Get all cities from all states
+    const allCities = initialCities.map((city) => city.value);
+    setSelectedRegions(allCities);
+    setOpen(false);
+  };
+
   // Handle map selection changes
   const handleMapSelectionChange = (newSelection: string[]) => {
     setSelectedRegions(newSelection);
@@ -232,6 +240,34 @@ export function DeliveryMapWrapper({
 
               {filteredStates.length > 0 && (
                 <>
+                  <CommandGroup heading="País">
+                    <CommandItem
+                      key="all-mexico"
+                      value="all-mexico"
+                      onSelect={selectAllMexico}
+                      className="flex items-center"
+                    >
+                      <div className="flex items-center flex-1">
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedRegions.length === initialCities.length
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Todo México</span>
+                      </div>
+                      {selectedRegions.length > 0 &&
+                        selectedRegions.length < initialCities.length && (
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {selectedRegions.length}/{initialCities.length}{" "}
+                            ciudades
+                          </span>
+                        )}
+                    </CommandItem>
+                  </CommandGroup>
                   <CommandGroup heading="Estados">
                     {filteredStates.map((state) => {
                       const stateSelected = isEntireStateSelected(state.name);
