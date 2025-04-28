@@ -40,7 +40,13 @@ const formSchema = z.object({
     .min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
 });
 
-export function RegisterForm() {
+export function RegisterForm({
+  businessId,
+  token,
+}: {
+  businessId: string | null;
+  token: string | null;
+}) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -61,8 +67,13 @@ export function RegisterForm() {
     setLoading(true);
 
     try {
-      // Construir la URL de redirección incluyendo weddingId y token si existen
-      const redirectUrl = `${window.location.origin}/api/auth/callback?origin=1`;
+      // Construir la URL de redirección incluyendo businessId y token si existen
+      let redirectUrl = `${window.location.origin}/api/auth/callback?origin=1`;
+
+      // Agregar parámetros de invitación si existen
+      if (businessId && token) {
+        redirectUrl += `&businessId=${businessId}&token=${token}`;
+      }
 
       // Registrar el usuario con email y contraseña proporcionados
       const { data, error } = await supabase.auth.signUp({
@@ -94,9 +105,8 @@ export function RegisterForm() {
           "Te hemos enviado un correo electrónico para verificar tu cuenta.",
       });
 
-      // Redirigir al usuario a una página de confirmación, incluyendo parámetros de invitación
+      // Redirigir al usuario a una página de confirmación
       const confirmationUrl = `/register/confirmation?email=${values.email}`;
-
       router.push(confirmationUrl);
     } catch (error) {
       console.error("Error en el registro:", error);
@@ -112,8 +122,11 @@ export function RegisterForm() {
     setShowPassword(!showPassword);
   };
 
-  // Construir la URL para el enlace de "Iniciar sesión" incluyendo weddingId y token si existen
-  const loginUrl = "/login";
+  // Construir la URL para el enlace de "Iniciar sesión" incluyendo businessId y token si existen
+  let loginUrl = "/login";
+  if (businessId && token) {
+    loginUrl += `?businessId=${businessId}&token=${token}`;
+  }
 
   return (
     <div className="w-full h-fit items-start justify-start flex flex-col gap-y-4 px-5 md:px-0">
@@ -175,7 +188,6 @@ export function RegisterForm() {
             )}
           />
 
-          {/* Reemplazamos el campo de teléfono con nuestro componente personalizado */}
           <FormField
             control={form.control}
             name="phone"
@@ -247,7 +259,7 @@ export function RegisterForm() {
               "Registrando..."
             ) : (
               <span className="flex items-center gap-2">
-                Crear cuenta
+                {businessId && token ? "Unirme al negocio" : "Crear cuenta"}
                 <ArrowRight className="size-4" />
               </span>
             )}

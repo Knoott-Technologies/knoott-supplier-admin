@@ -1,4 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -158,4 +160,75 @@ export function generateReferenceFromName(name: string): string {
   }
 
   return reference;
+}
+
+/**
+ * Maneja la invitación de negocio después de la autenticación
+ * @param userId ID del usuario autenticado
+ * @param businessId ID del negocio al que fue invitado
+ * @param token Token de invitación
+ * @param router Router de Next.js para redirecciones
+ */
+export async function handleBusinessInvitation(
+  userId: string,
+  businessId: string,
+  token: string,
+  router: AppRouterInstance
+) {
+  try {
+    // Llamar a la API para aceptar la invitación
+    const response = await fetch("/api/businesses/invitations/accept", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        invitationId: "", // Este valor se obtendrá en el servidor usando el token
+        businessId,
+        userId,
+        token,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Error al procesar la invitación");
+    }
+
+    toast.success("¡Invitación aceptada correctamente!");
+
+    // Redirigir al dashboard del negocio
+    router.push(`/business/${businessId}/dashboard`);
+  } catch (error) {
+    console.error("Error al procesar la invitación:", error);
+    toast.error("Error al procesar la invitación", {
+      description:
+        "No se pudo completar el proceso de invitación. Por favor, contacta al administrador.",
+    });
+
+    // En caso de error, redirigir al dashboard general
+    router.push("/dashboard");
+  }
+}
+
+/**
+ * Procede con la navegación normal después de la autenticación
+ * @param userId ID del usuario autenticado
+ * @param router Router de Next.js para redirecciones
+ */
+export async function proceedAfterAuthentication(
+  userId: string,
+  router: AppRouterInstance
+) {
+  try {
+    // Aquí puedes agregar lógica para verificar el rol del usuario o sus negocios
+    // Por ejemplo, verificar si es administrador de algún negocio
+
+    // Por ahora, simplemente redirigimos al dashboard
+    router.push("/dashboard");
+  } catch (error) {
+    console.error("Error al procesar la autenticación:", error);
+    router.push("/dashboard");
+  }
 }

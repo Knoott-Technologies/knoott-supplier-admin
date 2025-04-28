@@ -9,7 +9,13 @@ import { LoginFormEmail } from "./login-form-email";
 import { LoginFormPhone } from "./login-form-phone";
 import { LoginFormOtp } from "./login-form-otp";
 
-export const LoginTypesRenderer = () => {
+export const LoginTypesRenderer = ({
+  businessId,
+  token,
+}: {
+  businessId: string | null;
+  token: string | null;
+}) => {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -35,7 +41,15 @@ export const LoginTypesRenderer = () => {
 
   const handleLoginType = (type: string) => {
     // Build the URL with only the parameters that exist
-    const url = `/login?type=${type}`;
+    let url = `/login?type=${type}`;
+
+    if (businessId) {
+      url += `&businessId=${businessId}`;
+    }
+
+    if (token) {
+      url += `&token=${token}`;
+    }
 
     router.push(url);
   };
@@ -43,21 +57,28 @@ export const LoginTypesRenderer = () => {
   const renderTypeForm = () => {
     switch (type) {
       case "email":
-        return <LoginFormEmail />;
+        return <LoginFormEmail businessId={businessId} token={token} />;
       case "phone":
-        return <LoginFormPhone />;
+        return <LoginFormPhone businessId={businessId} token={token} />;
       case "otp":
-        return <LoginFormOtp />;
+        return <LoginFormOtp businessId={businessId} token={token} />;
       default:
         return null;
     }
   };
 
   return (
-    <div className="w-full h-fit items-start justify-start flex flex-col gap-y-4 px-5 md:px-0">
+    <div className="w-full h-fit items-start justify-start flex flex-col gap-y-7">
       {type && (
         <Button variant={"ghost"} size={"sm"} asChild>
-          <Link href={"/login"}>
+          <Link
+            href={
+              (businessId &&
+                token &&
+                `/login?businessId=${businessId}&token=${token}`) ||
+              "/login"
+            }
+          >
             <ArrowLeft className="size-4" />
             Volver
           </Link>
@@ -66,14 +87,6 @@ export const LoginTypesRenderer = () => {
 
       {(!type && (
         <div className="w-full h-fit items-start justify-start flex flex-col gap-y-2">
-          {/* <Button
-            className="w-full relative"
-            size={"default"}
-            variant={"outline"}
-          >
-            Inicio de sesión con Google
-            <Google className="size-4 absolute left-2" />
-          </Button> */}
           {loginTypes.map((item, index) => (
             <Button
               className="w-full relative"
@@ -92,7 +105,7 @@ export const LoginTypesRenderer = () => {
 
       <div className="w-full flex gap-x-3 items-center justify-center">
         <Separator className="flex-1" />
-        <p className="text-xs text-muted-foreground shrink-0">
+        <p className="text-sm text-muted-foreground shrink-0">
           ¿No tienes una cuenta?
         </p>
         <Separator className="flex-1" />
@@ -103,8 +116,15 @@ export const LoginTypesRenderer = () => {
         variant={"ghost"}
         asChild
       >
-        <Link href={"/register"}>
-          Regístrate en Knoott Partners
+        <Link
+          href={
+            (businessId &&
+              token &&
+              `/register?businessId=${businessId}&token=${token}`) ||
+            "/register"
+          }
+        >
+          Regístrate en Partners
           <ArrowRight className="size-4" />
         </Link>
       </Button>

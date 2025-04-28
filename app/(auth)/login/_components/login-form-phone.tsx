@@ -14,12 +14,16 @@ import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { EyeIcon, EyeOff, Phone, Loader } from "lucide-react";
+import { EyeIcon, EyeOff, Loader } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { PhoneInputWithCountry } from "@/components/universal/phone-input-country";
+import {
+  handleBusinessInvitation,
+  proceedAfterAuthentication,
+} from "@/lib/utils";
 
 const formSchema = z.object({
   phone: z
@@ -33,7 +37,13 @@ const formSchema = z.object({
     .min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
 });
 
-export function LoginFormPhone() {
+export function LoginFormPhone({
+  businessId,
+  token,
+}: {
+  businessId: string | null;
+  token: string | null;
+}) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
@@ -65,8 +75,13 @@ export function LoginFormPhone() {
 
       toast.success("Inicio de sesión exitoso");
 
-      // Si no encuentra userProvider, redirigir a la ruta general
-      return router.push("/dashboard");
+      // Si hay businessId y token, verificar la invitación y crear relación
+      if (businessId && token) {
+        await handleBusinessInvitation(data.user.id, businessId, token, router);
+      } else {
+        // Si no hay invitación, proceder normalmente
+        await proceedAfterAuthentication(data.user.id, router);
+      }
     } catch (error: any) {
       console.error("Error al iniciar sesión:", error);
       toast.error("Error al iniciar sesión", {

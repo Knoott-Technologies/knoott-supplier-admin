@@ -14,18 +14,15 @@ import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import {
-  Mail,
-  Phone,
-  ArrowRight,
-  Timer,
-  RefreshCw,
-  ArrowLeft,
-} from "lucide-react";
+import { Mail, Phone, ArrowRight, Timer, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import {
+  handleBusinessInvitation,
+  proceedAfterAuthentication,
+} from "@/lib/utils";
 
 // Esquema inicial para validación del contacto (email o teléfono)
 const contactSchema = z.object({
@@ -55,7 +52,13 @@ const otpSchema = z.object({
     .regex(/^\d+$/, { message: "El código debe contener solo números" }),
 });
 
-export function LoginFormOtp() {
+export function LoginFormOtp({
+  businessId,
+  token,
+}: {
+  businessId: string | null;
+  token: string | null;
+}) {
   const [step, setStep] = useState<"contact" | "otp">("contact");
   const [loading, setLoading] = useState(false);
   const [contactType, setContactType] = useState<"email" | "phone" | null>(
@@ -228,10 +231,14 @@ export function LoginFormOtp() {
       if (user) {
         // Mostrar mensaje de éxito general
         toast.success("Inicio de sesión exitoso");
-       
 
-        // Si no encuentra userProvider, redirigir a la ruta general
-        return router.push("/dashboard");
+        // Si hay businessId y token, verificar la invitación y crear relación
+        if (businessId && token) {
+          await handleBusinessInvitation(user.id, businessId, token, router);
+        } else {
+          // Si no hay invitación, proceder normalmente
+          await proceedAfterAuthentication(user.id, router);
+        }
       } else {
         toast.error("Error de autenticación", {
           description: "No se pudo obtener la información del usuario.",
@@ -302,12 +309,6 @@ export function LoginFormOtp() {
         return prev - 1;
       });
     }, 1000);
-  };
-
-  // Volver al paso anterior
-  const goBack = () => {
-    setStep("contact");
-    otpForm.reset();
   };
 
   return (

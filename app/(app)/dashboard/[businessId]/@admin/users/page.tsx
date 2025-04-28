@@ -6,6 +6,7 @@ import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
 import { Button } from "@/components/ui/button";
 import { Plus, UserPlus } from "lucide-react";
+import Link from "next/link";
 
 export type User =
   Database["public"]["Tables"]["provider_business_users"]["Row"] & {
@@ -27,8 +28,10 @@ const OrdersPage = async ({ params }: { params: { businessId: string } }) => {
         title="Usuarios"
         description="Consulta y gestiona los usuarios que tienen acceso a tu negocio en Knoott Partners."
       >
-        <Button className="hidden lg:flex" variant={"defaultBlack"}>
-          Agregar usuario <Plus />
+        <Button asChild className="hidden lg:flex" variant={"defaultBlack"}>
+          <Link href={`/dashboard/${params.businessId}/users/new`}>
+            Agregar usuario <Plus />
+          </Link>
         </Button>
         <Button className="lg:hidden" size={"icon"} variant={"defaultBlack"}>
           <UserPlus />

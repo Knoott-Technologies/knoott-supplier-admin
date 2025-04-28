@@ -3,7 +3,14 @@ import { PageHeader } from "@/components/universal/headers";
 import { LoginTypesRenderer } from "./_components/login-types-renderer";
 import { Suspense } from "react";
 
-const LoginPage = () => {
+const LoginPage = ({
+  searchParams,
+}: {
+  searchParams: { businessId?: string; token?: string; type?: string };
+}) => {
+  const businessId = searchParams.businessId || null;
+  const token = searchParams.token || null;
+
   return (
     <main className="w-full h-fit items-center justify-center flex flex-col min-h-[calc(100dvh-56px)]">
       <div className="w-full h-fit items-start justify-start flex flex-col max-w-lg px-5 md:px-7 lg:px-0">
@@ -14,7 +21,7 @@ const LoginPage = () => {
         <Card className="w-full">
           <CardContent className="bg-sidebar">
             <Suspense>
-              <LoginTypesRenderer />
+              <LoginTypesRenderer businessId={businessId} token={token} />
             </Suspense>
           </CardContent>
         </Card>

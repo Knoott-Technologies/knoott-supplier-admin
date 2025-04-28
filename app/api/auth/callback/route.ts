@@ -1,5 +1,3 @@
-// app/api/auth/callback/route.ts
-
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
@@ -9,6 +7,8 @@ export async function GET(request: Request) {
   // Obtener la URL completa y extraer los parámetros
   const requestUrl = new URL(request.url);
   const tokenHash = requestUrl.searchParams.get("tokenHash");
+  const businessId = requestUrl.searchParams.get("businessId");
+  const invitationToken = requestUrl.searchParams.get("token");
 
   // Si no hay token, redirigir a la página de inicio de sesión
   if (!tokenHash) {
@@ -41,7 +41,10 @@ export async function GET(request: Request) {
       // Actualizar el teléfono en la información del usuario
       const { error: updateError } = await admin.auth.admin.updateUserById(
         verifyData.user.id,
-        { phone: phoneNumber, phone_confirm: true }
+        {
+          phone: phoneNumber,
+          phone_confirm: true,
+        }
       );
     }
 
@@ -52,13 +55,11 @@ export async function GET(request: Request) {
       .eq("id", verifyData.user.id)
       .single();
 
-    // CORRECCIÓN: Determinar si debemos insertar basándonos en el código de error específico
-    // El error PGRST116 significa que no se encontró ninguna fila, lo que indica que debemos insertar
+    // Determinar si debemos insertar basándonos en el código de error específico
     const userNotFound = existingUserError?.code === "PGRST116";
     const shouldInsert = !existingUser && userNotFound;
 
     // Si no existe, insertar el usuario en la tabla users
-
     if (shouldInsert) {
       const userData = {
         id: verifyData.user.id,
@@ -85,6 +86,73 @@ export async function GET(request: Request) {
         return NextResponse.redirect(
           new URL("/register?error=db_error", request.url)
         );
+      }
+    }
+
+    // Si hay businessId y invitationToken, procesar la invitación
+    if (businessId && invitationToken) {
+      try {
+        // 1. Verificar si existe una invitación pendiente
+        const { data: invitation, error: invitationError } = await admin
+          .from("business_invitations")
+          .select("id, role")
+          .eq("business_id", businessId)
+          .eq("invitation_token", invitationToken)
+          .eq("status", "pending")
+          .single();
+
+        if (invitationError) {
+          if (invitationError.code !== "PGRST116") {
+            console.error("Error al verificar invitación:", invitationError);
+          }
+        } else if (invitation) {
+          // 2. Verificar si ya existe una relación provider_business_users
+          const { data: existingRelation, error: relationCheckError } =
+            await admin
+              .from("provider_business_users")
+              .select("id")
+              .eq("user_id", verifyData.user.id)
+              .eq("business_id", businessId)
+              .maybeSingle();
+
+          if (
+            !existingRelation &&
+            (!relationCheckError || relationCheckError.code === "PGRST116")
+          ) {
+            // 3. Crear la relación provider_business_users con el rol especificado en la invitación
+            const { error: userBusinessError } = await admin
+              .from("provider_business_users")
+              .insert({
+                user_id: verifyData.user.id,
+                business_id: businessId,
+                role: invitation.role,
+              });
+
+            if (!userBusinessError) {
+              // 4. Actualizar el estado de la invitación a 'accepted'
+              await admin
+                .from("business_invitations")
+                .update({
+                  status: "accepted",
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("id", invitation.id);
+
+              // 5. Redirigir al dashboard del negocio
+              return NextResponse.redirect(
+                new URL(`/business/${businessId}/dashboard`, request.url)
+              );
+            }
+          } else if (existingRelation) {
+            // Si ya existe la relación, igual redirigir al dashboard del negocio
+            return NextResponse.redirect(
+              new URL(`/business/${businessId}/dashboard`, request.url)
+            );
+          }
+        }
+      } catch (inviteError) {
+        console.error("Error al procesar invitación de negocio:", inviteError);
+        // Si hay error, continuar con el flujo normal sin invitación
       }
     }
 

@@ -20,7 +20,10 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
+import {
+  handleBusinessInvitation,
+  proceedAfterAuthentication,
+} from "@/lib/utils";
 const loginFormSchema = z.object({
   email: z
     .string()
@@ -31,7 +34,13 @@ const loginFormSchema = z.object({
     .min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
 });
 
-export function LoginFormEmail() {
+export function LoginFormEmail({
+  businessId,
+  token,
+}: {
+  businessId: string | null;
+  token: string | null;
+}) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -64,8 +73,14 @@ export function LoginFormEmail() {
       }
 
       toast.success("Inicio de sesión exitoso");
-      // Si no encuentra userProvider, redirigir a la ruta general
-      return router.push("/dashboard");
+
+      // Si hay businessId y token, verificar la invitación y crear relación
+      if (businessId && token) {
+        await handleBusinessInvitation(data.user.id, businessId, token, router);
+      } else {
+        // Si no hay invitación, proceder normalmente
+        await proceedAfterAuthentication(data.user.id, router);
+      }
     } catch (error: any) {
       console.error("Error durante el inicio de sesión:", error);
       toast.error("Error al iniciar sesión", {
