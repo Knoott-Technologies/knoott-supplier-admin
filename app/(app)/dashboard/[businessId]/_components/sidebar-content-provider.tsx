@@ -104,25 +104,13 @@ export const SidebarContentProvider = ({
   const menuItems: MenuGroup[] = [
     {
       label: "Tienda",
-      visibleTo: ["admin", "supervisor"],
+      visibleTo: ["admin", "supervisor", "staff"],
       items: [
         {
           title: "Productos",
           icon: Tag,
           href: `${startUrl}/products`,
         },
-        {
-          title: "Órdenes",
-          icon: Package,
-          href: `${startUrl}/orders`,
-          badge: ordersCount,
-        },
-      ],
-    },
-    {
-      label: "Tienda",
-      visibleTo: ["staff"],
-      items: [
         {
           title: "Órdenes",
           icon: Package,

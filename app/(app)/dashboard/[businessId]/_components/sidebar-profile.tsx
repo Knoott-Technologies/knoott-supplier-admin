@@ -113,22 +113,24 @@ export const SidebarProfile = ({
           </span>
         </div>
       </div>
-      <div className="p-1 border-b">
-        <Button
-          variant={"ghost"}
-          className="w-full justify-between text-muted-foreground"
-          asChild
-        >
-          <Link
-            href={`/settings/${user.id}/${business.id}/wedding`}
-            className="flex items-center justify-between w-full"
-            onClick={() => isMobile && setSheetOpen(false)}
+      {role === "admin" && (
+        <div className="p-1 border-b">
+          <Button
+            variant={"ghost"}
+            className="w-full justify-between text-muted-foreground"
+            asChild
           >
-            <span className="truncate">Ajustes de mi tienda</span>
-            <ArrowRight className="!size-3.5 flex-shrink-0 ml-2" />
-          </Link>
-        </Button>
-      </div>
+            <Link
+              href={`/settings/${user.id}/${business.id}/wedding`}
+              className="flex items-center justify-between w-full"
+              onClick={() => isMobile && setSheetOpen(false)}
+            >
+              <span className="truncate">Ajustes de mi tienda</span>
+              <ArrowRight className="!size-3.5 flex-shrink-0 ml-2" />
+            </Link>
+          </Button>
+        </div>
+      )}
       <div className="p-1 pb-8 md:pb-3">
         <Button
           variant={"ghost"}
@@ -310,23 +312,25 @@ export const SidebarProfile = ({
                   </span>
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
-              <DropdownMenuGroup className="p-1 border-b">
-                <DropdownMenuItem asChild>
-                  <Button
-                    variant={"ghost"}
-                    className="w-full justify-between text-muted-foreground"
-                    asChild
-                  >
-                    <Link
-                      href={`/settings/${user.id}/${business.id}/settings`}
-                      className="flex items-center justify-between w-full"
+              {user.role === "admin" && (
+                <DropdownMenuGroup className="p-1 border-b">
+                  <DropdownMenuItem asChild>
+                    <Button
+                      variant={"ghost"}
+                      className="w-full justify-between text-muted-foreground"
+                      asChild
                     >
-                      <span className="truncate">Ajustes de mi tienda</span>
-                      <ArrowRight className="!size-3.5 flex-shrink-0 ml-2" />
-                    </Link>
-                  </Button>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
+                      <Link
+                        href={`/settings/${user.id}/${business.id}/settings`}
+                        className="flex items-center justify-between w-full"
+                      >
+                        <span className="truncate">Ajustes de mi tienda</span>
+                        <ArrowRight className="!size-3.5 flex-shrink-0 ml-2" />
+                      </Link>
+                    </Button>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              )}
               <DropdownMenuGroup className="p-1">
                 <DropdownMenuItem asChild>
                   <Button

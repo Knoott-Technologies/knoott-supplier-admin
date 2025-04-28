@@ -44,7 +44,8 @@ const ProfileLayout = async ({
       )
     `
     )
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .eq("role", "admin");
 
   if (businessesError) {
     console.error(
