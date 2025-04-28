@@ -55,7 +55,7 @@ export const columns: ColumnDef<User>[] = [
       return (
         <UserActions
           businessId={row.original.business_id}
-          user={row.original}
+          data={row.original}
         />
       );
     },

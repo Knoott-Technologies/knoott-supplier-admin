@@ -1,11 +1,12 @@
-import { createAdminClient } from "@/utils/supabase/admin";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 // Ruta para actualizar el rol de un usuario
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { userId: string } }
 ) {
-  const supabase = createAdminClient();
+  const supabase = createClient(cookies());
   const userId = params.userId;
 
   // Obtener el nuevo rol del cuerpo de la solicitud
@@ -33,8 +34,6 @@ export async function PATCH(
     .update({ role })
     .eq("user_id", userId)
     .eq("business_id", businessId)
-
-  console.log(data, error);
 
   if (error) {
     return NextResponse.json(

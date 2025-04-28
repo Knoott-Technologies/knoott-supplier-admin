@@ -1,4 +1,5 @@
-import { createAdminClient } from "@/utils/supabase/admin";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
 // Ruta para eliminar un usuario
@@ -6,7 +7,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { userId: string } }
 ) {
-  const supabase = createAdminClient();
+  const supabase = createClient(cookies());
   const userId = params.userId;
 
   // Obtener el business_id de los parámetros de consulta

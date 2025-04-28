@@ -26,20 +26,13 @@ import { ChevronRight, MoreVertical, Trash2, UserCog } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
-export type User = {
-  id: string;
-  role: "admin" | "supervisor" | "staff";
-  name?: string;
-  email?: string;
-  // Otros campos del usuario
-};
+import { User } from "../page";
 
 export const UserActions = ({
-  user,
+  data,
   businessId,
 }: {
-  user: User;
+  data: User;
   businessId: string;
 }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -50,7 +43,7 @@ export const UserActions = ({
     try {
       setIsLoading(true);
       const response = await fetch(
-        `/api/users/${user.id}/role?businessId=${businessId}`,
+        `/api/users/${data.user.id}/role?businessId=${businessId}`,
         {
           method: "PATCH",
           headers: {
@@ -87,7 +80,7 @@ export const UserActions = ({
     try {
       setIsLoading(true);
       const response = await fetch(
-        `/api/users/${user.id}?businessId=${businessId}`,
+        `/api/users/${data.user.id}?businessId=${businessId}`,
         {
           method: "DELETE",
         }
@@ -127,9 +120,9 @@ export const UserActions = ({
             <DropdownMenuSubContent>
               <DropdownMenuItem
                 onClick={() => handleRoleChange("admin")}
-                disabled={user.role === "admin"}
+                disabled={data.role === "admin"}
                 className={cn(
-                  user.role === "admin" &&
+                  data.role === "admin" &&
                     "bg-contrast/10 text-contrast font-medium"
                 )}
               >
@@ -140,9 +133,9 @@ export const UserActions = ({
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRoleChange("supervisor")}
-                disabled={user.role === "supervisor"}
+                disabled={data.role === "supervisor"}
                 className={cn(
-                  user.role === "supervisor" &&
+                  data.role === "supervisor" &&
                     "bg-contrast2/10 text-contrast2 font-medium"
                 )}
               >
@@ -153,9 +146,9 @@ export const UserActions = ({
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRoleChange("staff")}
-                disabled={user.role === "staff"}
+                disabled={data.role === "staff"}
                 className={cn(
-                  user.role === "staff" &&
+                  data.role === "staff" &&
                     "bg-tertiary/10 text-tertiary font-medium"
                 )}
               >
