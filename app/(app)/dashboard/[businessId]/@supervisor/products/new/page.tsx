@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import ProductForm from "./_components/product-form";
 import { PageHeaderBackButton } from "@/components/universal/headers";
+import ProductForm from "../../../@admin/products/new/_components/product-form";
 
 export default async function NewProductPage({
   params,

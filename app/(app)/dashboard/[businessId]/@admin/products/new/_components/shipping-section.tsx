@@ -1,14 +1,12 @@
 "use client";
 
-import { UseFormReturn } from "react-hook-form";
 import {
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
+  FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { ImageUploadDropzone } from "@/components/universal/image-upload-dropzone";
 import {
   Card,
   CardContent,
@@ -16,30 +14,34 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { AmountInput } from "@/components/universal/amount-input";
+import type { UseFormReturn } from "react-hook-form";
 
-interface ImagesSectionProps {
+interface ShippingSectionProps {
   form: UseFormReturn<any>;
 }
 
-export default function ImagesSection({ form }: ImagesSectionProps) {
+export default function ShippingSection({ form }: ShippingSectionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Imágenes del producto</CardTitle>
-        <CardDescription>Agrega las imagenes del producto.</CardDescription>
+        <CardTitle>Envío</CardTitle>
+        <CardDescription>
+          Configura los costos de envío para este producto
+        </CardDescription>
       </CardHeader>
       <CardContent className="bg-sidebar">
         <FormField
           control={form.control}
-          name="images_url"
+          name="shipping_cost"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Imágenes (relación de aspecto 3:4)</FormLabel>
+              <FormLabel>Costo de envío</FormLabel>
               <FormControl>
-                <ImageUploadDropzone
-                  value={field.value}
+                <AmountInput
+                  className="bg-background"
+                  value={field.value || 0}
                   onChange={field.onChange}
-                  maxFiles={20}
                 />
               </FormControl>
               <FormMessage />

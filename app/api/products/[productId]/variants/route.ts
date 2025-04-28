@@ -48,15 +48,16 @@ export async function POST(
           .insert({
             variant_id: variantData.id,
             name: option.name,
-            display_name: option.display_name,
+            display_name: option.display_name || option.name, // Aseguramos que display_name tenga un valor
             price: option.price || null,
-            accorded_commision: option.accorded_commision || 0.058,
+            accorded_commision:
+              option.accorded_commision || option.accorded_commission || 0.085, // Corregimos el nombre del campo y valor por defecto
             stock: option.stock || null,
             position: index,
             is_default: option.is_default || false,
             metadata: option.metadata || null,
             sku: option.sku || null,
-            images_url: option.images_url || null,
+            images_url: option.images_url || [], // Aseguramos que sea un array vacío en lugar de null
           });
 
         if (optionError) {
@@ -92,7 +93,7 @@ export async function PUT(
 
     // First, get existing variants for this product
     const { data: existingVariants, error: fetchError } = await supabase
-      .from("product_variants")
+      .from("products_variants") // Corregimos el nombre de la tabla
       .select("*")
       .eq("product_id", productId);
 
@@ -103,9 +104,9 @@ export async function PUT(
 
     // Get existing variant options
     const { data: existingOptions, error: fetchOptionsError } = await supabase
-      .from("product_variant_options")
+      .from("products_variant_options") // Corregimos el nombre de la tabla
       .select("*")
-      .eq("product_id", productId);
+      .in("variant_id", existingVariants?.map((v) => v.id) || []);
 
     if (fetchOptionsError) {
       console.error("Error fetching existing options:", fetchOptionsError);
@@ -115,42 +116,43 @@ export async function PUT(
       );
     }
 
-    // Delete existing variants and options that are no longer in the updated list
-    const existingVariantIds = existingVariants?.map((v) => v.id) || [];
-    const existingOptionIds = existingOptions?.map((o) => o.id) || [];
+    // Delete existing options first
+    if (existingVariants && existingVariants.length > 0) {
+      const variantIds = existingVariants.map((v) => v.id);
 
-    // Start a transaction
-    const { error: deleteOptionsError } = await supabase
-      .from("product_variant_options")
-      .delete()
-      .eq("product_id", productId);
+      const { error: deleteOptionsError } = await supabase
+        .from("products_variant_options")
+        .delete()
+        .in("variant_id", variantIds);
 
-    if (deleteOptionsError) {
-      console.error("Error deleting variant options:", deleteOptionsError);
-      return NextResponse.json(
-        { error: deleteOptionsError.message },
-        { status: 500 }
-      );
-    }
+      if (deleteOptionsError) {
+        console.error("Error deleting variant options:", deleteOptionsError);
+        return NextResponse.json(
+          { error: deleteOptionsError.message },
+          { status: 500 }
+        );
+      }
 
-    const { error: deleteVariantsError } = await supabase
-      .from("product_variants")
-      .delete()
-      .eq("product_id", productId);
+      // Then delete variants
+      const { error: deleteVariantsError } = await supabase
+        .from("products_variants")
+        .delete()
+        .eq("product_id", productId);
 
-    if (deleteVariantsError) {
-      console.error("Error deleting variants:", deleteVariantsError);
-      return NextResponse.json(
-        { error: deleteVariantsError.message },
-        { status: 500 }
-      );
+      if (deleteVariantsError) {
+        console.error("Error deleting variants:", deleteVariantsError);
+        return NextResponse.json(
+          { error: deleteVariantsError.message },
+          { status: 500 }
+        );
+      }
     }
 
     // Insert new variants
     const variantPromises = variants.map(
       async (variant: any, index: number) => {
         const { data: newVariant, error: insertVariantError } = await supabase
-          .from("product_variants")
+          .from("products_variants") // Corregimos el nombre de la tabla
           .insert({
             product_id: productId,
             name: variant.name,
@@ -169,13 +171,16 @@ export async function PUT(
         const optionPromises = variant.options.map(
           async (option: any, optionIndex: number) => {
             const { error: insertOptionError } = await supabase
-              .from("product_variant_options")
+              .from("products_variant_options") // Corregimos el nombre de la tabla
               .insert({
-                product_id: productId,
                 variant_id: newVariant.id,
                 name: option.name,
                 display_name: option.display_name || option.name,
                 price: option.price,
+                accorded_commision:
+                  option.accorded_commision ||
+                  option.accorded_commission ||
+                  0.085, // Corregimos el nombre del campo
                 stock: option.stock,
                 is_default: option.is_default,
                 sku: option.sku || "",
@@ -219,7 +224,7 @@ export async function GET(
 
     // Get variants for this product
     const { data: variants, error: variantsError } = await supabase
-      .from("product_variants")
+      .from("products_variants") // Corregimos el nombre de la tabla
       .select("*")
       .eq("product_id", productId)
       .order("position");
@@ -233,10 +238,17 @@ export async function GET(
     }
 
     // Get options for these variants
+    const variantIds = variants.map((v) => v.id);
+
+    // Si no hay variantes, devolver un array vacío
+    if (variantIds.length === 0) {
+      return NextResponse.json([]);
+    }
+
     const { data: options, error: optionsError } = await supabase
-      .from("product_variant_options")
+      .from("products_variant_options") // Corregimos el nombre de la tabla
       .select("*")
-      .eq("product_id", productId)
+      .in("variant_id", variantIds)
       .order("position");
 
     if (optionsError) {

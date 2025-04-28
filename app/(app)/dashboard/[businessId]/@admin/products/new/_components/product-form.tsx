@@ -13,7 +13,9 @@ import ImagesSection from "./images-section";
 import CategorizationSection from "./categorization-section";
 import SpecificationsSection from "./specifications-section";
 import VariantsSection from "./variants-section";
-import { Database } from "@/database.types";
+import ShippingSection from "./shipping-section";
+import NoVariantsSection from "./no-variants-section";
+import type { Database } from "@/database.types";
 
 // Define the combined schema for all form sections
 const productFormSchema = z.object({
@@ -50,6 +52,15 @@ const productFormSchema = z.object({
     .optional()
     .default([]),
   keywords: z.array(z.string()).optional().default([]),
+
+  // Shipping
+  shipping_cost: z.number().default(0),
+
+  // Single product (no variants)
+  single_price: z.number().optional(),
+  single_stock: z.number().nullable().optional(),
+  single_sku: z.string().optional(),
+  single_commission: z.number().optional(),
 
   // Variants
   variants: z
@@ -104,6 +115,7 @@ export default function ProductForm({
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [productId, setProductId] = useState<string | null>(null);
+  const [hasVariants, setHasVariants] = useState(false);
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -118,6 +130,11 @@ export default function ProductForm({
       dimensions: [],
       specs: [],
       keywords: [],
+      shipping_cost: 0,
+      single_price: 0,
+      single_stock: null,
+      single_sku: "",
+      single_commission: business.commission_percentage || 0.085,
       variants: [],
     },
   });
@@ -165,14 +182,42 @@ export default function ProductForm({
         });
       }
 
-      // Create variants
-      if (data.variants && data.variants.length > 0) {
+      // Handle variants or single product
+      if (hasVariants && data.variants && data.variants.length > 0) {
+        // Create variants
         await fetch(`/api/products/${newProductId}/variants`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ variants: data.variants }),
+        });
+      } else if (!hasVariants) {
+        // Create a default variant for a product without variants
+        const defaultVariant = {
+          name: "Default",
+          display_name: "Default",
+          options: [
+            {
+              name: "Default",
+              display_name: "Default",
+              price: data.single_price || 0,
+              stock: data.single_stock,
+              is_default: true,
+              sku: data.single_sku || "",
+              images_url: data.images_url || [],
+              metadata: null,
+              accorded_commission: data.single_commission || 0.085,
+            },
+          ],
+        };
+
+        await fetch(`/api/products/${newProductId}/variants`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ variants: [defaultVariant] }),
         });
       }
 
@@ -189,6 +234,7 @@ export default function ProductForm({
     <>
       <Form {...form}>
         <form
+          id="product-form"
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-y-5 lg:gap-y-7 max-w-5xl mx-auto px-3 md:px-0"
         >
@@ -197,11 +243,21 @@ export default function ProductForm({
               <GeneralInfoSection form={form} />
               <ImagesSection form={form} />
               <SpecificationsSection form={form} />
-              <VariantsSection
-                commission={business.commission_percentage!}
+              <ShippingSection form={form} />
+              <NoVariantsSection
                 form={form}
                 productId={productId}
+                commission={business.commission_percentage!}
+                hasVariants={hasVariants}
+                onToggleVariants={setHasVariants}
               />
+              {hasVariants && (
+                <VariantsSection
+                  commission={business.commission_percentage!}
+                  form={form}
+                  productId={productId}
+                />
+              )}
             </section>
             <section className="w-full h-fit items-start justify-start flex flex-col lg:sticky lg:top-[calc(56px_+_28px)]">
               <CategorizationSection
@@ -226,8 +282,8 @@ export default function ProductForm({
           type="submit"
           size={"sm"}
           variant="defaultBlack"
+          form="product-form"
           disabled={isSubmitting}
-          onClick={form.handleSubmit(onSubmit)}
         >
           {isSubmitting ? (
             <>

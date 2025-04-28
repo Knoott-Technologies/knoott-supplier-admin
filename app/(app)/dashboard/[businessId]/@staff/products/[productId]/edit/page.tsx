@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { PageHeaderBackButton } from "@/components/universal/headers";
-import ProductFormEdit from "./_components/product-form-edit";
+import ProductFormEdit from "../../../../@admin/products/[productId]/edit/_components/product-form-edit";
 
 export default async function ProductEditPage({
   params,

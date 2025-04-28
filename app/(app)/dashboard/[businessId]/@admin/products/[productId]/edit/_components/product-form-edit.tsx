@@ -8,12 +8,14 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
-import { Database } from "@/database.types";
+import type { Database } from "@/database.types";
 import GeneralInfoSection from "../../../new/_components/general-info-section";
 import ImagesSection from "../../../new/_components/images-section";
 import SpecificationsSection from "../../../new/_components/specifications-section";
 import VariantsSection from "../../../new/_components/variants-section";
 import CategorizationSection from "../../../new/_components/categorization-section";
+import ShippingSection from "../../../new/_components/shipping-section";
+import NoVariantsSection from "../../../new/_components/no-variants-section";
 
 // Define the combined schema for all form sections
 const productFormSchema = z.object({
@@ -50,6 +52,15 @@ const productFormSchema = z.object({
     .optional()
     .default([]),
   keywords: z.array(z.string()).optional().default([]),
+
+  // Shipping
+  shipping_cost: z.number().default(0),
+
+  // Single product (no variants)
+  single_price: z.number().optional(),
+  single_stock: z.number().nullable().optional(),
+  single_sku: z.string().optional(),
+  single_commission: z.number().optional(),
 
   // Variants
   variants: z
@@ -99,10 +110,13 @@ export default function ProductFormEdit({
   variantOptions,
   brands,
   categories,
-  commision
+  commision,
 }: ProductFormEditProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasVariants, setHasVariants] = useState(
+    product?.hasVariants !== false
+  );
 
   // Process dimensions and specs from JSON to array format
   const processDimensions = () => {
@@ -124,6 +138,16 @@ export default function ProductFormEdit({
   // Process variants and options
   const processVariants = () => {
     if (!variants || variants.length === 0) return [];
+
+    // Si es un producto simple (sin variantes reales), no devolvemos las variantes
+    if (
+      variants.length === 1 &&
+      variants[0].name === "Default" &&
+      variantOptions.length === 1 &&
+      variantOptions[0].name === "Default"
+    ) {
+      return [];
+    }
 
     return variants.map((variant) => {
       const options = variantOptions
@@ -160,6 +184,11 @@ export default function ProductFormEdit({
       dimensions: processDimensions(),
       specs: processSpecs(),
       keywords: product?.keywords || [],
+      shipping_cost: product?.shipping_cost || 0,
+      single_price: product?.single_price || 0,
+      single_stock: product?.single_stock || null,
+      single_sku: product?.single_sku || "",
+      single_commission: product?.single_commission || commision,
       variants: processVariants(),
     },
   });
@@ -178,8 +207,14 @@ export default function ProductFormEdit({
         dimensions: processDimensions(),
         specs: processSpecs(),
         keywords: product.keywords || [],
+        shipping_cost: product.shipping_cost || 0,
+        single_price: product.single_price || 0,
+        single_stock: product.single_stock || null,
+        single_sku: product.single_sku || "",
+        single_commission: product.single_commission || commision,
         variants: processVariants(),
       });
+      setHasVariants(product.hasVariants !== false);
     }
   }, [product, variants, variantOptions]);
 
@@ -192,6 +227,7 @@ export default function ProductFormEdit({
         ...data,
         status: product.status, // Maintain the current status
         provider_business_id: product.provider_business_id,
+        hasVariants: hasVariants,
       };
 
       // Submit the product to the API
@@ -225,7 +261,7 @@ export default function ProductFormEdit({
       }
 
       // Update variants
-      if (data.variants && data.variants.length > 0) {
+      if (hasVariants && data.variants && data.variants.length > 0) {
         await fetch(`/api/products/${product.id}/variants`, {
           method: "PUT",
           headers: {
@@ -250,6 +286,7 @@ export default function ProductFormEdit({
     <>
       <Form {...form}>
         <form
+          id="product-form-edit"
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-y-5 lg:gap-y-7 max-w-5xl mx-auto px-3 md:px-0"
         >
@@ -258,11 +295,21 @@ export default function ProductFormEdit({
               <GeneralInfoSection form={form} />
               <ImagesSection form={form} />
               <SpecificationsSection form={form} />
-              <VariantsSection
-                commission={commision}
+              <NoVariantsSection
                 form={form}
                 productId={product?.id}
+                commission={commision}
+                hasVariants={hasVariants}
+                onToggleVariants={setHasVariants}
               />
+              {hasVariants && (
+                <VariantsSection
+                  commission={commision}
+                  form={form}
+                  productId={product?.id}
+                />
+              )}
+              <ShippingSection form={form} />
             </section>
             <section className="w-full h-fit items-start justify-start flex flex-col lg:sticky lg:top-[calc(56px_+_28px)]">
               <CategorizationSection
@@ -290,7 +337,7 @@ export default function ProductFormEdit({
           size={"sm"}
           variant="defaultBlack"
           disabled={isSubmitting}
-          onClick={form.handleSubmit(onSubmit)}
+          form="product-form-edit"
         >
           {isSubmitting ? (
             <>
