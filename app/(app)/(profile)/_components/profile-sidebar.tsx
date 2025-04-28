@@ -20,14 +20,16 @@ export type UserBusinesses =
 export const ProfileSidebar = ({
   user,
   userBusinesses,
+  previousPath,
 }: {
   user: User;
   userBusinesses: UserBusinesses[];
+  previousPath: string;
 }) => {
   return (
     <Sidebar variant="sidebar" collapsible="icon">
       <SidebarHeader className="bg-background border-b">
-        <ProfileBackButton />
+        <ProfileBackButton previousPath={previousPath} />
       </SidebarHeader>
       <SidebarContent>
         <ProfileSidebarContent userBusinesses={userBusinesses} user={user} />

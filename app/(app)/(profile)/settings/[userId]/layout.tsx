@@ -1,7 +1,7 @@
 import type React from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { ProfileSidebar } from "../../_components/profile-sidebar";
 import { Logo } from "@/components/universal/logo";
@@ -15,6 +15,15 @@ const ProfileLayout = async ({
   children: React.ReactNode;
 }) => {
   const supabase = createClient(cookies());
+
+  // Obtener información de la ruta actual
+  const headersList = headers();
+  const pathname =
+    headersList.get("x-pathname") || headersList.get("x-url") || "";
+  const referer = headersList.get("referer") || "";
+
+  // También puedes usar el referer para saber de dónde viene el usuario
+  const previousPath = referer ? new URL(referer).pathname : "/";
 
   const {
     data: { user },
@@ -46,7 +55,11 @@ const ProfileLayout = async ({
 
   return (
     <SidebarProvider>
-      <ProfileSidebar user={user} userBusinesses={userBusinesses || []} />
+      <ProfileSidebar
+        user={user}
+        userBusinesses={userBusinesses || []}
+        previousPath={previousPath}
+      />
       <SidebarBox>
         <header className="w-full bg-sidebar lg:hidden flex h-12 py-3 items-center justify-between px-5 border-b sticky top-0 z-10">
           <SidebarTrigger />

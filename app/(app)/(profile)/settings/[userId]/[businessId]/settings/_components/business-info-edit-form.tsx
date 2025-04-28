@@ -1,12 +1,14 @@
 "use client";
 
 import type React from "react";
+import type { FeatureCollection } from "geojson";
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +29,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -39,7 +40,6 @@ import { DocumentUpload } from "@/components/file-upload";
 import { PhoneInputWithCountry } from "@/components/universal/phone-input-country";
 import { Facebook, Instagram, Twitter, Youtube, Linkedin } from "lucide-react";
 import { Tiktok } from "@/components/svgs/icons";
-import type { FeatureCollection } from "geojson";
 import { ImageUpload } from "@/app/(onboarding)/onboarding/_components/image-upload";
 import { DeliveryMapWrapper } from "@/app/(onboarding)/onboarding/_components/delivery-map-wrapper";
 
@@ -252,24 +252,22 @@ type BusinessFormValues = z.infer<typeof businessFormSchema>;
 
 interface BusinessInfoEditFormProps {
   business: any;
+  geoJsonData: FeatureCollection | null;
+  mapCities: any[];
+  mapStates: any[];
+  deliveryZonesFormatted: string[];
 }
 
-export function BusinessInfoEditForm({ business }: BusinessInfoEditFormProps) {
+export function BusinessInfoEditForm({
+  business,
+  geoJsonData,
+  mapCities,
+  mapStates,
+  deliveryZonesFormatted,
+}: BusinessInfoEditFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [geoJsonData, setGeoJsonData] = useState<FeatureCollection | null>(
-    null
-  );
-  const [mapCities, setMapCities] = useState<any[]>([]);
-  const [mapStates, setMapStates] = useState<any[]>([]);
-  const [deliveryZonesFormatted, setDeliveryZonesFormatted] = useState<
-    string[]
-  >([]);
-
-  // Extraer usernames de las URLs de redes sociales
-  const extractUsername = (url: string, baseUrl: string): string => {
-    if (!url) return "";
-    return url.replace(baseUrl, "");
-  };
+  const [formHasChanges, setFormHasChanges] = useState(false);
+  const router = useRouter();
 
   // Valores por defecto del formulario basados en el negocio existente
   const defaultValues: Partial<BusinessFormValues> = {
@@ -303,66 +301,7 @@ export function BusinessInfoEditForm({ business }: BusinessInfoEditFormProps) {
     defaultValues,
   });
 
-  // Cargar datos GeoJSON para el mapa
-  useEffect(() => {
-    const fetchGeoData = async () => {
-      try {
-        const response = await fetch(
-          "https://raw.githubusercontent.com/angelnmara/geojson/refs/heads/master/MunicipiosMexico.json"
-        );
-        const data = await response.json();
-        setGeoJsonData(data);
-
-        // Extraer estados y ciudades del GeoJSON
-        const statesMap = new Map<string, string>();
-        const citiesArray: any[] = [];
-
-        if (data && data.features) {
-          data.features.forEach((feature: any) => {
-            if (feature.properties) {
-              const municipio = feature.properties.NAME_2 || "";
-              const estado = feature.properties.NAME_1 || "";
-
-              if (!municipio || !estado) return;
-
-              statesMap.set(estado, estado);
-
-              citiesArray.push({
-                name: municipio,
-                state: estado,
-                value: `${municipio}|${estado}`,
-              });
-            }
-          });
-        }
-
-        // Convertir estados a formato para el mapa
-        const statesArray = Array.from(statesMap.entries()).map(([name]) => ({
-          name,
-          value: name,
-        }));
-
-        setMapStates(statesArray);
-        setMapCities(citiesArray);
-
-        // Formatear zonas de entrega para el componente de mapa
-        if (business.delivery_zones && business.delivery_zones.length > 0) {
-          const formattedZones = business.delivery_zones.map(
-            (zone: { city: string; state: string }) =>
-              `${zone.city}|${zone.state}`
-          );
-          setDeliveryZonesFormatted(formattedZones);
-        }
-      } catch (error) {
-        console.error("Error loading GeoJSON data:", error);
-        toast.error("Error al cargar datos geográficos");
-      }
-    };
-
-    fetchGeoData();
-  }, [business.delivery_zones]);
-
-  // Manejar cambio en las zonas de entrega
+  // Modify the handleDeliveryZonesChange function to properly mark the form as dirty
   const handleDeliveryZonesChange = (zones: string[]) => {
     // Convertir de formato "city|state" a objetos { city, state }
     const formattedZones = zones.map((zone) => {
@@ -370,7 +309,11 @@ export function BusinessInfoEditForm({ business }: BusinessInfoEditFormProps) {
       return { city, state };
     });
 
-    form.setValue("delivery_zones", formattedZones);
+    // Set the value and mark the field as dirty
+    form.setValue("delivery_zones", formattedZones, {
+      shouldDirty: true,
+      shouldTouch: true,
+    });
   };
 
   // Inicializar valores de redes sociales
@@ -382,6 +325,24 @@ export function BusinessInfoEditForm({ business }: BusinessInfoEditFormProps) {
       form.setValue("social_media", socialMedia);
     }
   }, [business.social_media, form]);
+
+  // Add a watch for the delivery zones field to detect changes
+  useEffect(() => {
+    // Watch for form changes to control the Save button visibility
+    const subscription = form.watch((value, { name, type }) => {
+      // Check if the form is dirty or if delivery zones have changed
+      const formIsDirty = form.formState.isDirty;
+
+      // Compare delivery zones with the original values
+      const deliveryZonesChanged =
+        JSON.stringify(value.delivery_zones) !==
+        JSON.stringify(defaultValues.delivery_zones);
+
+      setFormHasChanges(formIsDirty || deliveryZonesChanged);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, form.formState.isDirty, defaultValues.delivery_zones]);
 
   async function onSubmit(data: BusinessFormValues) {
     try {
@@ -405,6 +366,7 @@ export function BusinessInfoEditForm({ business }: BusinessInfoEditFormProps) {
         description:
           "La información de tu negocio ha sido actualizada exitosamente.",
       });
+      router.refresh();
     } catch (error) {
       console.error("Error al actualizar el negocio:", error);
       toast.error("Error al actualizar el negocio", {
@@ -414,6 +376,7 @@ export function BusinessInfoEditForm({ business }: BusinessInfoEditFormProps) {
             : "Ocurrió un error inesperado",
       });
     } finally {
+      router.refresh();
       setIsLoading(false);
     }
   }
@@ -794,11 +757,21 @@ export function BusinessInfoEditForm({ business }: BusinessInfoEditFormProps) {
                     <FormItem>
                       <FormLabel>Estado</FormLabel>
                       <FormControl>
-                        <Input
-                          className="bg-background"
-                          placeholder="Estado"
-                          {...field}
-                        />
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger className="bg-background">
+                            <SelectValue placeholder="Selecciona un estado" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {mapStates.map((state) => (
+                              <SelectItem key={state.value} value={state.name}>
+                                {state.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -812,11 +785,26 @@ export function BusinessInfoEditForm({ business }: BusinessInfoEditFormProps) {
                     <FormItem>
                       <FormLabel>Ciudad</FormLabel>
                       <FormControl>
-                        <Input
-                          className="bg-background"
-                          placeholder="Ciudad"
-                          {...field}
-                        />
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          disabled={!form.getValues("state")}
+                        >
+                          <SelectTrigger className="bg-background">
+                            <SelectValue placeholder="Selecciona una ciudad" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {mapCities
+                              .filter(
+                                (city) => city.state === form.getValues("state")
+                              )
+                              .map((city) => (
+                                <SelectItem key={city.value} value={city.name}>
+                                  {city.name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1082,16 +1070,18 @@ export function BusinessInfoEditForm({ business }: BusinessInfoEditFormProps) {
             </CardContent>
           </Card>
 
-          {/* Botón de envío */}
-          <Button
-            variant={"defaultBlack"}
-            size={"sm"}
-            type="submit"
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? "Guardando cambios..." : "Guardar cambios"}
-          </Button>
+          {/* Botón de envío - solo visible cuando hay cambios */}
+          {formHasChanges && (
+            <Button
+              variant={"defaultBlack"}
+              size={"sm"}
+              type="submit"
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? "Guardando cambios..." : "Guardar cambios"}
+            </Button>
+          )}
         </form>
       </Form>
     </div>

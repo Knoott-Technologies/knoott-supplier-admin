@@ -9,6 +9,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { SheetClose } from "@/components/ui/sheet";
 import type { User } from "@supabase/supabase-js";
 import { Settings, Settings2, UserIcon } from "lucide-react";
 import Link from "next/link";
@@ -17,6 +18,7 @@ import type { UserBusinesses } from "./profile-sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import type React from "react";
 
 export const ProfileSidebarContent = ({
   user,
@@ -31,6 +33,14 @@ export const ProfileSidebarContent = ({
 
   const isCollapsed = !isMobile && state === "collapsed";
 
+  // Helper function to conditionally wrap with SheetClose
+  const wrapIfMobile = (element: React.ReactNode) => {
+    if (isMobile) {
+      return <SheetClose asChild>{element}</SheetClose>;
+    }
+    return element;
+  };
+
   return (
     <>
       <SidebarGroup>
@@ -38,26 +48,30 @@ export const ProfileSidebarContent = ({
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton
-                isActive={pathname === `/settings/${user.id}/profile`}
-                asChild
-              >
-                <Link href={`/settings/${user.id}/profile`}>
-                  <UserIcon />
-                  <span>Perfil</span>
-                </Link>
-              </SidebarMenuButton>
+              {wrapIfMobile(
+                <SidebarMenuButton
+                  isActive={pathname === `/settings/${user.id}/profile`}
+                  asChild
+                >
+                  <Link href={`/settings/${user.id}/profile`}>
+                    <UserIcon />
+                    <span>Perfil</span>
+                  </Link>
+                </SidebarMenuButton>
+              )}
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton
-                isActive={pathname === `/settings/${user.id}/preferences`}
-                asChild
-              >
-                <Link href={`/settings/${user.id}/preferences`}>
-                  <Settings2 />
-                  <span>Preferencias</span>
-                </Link>
-              </SidebarMenuButton>
+              {wrapIfMobile(
+                <SidebarMenuButton
+                  isActive={pathname === `/settings/${user.id}/preferences`}
+                  asChild
+                >
+                  <Link href={`/settings/${user.id}/preferences`}>
+                    <Settings2 />
+                    <span>Preferencias</span>
+                  </Link>
+                </SidebarMenuButton>
+              )}
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
@@ -69,42 +83,47 @@ export const ProfileSidebarContent = ({
             <SidebarMenu>
               {userBusinesses.map((item) => (
                 <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={item.business.business_name}
-                    className={cn(
-                      "flex items-center gap-2",
-                      isCollapsed && "justify-center p-0 h-8 w-8"
-                    )}
-                    isActive={
-                      pathname ===
-                      `/settings/${user.id}/${item.business.id}/settings`
-                    }
-                  >
-                    <Link
-                      href={`/settings/${user.id}/${item.business.id}/settings`}
-                    >
-                      <Avatar
-                        className={cn(
-                          "size-4 rounded-none",
-                          isCollapsed && "size-4"
-                        )}
-                      >
-                        <AvatarImage
-                          src={item.business.business_logo_url}
-                          alt={item.business.business_name}
-                        />
-                        <AvatarFallback className="rounded-none">
-                          {item.business.business_name.slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      {!isCollapsed && (
-                        <span className="flex-1 text-left max-w-[80%] truncate">
-                          {item.business.business_name}
-                        </span>
+                  {wrapIfMobile(
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={item.business.business_name}
+                      className={cn(
+                        "flex items-center gap-2",
+                        isCollapsed && "justify-center p-0 h-8 w-8"
                       )}
-                    </Link>
-                  </SidebarMenuButton>
+                      isActive={
+                        pathname ===
+                        `/settings/${user.id}/${item.business.id}/settings`
+                      }
+                    >
+                      <Link
+                        href={`/settings/${user.id}/${item.business.id}/settings`}
+                      >
+                        <Avatar
+                          className={cn(
+                            "size-4 rounded-none",
+                            isCollapsed && "size-4"
+                          )}
+                        >
+                          <AvatarImage
+                            src={
+                              item.business.business_logo_url ||
+                              "/placeholder.svg"
+                            }
+                            alt={item.business.business_name}
+                          />
+                          <AvatarFallback className="rounded-none">
+                            {item.business.business_name.slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        {!isCollapsed && (
+                          <span className="flex-1 text-left max-w-[80%] truncate">
+                            {item.business.business_name}
+                          </span>
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
