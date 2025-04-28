@@ -5,6 +5,7 @@ import { User } from "../page";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { UserActions } from "./user-actions";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -45,6 +46,17 @@ export const columns: ColumnDef<User>[] = [
             ? "Supervisor"
             : "Staff"}
         </Badge>
+      );
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      return (
+        <UserActions
+          businessId={row.original.business_id}
+          user={row.original}
+        />
       );
     },
   },
