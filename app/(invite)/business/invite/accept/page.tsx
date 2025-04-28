@@ -155,7 +155,7 @@ const AcceptBusinessInvitationPage = async ({
         <span className="max-w-3xl mx-auto flex flex-col gap-y-7 items-center justify-center">
           <div className="w-full max-w-xl mx-auto aspect-[3/2] relative">
             <Image
-              src={"/invitation-illustration.svg"}
+              src={"/login-required-illustration.svg"}
               alt="Invitation illustration"
               fill
               className="w-full h-full object-contain"
@@ -173,7 +173,7 @@ const AcceptBusinessInvitationPage = async ({
             <p className="text-muted-foreground text-base lg:text-lg text-center">
               Has sido invitado a unirte a{" "}
               <span className="text-foreground font-medium">
-                {invitation.business.name}
+                {invitation.business.business_name}
               </span>{" "}
               como{" "}
               <span className="text-foreground font-medium">
@@ -218,7 +218,7 @@ const AcceptBusinessInvitationPage = async ({
           <p className="text-muted-foreground text-base lg:text-lg text-center">
             ¡Buenas noticias! Has sido invitado a colaborar en{" "}
             <span className="text-foreground font-medium">
-              {invitation.business?.name || "un negocio"}
+              {invitation.business?.business_name || "un negocio"}
             </span>
             . Para acceder a todas las herramientas y comenzar a colaborar,
             necesitas crear una cuenta o iniciar sesión si ya eres parte de
