@@ -9,6 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      business_invitations: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          invitation_token: string
+          role: Database["public"]["Enums"]["provider_businees_user_roles"]
+          status: string
+          updated_at: string
+          user_email: string
+          user_name: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          invitation_token: string
+          role?: Database["public"]["Enums"]["provider_businees_user_roles"]
+          status?: string
+          updated_at?: string
+          user_email: string
+          user_name: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          invitation_token?: string
+          role?: Database["public"]["Enums"]["provider_businees_user_roles"]
+          status?: string
+          updated_at?: string
+          user_email?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_invitations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "provider_business"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cart_items: {
         Row: {
           amount: number
@@ -225,44 +269,6 @@ export type Database = {
           },
         ]
       }
-      conversations: {
-        Row: {
-          created_at: string | null
-          id: string
-          last_message: string | null
-          messages: Json | null
-          updated_at: string | null
-          user_id: string
-          wedding_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          last_message?: string | null
-          messages?: Json | null
-          updated_at?: string | null
-          user_id: string
-          wedding_id: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          last_message?: string | null
-          messages?: Json | null
-          updated_at?: string | null
-          user_id?: string
-          wedding_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "conversations_wedding_id_fkey"
-            columns: ["wedding_id"]
-            isOneToOne: false
-            referencedRelation: "weddings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       gift_cards: {
         Row: {
           bg_color: string | null
@@ -323,6 +329,54 @@ export type Database = {
           },
           {
             foreignKeyName: "gift_cards_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knoott_ai_conversations: {
+        Row: {
+          conversation_id: string
+          created_at: string | null
+          id: string
+          messages: Json | null
+          title: string | null
+          updated_at: string | null
+          user_id: string
+          wedding_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          messages?: Json | null
+          title?: string | null
+          updated_at?: string | null
+          user_id: string
+          wedding_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          messages?: Json | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knoott_ai_conversations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knoott_ai_conversations_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -409,17 +463,14 @@ export type Database = {
           created_at: string
           description: string
           dimensions: Json | null
+          embedding: string | null
           id: number
           images_url: string[]
           keywords: string[] | null
           name: string
           presence_in_gifts: number
           provider_business_id: string | null
-          shopify_created_at: string | null
-          shopify_integration_id: string | null
-          shopify_product_id: string | null
-          shopify_synced_at: string | null
-          shopify_updated_at: string | null
+          shipping_cost: number
           short_description: string
           short_name: string
           specs: Json | null
@@ -432,17 +483,14 @@ export type Database = {
           created_at?: string
           description: string
           dimensions?: Json | null
+          embedding?: string | null
           id?: number
           images_url?: string[]
           keywords?: string[] | null
           name: string
           presence_in_gifts?: number
           provider_business_id?: string | null
-          shopify_created_at?: string | null
-          shopify_integration_id?: string | null
-          shopify_product_id?: string | null
-          shopify_synced_at?: string | null
-          shopify_updated_at?: string | null
+          shipping_cost?: number
           short_description: string
           short_name: string
           specs?: Json | null
@@ -455,17 +503,14 @@ export type Database = {
           created_at?: string
           description?: string
           dimensions?: Json | null
+          embedding?: string | null
           id?: number
           images_url?: string[]
           keywords?: string[] | null
           name?: string
           presence_in_gifts?: number
           provider_business_id?: string | null
-          shopify_created_at?: string | null
-          shopify_integration_id?: string | null
-          shopify_product_id?: string | null
-          shopify_synced_at?: string | null
-          shopify_updated_at?: string | null
+          shipping_cost?: number
           short_description?: string
           short_name?: string
           specs?: Json | null
@@ -493,13 +538,6 @@ export type Database = {
             columns: ["provider_business_id"]
             isOneToOne: false
             referencedRelation: "provider_business"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "products_shopify_integration_id_fkey"
-            columns: ["shopify_integration_id"]
-            isOneToOne: false
-            referencedRelation: "shopify_integrations"
             referencedColumns: ["id"]
           },
           {
@@ -604,50 +642,6 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      provider_branches: {
-        Row: {
-          bank_account_number: number | null
-          branch_name: string
-          branch_reference: string
-          commision_percentaje: number
-          contact_phone_number: string
-          created_at: string
-          description: string | null
-          id: string
-          provider_business_id: string
-        }
-        Insert: {
-          bank_account_number?: number | null
-          branch_name: string
-          branch_reference?: string
-          commision_percentaje?: number
-          contact_phone_number: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          provider_business_id: string
-        }
-        Update: {
-          bank_account_number?: number | null
-          branch_name?: string
-          branch_reference?: string
-          commision_percentaje?: number
-          contact_phone_number?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          provider_business_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "provider_branches_provider_business_id_fkey"
-            columns: ["provider_business_id"]
-            isOneToOne: false
-            referencedRelation: "provider_business"
             referencedColumns: ["id"]
           },
         ]
@@ -1173,6 +1167,7 @@ export type Database = {
           last_name: string
           phone_number: string
           role: Database["public"]["Enums"]["admin_role"] | null
+          status: Database["public"]["Enums"]["user_status"]
           stripe_cus_id: string | null
           updated_at: string | null
         }
@@ -1184,6 +1179,7 @@ export type Database = {
           last_name: string
           phone_number: string
           role?: Database["public"]["Enums"]["admin_role"] | null
+          status?: Database["public"]["Enums"]["user_status"]
           stripe_cus_id?: string | null
           updated_at?: string | null
         }
@@ -1195,6 +1191,7 @@ export type Database = {
           last_name?: string
           phone_number?: string
           role?: Database["public"]["Enums"]["admin_role"] | null
+          status?: Database["public"]["Enums"]["user_status"]
           stripe_cus_id?: string | null
           updated_at?: string | null
         }
@@ -1289,6 +1286,44 @@ export type Database = {
             foreignKeyName: "wedding_invitations_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wedding_memories: {
+        Row: {
+          access_code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          qr_code_url: string | null
+          updated_at: string
+          wedding_id: string
+        }
+        Insert: {
+          access_code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          qr_code_url?: string | null
+          updated_at?: string
+          wedding_id: string
+        }
+        Update: {
+          access_code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          qr_code_url?: string | null
+          updated_at?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wedding_memories_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: true
             referencedRelation: "weddings"
             referencedColumns: ["id"]
           },
@@ -1564,6 +1599,57 @@ export type Database = {
           },
         ]
       }
+      wedding_verify: {
+        Row: {
+          document_back_url: string | null
+          document_front_url: string
+          document_type: string
+          full_name: string
+          id: number
+          selfie_url: string
+          status: Database["public"]["Enums"]["verify_status"]
+          user_id: string
+          wedding_id: string
+        }
+        Insert: {
+          document_back_url?: string | null
+          document_front_url: string
+          document_type: string
+          full_name: string
+          id?: number
+          selfie_url: string
+          status?: Database["public"]["Enums"]["verify_status"]
+          user_id: string
+          wedding_id: string
+        }
+        Update: {
+          document_back_url?: string | null
+          document_front_url?: string
+          document_type?: string
+          full_name?: string
+          id?: number
+          selfie_url?: string
+          status?: Database["public"]["Enums"]["verify_status"]
+          user_id?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wedding_verify_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wedding_verify_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: true
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       weddings: {
         Row: {
           account_holder: string | null
@@ -1655,13 +1741,106 @@ export type Database = {
       }
     }
     Functions: {
+      bytea_to_text: {
+        Args: { data: string }
+        Returns: string
+      }
       cleanup_old_shopify_auth_states: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      get_current_user_info: {
+        Args: { business_id: string }
+        Returns: Json
+      }
       get_user_provider_ids: {
         Args: { user_uuid: string }
         Returns: string[]
+      }
+      http: {
+        Args: { request: Database["public"]["CompositeTypes"]["http_request"] }
+        Returns: unknown
+      }
+      http_delete: {
+        Args:
+          | { uri: string }
+          | { uri: string; content: string; content_type: string }
+        Returns: unknown
+      }
+      http_get: {
+        Args: { uri: string } | { uri: string; data: Json }
+        Returns: unknown
+      }
+      http_head: {
+        Args: { uri: string }
+        Returns: unknown
+      }
+      http_header: {
+        Args: { field: string; value: string }
+        Returns: Database["public"]["CompositeTypes"]["http_header"]
+      }
+      http_list_curlopt: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          curlopt: string
+          value: string
+        }[]
+      }
+      http_patch: {
+        Args: { uri: string; content: string; content_type: string }
+        Returns: unknown
+      }
+      http_post: {
+        Args:
+          | { uri: string; content: string; content_type: string }
+          | { uri: string; data: Json }
+        Returns: unknown
+      }
+      http_put: {
+        Args: { uri: string; content: string; content_type: string }
+        Returns: unknown
+      }
+      http_reset_curlopt: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      http_set_curlopt: {
+        Args: { curlopt: string; value: string }
+        Returns: boolean
+      }
+      is_admin_for_business: {
+        Args: { business_id: string }
+        Returns: boolean
+      }
+      is_admin_of_business: {
+        Args: { business_uuid: string }
+        Returns: boolean
+      }
+      is_business_admin: {
+        Args: { business_id: string }
+        Returns: boolean
+      }
+      search_products_by_delivery_zone: {
+        Args: {
+          p_city: string
+          p_state: string
+          p_query?: string
+          p_subcategory_id?: number
+          p_brand_id?: number
+          p_status?: Database["public"]["Enums"]["product_status"]
+          p_limit?: number
+          p_offset?: number
+          p_debug?: boolean
+        }
+        Returns: Json
+      }
+      text_to_bytea: {
+        Args: { data: string }
+        Returns: string
+      }
+      urlencode: {
+        Args: { data: Json } | { string: string } | { string: string }
+        Returns: string
       }
     }
     Enums: {
@@ -1689,11 +1868,29 @@ export type Database = {
       transaction_status: "completed" | "pending" | "canceled"
       transaction_types: "income" | "egress" | "purchase"
       user_provider_branches_role: "admin" | "supervisor" | "cashier"
+      user_status: "active" | "deactivated" | "deleted"
+      verify_status: "pending" | "on_revision" | "verified" | "rejected"
       wedding_status: "active" | "paused" | "closed"
       wedding_user_role: "admin" | "planner"
     }
     CompositeTypes: {
-      [_ in never]: never
+      http_header: {
+        field: string | null
+        value: string | null
+      }
+      http_request: {
+        method: unknown | null
+        uri: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content_type: string | null
+        content: string | null
+      }
+      http_response: {
+        status: number | null
+        content_type: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content: string | null
+      }
     }
   }
 }
@@ -1832,6 +2029,8 @@ export const Constants = {
       transaction_status: ["completed", "pending", "canceled"],
       transaction_types: ["income", "egress", "purchase"],
       user_provider_branches_role: ["admin", "supervisor", "cashier"],
+      user_status: ["active", "deactivated", "deleted"],
+      verify_status: ["pending", "on_revision", "verified", "rejected"],
       wedding_status: ["active", "paused", "closed"],
       wedding_user_role: ["admin", "planner"],
     },
