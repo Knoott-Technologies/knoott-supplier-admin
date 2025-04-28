@@ -199,7 +199,7 @@ export async function handleBusinessInvitation(
     toast.success("¡Invitación aceptada correctamente!");
 
     // Redirigir al dashboard del negocio
-    router.push(`/business/${businessId}/dashboard`);
+    router.push(`/dahboard/${businessId}`);
   } catch (error) {
     console.error("Error al procesar la invitación:", error);
     toast.error("Error al procesar la invitación", {

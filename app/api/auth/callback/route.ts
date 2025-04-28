@@ -140,13 +140,13 @@ export async function GET(request: Request) {
 
               // 5. Redirigir al dashboard del negocio
               return NextResponse.redirect(
-                new URL(`/business/${businessId}/dashboard`, request.url)
+                new URL(`/dashboard/${businessId}`, request.url)
               );
             }
           } else if (existingRelation) {
             // Si ya existe la relación, igual redirigir al dashboard del negocio
             return NextResponse.redirect(
-              new URL(`/business/${businessId}/dashboard`, request.url)
+              new URL(`/dashboard/${businessId}`, request.url)
             );
           }
         }
