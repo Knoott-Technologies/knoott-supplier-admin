@@ -132,26 +132,6 @@ const ProductsPage = async ({
         >
           <span className="flex gap-x-2 items-center">
             <Button
-              variant={"outline"}
-              className="hidden lg:flex"
-              size={"default"}
-              asChild
-            >
-              <Link href={`/dashboard/${params.businessId}/products/shopify`}>
-                {integrations && integrations.length > 0 ? "Ver integración" : "Integración con Shopify"} <Shopify className="size-4" />
-              </Link>
-            </Button>
-            <Button
-              variant={"outline"}
-              className="lg:hidden flex"
-              size={"icon"}
-              asChild
-            >
-              <Link href={`/dashboard/${params.businessId}/products/shopify`}>
-                <Shopify className="size-4" />
-              </Link>
-            </Button>
-            <Button
               variant={"defaultBlack"}
               className="hidden lg:flex"
               size={"default"}
