@@ -59,11 +59,23 @@ export function DataTable<TData, TValue>({
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+                {row.getVisibleCells().map((cell) => {
+                  const maxWidth = cell.column.columnDef.maxSize;
+                  const minWidth = cell.column.columnDef.minSize;
+                  const width = cell.column.columnDef.size;
+
+                  return (
+                    <TableCell
+                      style={{ maxWidth, minWidth, width }}
+                      key={cell.id}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  );
+                })}
               </TableRow>
             ))
           ) : (
