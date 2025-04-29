@@ -88,15 +88,9 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => (
       <div className="flex flex-col min-w-0">
         <div className="font-medium truncate">
-          {(row.original.shopify_product_id && (
-            <p className="flex items-center justify-start gap-x-1">
-              Shopify <Shopify className="size-3.5" />
-            </p>
-          )) || (
-            <p className="flex items-center justify-start gap-x-1">
-              Knoott <Icon variant={"black"} className="size-3.5" />
-            </p>
-          )}
+          <p className="flex items-center justify-start gap-x-1">
+            Knoott <Icon variant={"black"} className="size-3.5" />
+          </p>
         </div>
       </div>
     ),
