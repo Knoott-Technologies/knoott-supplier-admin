@@ -97,7 +97,7 @@ export const NavigationMenuMobile = ({
                   </Link>
                 </Button>
               </SheetClose>
-              <SheetClose asChild>
+              {/* <SheetClose asChild>
                 <Button
                   variant="ghost"
                   className="px-3 w-full flex items-center justify-between text-muted-foreground"
@@ -108,7 +108,7 @@ export const NavigationMenuMobile = ({
                     Documentación <ArrowRight />
                   </Link>
                 </Button>
-              </SheetClose>
+              </SheetClose> */}
             </div>
             {!user && (
               <SheetClose asChild>
