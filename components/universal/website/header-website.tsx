@@ -28,10 +28,10 @@ const nav: NavProps[] = [
     label: "Producto",
     href: "/product",
   },
-  {
-    label: "Documentación",
-    href: "/docs",
-  },
+  // {
+  //   label: "Documentación",
+  //   href: "/docs",
+  // },
 ];
 
 export const HeaderWebsite = ({
