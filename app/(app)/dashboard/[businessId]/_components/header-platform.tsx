@@ -99,7 +99,7 @@ export const HeaderPlatform = ({
             ? "Supervisor"
             : "Staff"}
         </Button>
-        {nav.map((item, index) => (
+        {/* {nav.map((item, index) => (
           <Button
             variant={"outline"}
             key={index}
@@ -115,7 +115,7 @@ export const HeaderPlatform = ({
               <item.icon className="h-6 w-6" />
             </Link>
           </Button>
-        ))}
+        ))} */}
       </div>
     </header>
   );
