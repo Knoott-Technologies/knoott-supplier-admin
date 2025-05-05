@@ -130,7 +130,7 @@ const AcceptBusinessInvitationPage = async ({
             </p>
           </div>
           <Button asChild variant={"defaultBlack"} size={"default"}>
-            <Link href={`/business/${invitation.business_id}/dashboard`}>
+            <Link href={`/dashboard/${invitation.business_id}`}>
               Ir a mi dashboard <ArrowRight className="ml-2" />
             </Link>
           </Button>
