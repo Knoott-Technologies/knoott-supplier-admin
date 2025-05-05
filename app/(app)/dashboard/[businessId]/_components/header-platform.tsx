@@ -7,6 +7,7 @@ import { Logo } from "@/components/universal/logo";
 import { Database } from "@/database.types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { SupportPopover } from "./support-popover";
 
 interface NavProps {
   name: string;
@@ -57,28 +58,13 @@ export const HeaderPlatform = ({
             role === "admin"
               ? "text-contrast bg-contrast/10 hover:text-contrast hover:bg-contrast/10"
               : role === "supervisor"
-              ? "text-contrast2 bg-contrast2/10 hover:text-contrast2 hover:bg-contrast2/10"
-              : "text-tertiary bg-tertiary/10 hover:text-tertiary hover:bg-tertiary/10"
+                ? "text-contrast2 bg-contrast2/10 hover:text-contrast2 hover:bg-contrast2/10"
+                : "text-tertiary bg-tertiary/10 hover:text-tertiary hover:bg-tertiary/10"
           )}
         >
           <User2 />
         </Button>
-        {nav.map((item, index) => (
-          <Button
-            variant={"outline"}
-            key={index}
-            size={"icon"}
-            className="size-7"
-            asChild
-          >
-            <Link
-              href={item.href}
-              className="h-full flex items-center justify-center"
-            >
-              <item.icon className="h-6 w-6" />
-            </Link>
-          </Button>
-        ))}
+        <SupportPopover />
       </div>
       <div className="w-fit h-full items-center justify-end gap-1 lg:flex hidden">
         <Button
@@ -89,16 +75,17 @@ export const HeaderPlatform = ({
             role === "admin"
               ? "text-contrast bg-contrast/10 hover:text-contrast hover:bg-contrast/10"
               : role === "supervisor"
-              ? "text-contrast2 bg-contrast2/10 hover:text-contrast2 hover:bg-contrast2/10"
-              : "text-tertiary bg-tertiary/10 hover:text-tertiary hover:bg-tertiary/10"
+                ? "text-contrast2 bg-contrast2/10 hover:text-contrast2 hover:bg-contrast2/10"
+                : "text-tertiary bg-tertiary/10 hover:text-tertiary hover:bg-tertiary/10"
           )}
         >
           {role === "admin"
             ? "Administrador"
             : role === "supervisor"
-            ? "Supervisor"
-            : "Staff"}
+              ? "Supervisor"
+              : "Staff"}
         </Button>
+        <SupportPopover />
         {/* {nav.map((item, index) => (
           <Button
             variant={"outline"}
