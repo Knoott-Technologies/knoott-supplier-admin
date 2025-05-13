@@ -4,10 +4,9 @@ import { cookies } from "next/headers";
 import { columns } from "./_components/columns";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { FileSpreadsheet, Import, Plus } from "lucide-react";
 import { DataTable } from "./_components/products-table";
 import { FilterBar } from "./_components/filter-bar";
-import { Shopify } from "@/components/svgs/icons";
 
 const ProductsPage = async ({
   params,
@@ -131,26 +130,31 @@ const ProductsPage = async ({
           description="Administra todo tu catálogo desde un solo lugar. Agrega, edita o elimina productos según las necesidades de tu tienda."
         >
           <span className="flex gap-x-2 items-center">
-            <Button
-              variant={"defaultBlack"}
-              className="hidden lg:flex"
-              size={"default"}
-              asChild
-            >
-              <Link href={`/dashboard/${params.businessId}/products/new`}>
-                Agregar producto <Plus />
-              </Link>
-            </Button>
-            <Button
-              variant={"defaultBlack"}
-              className="lg:hidden flex"
-              size={"icon"}
-              asChild
-            >
-              <Link href={`/dashboard/${params.businessId}/products/new`}>
-                <Plus />
-              </Link>
-            </Button>
+            <span className="items-center gap-x-2 hidden lg:flex">
+              {" "}
+              <Button variant={"outline"} size={"default"} asChild>
+                <Link href={`/dashboard/${params.businessId}/products/import`}>
+                  Importar <FileSpreadsheet />
+                </Link>
+              </Button>
+              <Button variant={"defaultBlack"} size={"default"} asChild>
+                <Link href={`/dashboard/${params.businessId}/products/new`}>
+                  Agregar producto <Plus />
+                </Link>
+              </Button>
+            </span>
+            <span className="items-center gap-x-2 lg:hidden flex">
+              <Button variant={"outline"} size={"icon"} asChild>
+                <Link href={`/dashboard/${params.businessId}/products/import`}>
+                  <FileSpreadsheet />
+                </Link>
+              </Button>
+              <Button variant={"defaultBlack"} size={"icon"} asChild>
+                <Link href={`/dashboard/${params.businessId}/products/new`}>
+                  <Plus />
+                </Link>
+              </Button>
+            </span>
           </span>
         </PageHeader>
 
