@@ -176,13 +176,13 @@ export default function ProductsTable({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={product.brand_id ? "default" : "outline"}>
+                      <Badge variant={product.brand_id ? "secondary" : "outline"}>
                         {brandName}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={product.subcategory_id ? "default" : "outline"}
+                        variant={product.subcategory_id ? "secondary" : "outline"}
                       >
                         {categoryName}
                       </Badge>

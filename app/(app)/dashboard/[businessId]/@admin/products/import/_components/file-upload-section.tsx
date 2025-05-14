@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import type React from "react";
+
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Upload, FileSpreadsheet, AlertCircle } from "lucide-react";
+import { FileSpreadsheet, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useDropzone } from "react-dropzone";
 import DataPreview from "./data-preview";
 
@@ -18,6 +19,54 @@ export default function FileUploadSection({
   const [isUploading, setIsUploading] = useState(false);
   const [fileData, setFileData] = useState<any[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const processFile = async (fileToProcess: File) => {
+    setIsUploading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", fileToProcess);
+      formData.append("businessId", businessId);
+
+      const response = await fetch("/api/import/parse", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al procesar el archivo");
+      }
+
+      const data = await response.json();
+
+      // Check if data is empty or doesn't have the expected structure
+      if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
+        setError(
+          "No se encontraron datos en el archivo. Verifica que el archivo tenga el formato correcto y contenga datos."
+        );
+        toast.error("No se encontraron datos en el archivo");
+        return;
+      }
+
+      setFileData(data.data);
+      toast.success("Archivo procesado correctamente");
+    } catch (err: any) {
+      console.error("Error uploading file:", err);
+      setError(err.message || "Error al procesar el archivo");
+      toast.error("Error al procesar el archivo");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Process file automatically when it's selected
+  useEffect(() => {
+    if (file && !isUploading && !fileData) {
+      processFile(file);
+    }
+  }, [file]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
@@ -41,9 +90,6 @@ export default function FileUploadSection({
 
     setFile(selectedFile);
     setError(null);
-
-    // Automatically process the file when dropped
-    processFile(selectedFile);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -57,37 +103,6 @@ export default function FileUploadSection({
     },
     maxFiles: 1,
   });
-
-  const processFile = async (fileToProcess: File) => {
-    setIsUploading(true);
-    setError(null);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", fileToProcess);
-      formData.append("businessId", businessId);
-
-      const response = await fetch("/api/import/parse", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al procesar el archivo");
-      }
-
-      const data = await response.json();
-      setFileData(data.data);
-      toast.success("Archivo procesado correctamente");
-    } catch (err: any) {
-      console.error("Error uploading file:", err);
-      setError(err.message || "Error al procesar el archivo");
-      toast.error("Error al procesar el archivo");
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -111,16 +126,12 @@ export default function FileUploadSection({
     setError(null);
   };
 
-  const handleUpload = async () => {
-    if (!file) return;
-    await processFile(file);
-  };
-
   return (
     <div className="space-y-6">
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -136,6 +147,12 @@ export default function FileUploadSection({
             }`}
           >
             <input {...getInputProps()} id="file-upload" />
+
+            <FileSpreadsheet
+              className={`h-12 w-12 mb-4 transition-colors duration-200 ${
+                isDragActive ? "text-primary" : "text-gray-400"
+              }`}
+            />
 
             {isDragActive ? (
               <p className="text-sm text-primary font-medium mb-4">
@@ -160,35 +177,20 @@ export default function FileUploadSection({
               Seleccionar archivo
             </Button>
 
-            {file && (
+            {file && !isUploading && (
               <div className="mt-4 text-sm">
                 <p className="font-medium">Archivo seleccionado:</p>
                 <p className="text-gray-500">{file.name}</p>
               </div>
             )}
-          </div>
 
-          {file && !isDragActive && (
-            <div className="mt-4 flex justify-end">
-              <Button
-                onClick={handleUpload}
-                disabled={isUploading}
-                className="flex items-center gap-2"
-              >
-                {isUploading ? (
-                  <>
-                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Procesando...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4" />
-                    Procesar archivo
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
+            {isUploading && (
+              <div className="mt-4 flex items-center gap-2">
+                <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-sm text-gray-600">Procesando archivo...</p>
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <DataPreview data={fileData} businessId={businessId} />
