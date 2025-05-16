@@ -15,7 +15,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -45,6 +44,7 @@ import { DeliveryMapWrapper } from "./delivery-map-wrapper";
 import { Tiktok } from "@/components/svgs/icons";
 import { DocumentUpload } from "@/components/file-upload";
 import { Separator } from "@/components/ui/separator";
+import { useFormPersistence } from "@/hooks/use-form-persistance";
 
 // Lista de bancos en México
 const MEXICAN_BANKS = [
@@ -276,6 +276,13 @@ export function BusinessForm({
     defaultValues,
   });
 
+  // Use form persistence with localStorage
+  const { clearSavedData } = useFormPersistence(form, "business-form-data", [
+    "business_logo_url",
+    "tax_situation_url",
+    "delivery_zones",
+  ]);
+
   // Preparar datos para el mapa
   useEffect(() => {
     if (initialStates.length > 0) {
@@ -415,6 +422,9 @@ export function BusinessForm({
       toast.success("Negocio creado correctamente", {
         description: "Tu negocio ha sido registrado exitosamente.",
       });
+
+      // Clear saved form data after successful submission
+      clearSavedData();
 
       // Redirigir al dashboard
       router.push(`/dashboard`);

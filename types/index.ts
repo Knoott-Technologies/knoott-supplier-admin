@@ -1,4 +1,4 @@
-// Update the ProcessedProduct interface to match the Zod schema
+// Update the ProcessedProduct interface to match the database schema
 
 export interface RawProductData {
   [key: string]: any;
@@ -25,14 +25,16 @@ export interface ProcessedProduct {
   short_description: string;
   brand_id: number | null;
   brand_name?: string; // For display purposes
-  dimensions: any | null;
-  specs: any | null;
-  keywords: string[];
+  dimensions: any | null; // Can be null as per DB schema
+  specs: any | null; // Can be null as per DB schema
+  keywords: string[]; // Default to empty array if null
   images_url: string[];
   subcategory_id: number;
   subcategory_name?: string; // For display purposes
+  presence_in_gifts: number;
   status: "active" | "archived" | "draft" | "requires_verification" | "deleted";
   shipping_cost: number;
+  provider_business_id?: string | null; // Will be set in the save route
   variants: ProductVariant[];
 }
 
