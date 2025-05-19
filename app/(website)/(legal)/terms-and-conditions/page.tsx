@@ -1044,7 +1044,7 @@ const TermsAndConditionsPage = async () => {
                 través del SITIO, en donde una vez que el CLIENTE seleccione la
                 cantidad a disponer, KNOOTT se obliga a autorizar/realizar dicha
                 transacción a la cuenta bancaria que se haya establecido y en un
-                plazo máximo de 3 días hábiles, contados a partir de que se
+                plazo máximo de 5 días hábiles, contados a partir de que se
                 confirme la solicitud de retiro.
               </p>
             </div>
