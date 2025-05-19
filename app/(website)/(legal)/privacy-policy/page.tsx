@@ -35,15 +35,16 @@ const PrivacyPolicyPage = async () => {
           </p>
 
           <p>
-            Al momento de proporcionarnos sus Datos Personales (los "Datos")
-            entendemos que conoce y acepta las condiciones establecidas para el
-            tratamiento de sus DATOS de acuerdo al presente Aviso de Privacidad
-            (el "Aviso") en el cual le informamos de conformidad con lo
-            dispuesto por la Ley Federal de Protección de Datos Personales en
-            Posesión de los Particulares (la "Ley") y su Reglamento (el
-            "Reglamento"), sobre cómo y con qué fines tratamos su información
-            personal, por lo que le recomendamos de la manera más atenta lea
-            detenidamente el presente Aviso.
+            Al momento de proporcionarnos sus Datos Personales (los
+            &quot;Datos&quot;) entendemos que conoce y acepta las condiciones
+            establecidas para el tratamiento de sus DATOS de acuerdo al presente
+            Aviso de Privacidad (el &quot;Aviso&quot;) en el cual le informamos
+            de conformidad con lo dispuesto por la Ley Federal de Protección de
+            Datos Personales en Posesión de los Particulares (la
+            &quot;Ley&quot;) y su Reglamento (el &quot;Reglamento&quot;), sobre
+            cómo y con qué fines tratamos su información personal, por lo que le
+            recomendamos de la manera más atenta lea detenidamente el presente
+            Aviso.
           </p>
 
           <p>
@@ -56,16 +57,17 @@ const PrivacyPolicyPage = async () => {
             <div className="space-y-4">
               <p>
                 El responsable del tratamiento de sus datos personales es KNOOTT
-                TECHNOLOGIES, S.A.P.I. DE C.V., ("Knoott", o el "Responsable"),
-                con domicilio en Avenida Presidente Carranza número 68, C.P.
-                27000, en el municipio de Torreón, Coahuila, y a quien usted
-                puede contactar en cualquier momento a través del correo
-                electrónico: soporte@knoott.com.
+                TECHNOLOGIES, S.A.P.I. DE C.V., (&quot;Knoott&quot;, o el
+                &quot;Responsable&quot;), con domicilio en Avenida Presidente
+                Carranza número 68, C.P. 27000, en el municipio de Torreón,
+                Coahuila, y a quien usted puede contactar en cualquier momento a
+                través del correo electrónico: soporte@knoott.com.
               </p>
               <p>
-                El término "Usuario", "Usuarios" "Cliente" y/o "Titular" se
-                utilizará para hacer referencia en forma indistinta a toda
-                persona que utilice el Sitio Knoott.
+                El término &quot;Usuario&quot;, &quot;Usuarios&quot;
+                &quot;Cliente&quot; y/o &quot;Titular&quot; se utilizará para
+                hacer referencia en forma indistinta a toda persona que utilice
+                el Sitio Knoott.
               </p>
             </div>
           </section>
@@ -140,16 +142,16 @@ const PrivacyPolicyPage = async () => {
             <div className="space-y-4">
               <p>
                 Recabamos sus datos personales a través del sitio web denominado
-                "KNOOTT" (en lo sucesivo el "Sitio"), al momento en que realiza
-                el pago de algún producto y/o servicio, se pone en contacto con
-                el equipo, crea un usuario y contraseña, brinda sus propios
-                datos para la obtención de promociones o descuentos, transmite
-                información con otros usuarios a través del Sitio, entre otras
-                actividades que impliquen el uso del Sitio. Los datos que
-                obtenemos por estos medios pueden ser: Nombre, edad, domicilio,
-                ubicación geográfica, correo electrónico, número de teléfono,
-                datos financieros y/o cualquier contenido en el perfil del
-                usuario.
+                &quot;KNOOTT&quot; (en lo sucesivo el &quot;Sitio&quot;), al
+                momento en que realiza el pago de algún producto y/o servicio,
+                se pone en contacto con el equipo, crea un usuario y contraseña,
+                brinda sus propios datos para la obtención de promociones o
+                descuentos, transmite información con otros usuarios a través
+                del Sitio, entre otras actividades que impliquen el uso del
+                Sitio. Los datos que obtenemos por estos medios pueden ser:
+                Nombre, edad, domicilio, ubicación geográfica, correo
+                electrónico, número de teléfono, datos financieros y/o cualquier
+                contenido en el perfil del usuario.
               </p>
             </div>
           </section>
@@ -174,10 +176,10 @@ const PrivacyPolicyPage = async () => {
             <div className="space-y-4">
               <p>
                 En cualquier momento usted podrá ejercer los derechos de Acceso,
-                Rectificación, Cancelación u Oposición (los "Derechos Arco") y
-                revocar su consentimiento para el tratamiento de sus DATOS
-                presentando una solicitud por medios electrónicos a la dirección
-                soporte@knoott.com, en la que se cumpla lo siguiente:
+                Rectificación, Cancelación u Oposición (los &quot;Derechos
+                Arco&quot;) y revocar su consentimiento para el tratamiento de
+                sus DATOS presentando una solicitud por medios electrónicos a la
+                dirección soporte@knoott.com, en la que se cumpla lo siguiente:
               </p>
               <p>Dicha solicitud deberá contener por lo menos:</p>
               <ol className="list-[lower-alpha] pl-6 space-y-2">
@@ -385,8 +387,8 @@ const PrivacyPolicyPage = async () => {
                 DATOS existe alguna violación a las disposiciones previstas en
                 la LEY, podrá interponer la queja o denuncia correspondiente
                 ante el Instituto Nacional de Transparencia, Acceso a la
-                Información y Protección de Datos Personales ("INAI"), para
-                mayor información visite la página www.inai.org.mx.
+                Información y Protección de Datos Personales (&quot;INAI&quot;),
+                para mayor información visite la página www.inai.org.mx.
               </p>
             </div>
           </section>

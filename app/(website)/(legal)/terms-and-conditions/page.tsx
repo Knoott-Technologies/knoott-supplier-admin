@@ -132,8 +132,8 @@ const TermsAndConditionsPage = async () => {
                 CONTRATO, o en caso de no crearse una cuenta, al momento en que
                 éste de click en &quot;Pagar&quot;/ &quot;Contribuir&quot;
                 alguno de los PRODUCTOS; por lo que en caso de no estar de
-                acuerdo con lo aquí establecido, se deberá abstenerse de hacer
-                uso del SITIO.
+                acuerdo con lo aquí establecido, se deberá abstener de hacer uso
+                del SITIO.
               </p>
               <p>
                 Sin perjuicio de lo anterior, el CLIENTE O INVITADO contará con
@@ -765,19 +765,19 @@ const TermsAndConditionsPage = async () => {
               </p>
               <p>
                 En caso de que los PRODUCTOS tengan la leyenda y/o aviso de
-                compra "Bajo Pedido", el CLIENTE se sujetará a las siguientes
-                condiciones que se describen a continuación:
+                compra &quot;Bajo Pedido&quot;, el CLIENTE se sujetará a las
+                siguientes condiciones que se describen a continuación:
               </p>
               <p>
                 <strong>
                   A. Condiciones y Disponibilidad de Productos Bajo Pedido.-
                 </strong>{" "}
-                La modalidad de compra de productos "Bajo Pedido", es un
-                servicio que KNOOTT brinda al CLIENTE O INVITADO, en la compra
-                de aquellos PRODUCTOS que forman parte de su catálogo extendido,
-                mismos que son identificados de manera visible con una etiqueta
-                o señalizados con carteles en el SITIO para su fácil
-                identificación.
+                La modalidad de compra de productos &quot;Bajo Pedido&quot;, es
+                un servicio que KNOOTT brinda al CLIENTE O INVITADO, en la
+                compra de aquellos PRODUCTOS que forman parte de su catálogo
+                extendido, mismos que son identificados de manera visible con
+                una etiqueta o señalizados con carteles en el SITIO para su
+                fácil identificación.
               </p>
               <p>
                 Dichos productos refieren a aquellas mercancías que requieren de
@@ -793,9 +793,9 @@ const TermsAndConditionsPage = async () => {
                 al finalizar la compra.
               </p>
               <p>
-                La fecha de entrega de los PRODUCTOS "Bajo pedido" en ningún
-                caso podrá exceder de 90 (noventa) días hábiles posteriores a
-                partir de la compra.
+                La fecha de entrega de los PRODUCTOS &quot;Bajo pedido&quot; en
+                ningún caso podrá exceder de 90 (noventa) días hábiles
+                posteriores a partir de la compra.
               </p>
               <p>
                 Asimismo, el CLIENTE O INVITADO podrá solicitar en cualquier
