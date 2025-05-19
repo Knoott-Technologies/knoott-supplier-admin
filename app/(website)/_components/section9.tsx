@@ -88,7 +88,7 @@ export const Section9 = ({ user }: { user: User | null }) => {
       </div>
       <div className="w-full h-fit items-start justify-start flex flex-col px-3 lg:px-0">
         <BlurFade inView delay={0.2} direction="up" className="w-full h-fit">
-          <div className="h-fit items-center justify-center mx-auto max-w-lg flex bg-background border shadow-md rotate-[6deg] lg:rotate-[10deg]">
+          <div className="h-fit items-center justify-center mx-auto max-w-lg w-fit px-5 lg:px-10 ease-in-out transition-all duration-300 flex bg-background border shadow-md rotate-[6deg] lg:rotate-[10deg]">
             <NumberFlow
               value={numberValue}
               format={{
@@ -99,7 +99,7 @@ export const Section9 = ({ user }: { user: User | null }) => {
               onAnimationsStart={(e) => setFinish(true)}
               willChange
               className={cn(
-                "text-[clamp(8rem,10vw,15rem)] font-bold tracking-tighter leading-[0] ease-in-out duration-700",
+                "text-[clamp(6rem,8vw,12rem)] font-bold tracking-tighter leading-[0] ease-in-out duration-700",
                 finish && "text-success"
               )}
             />

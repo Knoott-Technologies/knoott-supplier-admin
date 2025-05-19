@@ -117,8 +117,12 @@ export const HeroSuppliers = ({
                   variant={"defaultBlack"}
                   size={"default"}
                   className="w-full md:w-auto"
+                  asChild
                 >
-                  Comienza ahora <ArrowRight />
+                  <Link href="/register">
+                    {" "}
+                    Comienza ahora <ArrowRight />
+                  </Link>
                 </Button>
               </div>
             )}

@@ -174,16 +174,10 @@ export const NewUserForm = ({ businessId }: { businessId: string }) => {
           </CardContent>
           <CardFooter className="flex justify-between border-t">
             <Button
-              variant="outline"
-              type="button"
-              onClick={() => form.reset()}
-            >
-              Cancelar
-            </Button>
-            <Button
               variant={"defaultBlack"}
               type="submit"
               disabled={isSubmitting}
+              className="w-full"
             >
               {isSubmitting ? (
                 <>

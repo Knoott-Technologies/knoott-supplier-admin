@@ -21,10 +21,10 @@ const LinkGroups: LinkGroup[] = [
   {
     label: "Navegación",
     items: [
-      {
-        href: "/product",
-        label: "Producto",
-      },
+      // {
+      //   href: "/product",
+      //   label: "Producto",
+      // },
       {
         href: "/login",
         label: "Inicia sesión",
@@ -35,27 +35,27 @@ const LinkGroups: LinkGroup[] = [
       },
     ],
   },
-  {
-    label: "Documentación",
-    items: [
-      {
-        href: "/docs/getting-started",
-        label: "Primeros pasos",
-      },
-      {
-        href: "/docs/products",
-        label: "Productos",
-      },
-      {
-        href: "/docs/orders",
-        label: "Órdenes",
-      },
-      {
-        href: "/docs/users",
-        label: "Usuarios",
-      },
-    ],
-  },
+  // {
+  //   label: "Documentación",
+  //   items: [
+  //     {
+  //       href: "/docs/getting-started",
+  //       label: "Primeros pasos",
+  //     },
+  //     {
+  //       href: "/docs/products",
+  //       label: "Productos",
+  //     },
+  //     {
+  //       href: "/docs/orders",
+  //       label: "Órdenes",
+  //     },
+  //     {
+  //       href: "/docs/users",
+  //       label: "Usuarios",
+  //     },
+  //   ],
+  // },
   {
     label: "Ayuda",
     items: [
@@ -75,11 +75,11 @@ const LinkGroups: LinkGroup[] = [
     label: "Legal",
     items: [
       {
-        href: "/terminos-y-condiciones",
+        href: "/terms-and-conditions",
         label: "Términos y condiciones",
       },
       {
-        href: "/aviso-de-privacidad",
+        href: "/privacy-policy",
         label: "Avsio de privacidad",
       },
       // {
@@ -120,7 +120,7 @@ export const FooterWebsite = () => {
             <Logo className="h-10 w-auto" variant="white" />
           </Link>
         </span>
-        <nav className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-7">
+        <nav className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-7">
           {LinkGroups.map((group, index) => (
             <ul
               key={index}

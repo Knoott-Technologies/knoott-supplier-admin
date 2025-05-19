@@ -11,7 +11,6 @@ import type { Database } from "@/database.types";
 import { cn } from "@/lib/utils";
 import type { User } from "@supabase/supabase-js";
 import { ArrowRight, Menu, X } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { Logo } from "../logo";
 
@@ -85,7 +84,7 @@ export const NavigationMenuMobile = ({
                   </Link>
                 </Button>
               </SheetClose>
-              <SheetClose asChild>
+              {/* <SheetClose asChild>
                 <Button
                   variant="ghost"
                   className="px-3 w-full flex items-center justify-between text-muted-foreground"
@@ -96,7 +95,7 @@ export const NavigationMenuMobile = ({
                     Producto <ArrowRight />
                   </Link>
                 </Button>
-              </SheetClose>
+              </SheetClose> */}
               {/* <SheetClose asChild>
                 <Button
                   variant="ghost"
@@ -110,7 +109,7 @@ export const NavigationMenuMobile = ({
                 </Button>
               </SheetClose> */}
             </div>
-            {!user && (
+            {/* {!user && (
               <SheetClose asChild>
                 <Link
                   href={"/register"}
@@ -141,7 +140,7 @@ export const NavigationMenuMobile = ({
                   </div>
                 </Link>
               </SheetClose>
-            )}
+            )} */}
           </div>
           <SheetFooter className="w-full bg-sidebar border-t p-3 pb-8 md:pb-3 flex flex-col sm:flex-col gap-y-2">
             {(user && !userBusinesses && (
@@ -169,8 +168,8 @@ export const NavigationMenuMobile = ({
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button variant={"defaultBlack"} className="w-full">
-                      Unirse a Knoott Suppliers
+                    <Button variant={"defaultBlack"} className="w-full" asChild>
+                      <Link href="/register">Unirse a Knoott Partners</Link>
                     </Button>
                   </SheetClose>
                 </>

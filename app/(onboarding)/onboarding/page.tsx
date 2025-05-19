@@ -6,6 +6,7 @@ import { BusinessForm } from "./_components/business-form";
 import type { FeatureCollection } from "geojson";
 import { Suspense } from "react";
 import { BusinessFormSkeleton } from "./_components/business-form-skeleton";
+import Link from "next/link";
 
 // Lista de sectores de negocio
 const BUSINESS_SECTORS = [

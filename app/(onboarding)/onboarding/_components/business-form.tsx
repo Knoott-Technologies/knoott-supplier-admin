@@ -45,6 +45,7 @@ import { Tiktok } from "@/components/svgs/icons";
 import { DocumentUpload } from "@/components/file-upload";
 import { Separator } from "@/components/ui/separator";
 import { useFormPersistence } from "@/hooks/use-form-persistance";
+import Link from "next/link";
 
 // Lista de bancos en México
 const MEXICAN_BANKS = [
@@ -1129,8 +1130,28 @@ export function BusinessForm({
             disabled={isLoading}
             className="w-full"
           >
-            {isLoading ? "Guardando información..." : "Guardar negocio"}
+            {isLoading ? "Guardando información..." : "Registrar negocio"}
           </Button>
+
+          <div className="w-full text-center items-center justify-center flex mt-5">
+            <p className="text-xs text-muted-foreground">
+              Al registrar un negocio en Knoott Partners, aceptas nuestros{"  "}
+              <Link
+                href="/terms-and-conditions"
+                className="font-medium underline hover:text-foreground"
+              >
+                Términos y Condiciones
+              </Link>
+              , así como nuestro{" "}
+              <Link
+                href="/privacy-policy"
+                className="font-medium underline hover:text-foreground"
+              >
+                Aviso de Privacidad
+              </Link>
+              .
+            </p>
+          </div>
         </form>
       </Form>
     </div>

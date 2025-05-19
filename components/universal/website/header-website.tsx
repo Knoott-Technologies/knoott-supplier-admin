@@ -132,7 +132,7 @@ export const HeaderWebsite = ({
         <Link href="/" className="h-full">
           <Logo variant={getLogoVariant()} />
         </Link>
-        <div className="items-center justify-start gap-x-1 hidden lg:flex">
+        {/* <div className="items-center justify-start gap-x-1 hidden lg:flex">
           {nav.map((item, index) => (
             <Button
               size={"sm"}
@@ -146,7 +146,7 @@ export const HeaderWebsite = ({
               </Link>
             </Button>
           ))}
-        </div>
+        </div> */}
       </div>
       <div className="h-full items-center justify-end gap-2 hidden lg:flex">
         {(user && (

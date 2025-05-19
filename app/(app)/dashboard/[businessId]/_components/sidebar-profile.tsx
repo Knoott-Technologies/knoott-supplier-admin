@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useState } from "react";
-import { ArrowRight, ChevronDown, LayoutDashboard, LogOut } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronsUpDown, LayoutDashboard, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -121,7 +121,7 @@ export const SidebarProfile = ({
             asChild
           >
             <Link
-              href={`/settings/${user.id}/${business.id}/wedding`}
+              href={`/settings/${user.id}/${business.id}/settings`}
               className="flex items-center justify-between w-full"
               onClick={() => isMobile && setSheetOpen(false)}
             >
@@ -186,6 +186,7 @@ export const SidebarProfile = ({
                 <span className="flex-1 text-left max-w-[80%] truncate">
                   {user.user_metadata.first_name}
                 </span>
+                <ChevronDown className="ml-auto"/>
               </SidebarMenuButton>
             </SheetTrigger>
             <SheetContent
@@ -312,7 +313,7 @@ export const SidebarProfile = ({
                   </span>
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
-              {user.role === "admin" && (
+              {role === "admin" && (
                 <DropdownMenuGroup className="p-1 border-b">
                   <DropdownMenuItem asChild>
                     <Button
