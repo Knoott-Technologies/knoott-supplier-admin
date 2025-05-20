@@ -1,5 +1,4 @@
 import { Resend } from "resend";
-import { renderAsync } from "@react-email/components";
 import OrderNotificationEmail from "@/components/emails/order-notification-email";
 
 // Inicializar Resend con la API key
@@ -45,6 +44,9 @@ interface OrderData {
       };
     };
   };
+  wedding?: {
+    name: string;
+  };
 }
 
 // Interfaz para los destinatarios del correo
@@ -70,7 +72,7 @@ export async function sendOrderNotificationEmail(
 ) {
   if (!orderDetails || !recipients || recipients.length === 0) {
     console.error("Datos insuficientes para enviar correo electrónico");
-    return { success: false, error: "Datos insuficientes" };
+    return { success: false, error: "Datos insuficientes", sent: 0, total: 0 };
   }
 
   try {
@@ -124,7 +126,6 @@ export async function sendOrderNotificationEmail(
           break;
         case "delivered":
           statusMessage = `La orden #${orderDetails.id} ha sido entregada con éxito.`;
-          additionalInfo = "¡Gracias por tu compra!";
           break;
         case "canceled":
           statusMessage = `La orden #${orderDetails.id} ha sido cancelada.`;
@@ -134,72 +135,82 @@ export async function sendOrderNotificationEmail(
 
     // Enviar correo a cada destinatario
     const emailPromises = recipients.map(async (recipient) => {
-      // Renderizar el correo electrónico
-      const emailHtml = await renderAsync(
-        OrderNotificationEmail({
-          firstName: recipient.name?.split(" ")[0] || "Usuario",
-          weddingName,
-          productName,
-          variantName,
-          brandName,
-          amount: formattedAmount,
-          orderId: orderDetails.id,
-          status: emailStatus,
-          statusMessage,
-          additionalInfo,
-          address: formattedAddress,
-          shippedBy,
-          cancelReason: orderDetails.cancelation_reason,
-        })
-      );
-
-      // Determinar el asunto del correo según el estado
-      let subject = "Actualización de orden";
-      switch (emailStatus) {
-        case "new":
-          subject = `¡Nueva orden recibida! - #${orderDetails.id}`;
-          break;
-        case "requires_confirmation":
-          subject = `Orden pendiente de confirmación - #${orderDetails.id}`;
-          break;
-        case "pending":
-          subject = `Orden confirmada - #${orderDetails.id}`;
-          break;
-        case "paid":
-          subject = `Pago recibido - Orden #${orderDetails.id}`;
-          break;
-        case "shipped":
-          subject = `Orden enviada - #${orderDetails.id}`;
-          break;
-        case "delivered":
-          subject = `Orden entregada - #${orderDetails.id}`;
-          break;
-        case "canceled":
-          subject = `Orden cancelada - #${orderDetails.id}`;
-          break;
+      if (!recipient.email) {
+        console.error("Destinatario sin correo electrónico:", recipient);
+        return null;
       }
 
-      // Enviar correo con Resend
-      return resend.emails.send({
-        from: "Knoott <notificaciones@knoott.com>",
-        to: recipient.email,
-        subject,
-        html: emailHtml,
-      });
+      try {
+        // Determinar el asunto del correo según el estado
+        let subject = "Actualización de orden";
+        switch (emailStatus) {
+          case "new":
+            subject = `¡Nueva orden recibida! - #${orderDetails.id}`;
+            break;
+          case "requires_confirmation":
+            subject = `Orden pendiente de confirmación - #${orderDetails.id}`;
+            break;
+          case "pending":
+            subject = `Orden confirmada - #${orderDetails.id}`;
+            break;
+          case "paid":
+            subject = `Pago recibido - Orden #${orderDetails.id}`;
+            break;
+          case "shipped":
+            subject = `Orden enviada - #${orderDetails.id}`;
+            break;
+          case "delivered":
+            subject = `Orden entregada - #${orderDetails.id}`;
+            break;
+          case "canceled":
+            subject = `Orden cancelada - #${orderDetails.id}`;
+            break;
+        }
+
+        // Enviar correo con Resend
+        return resend.emails.send({
+          from: "Knoott <soporte@knoott.com>",
+          to: recipient.email,
+          subject,
+          react: OrderNotificationEmail({
+            firstName: recipient.name?.split(" ")[0] || "Usuario",
+            weddingName,
+            productName,
+            variantName,
+            brandName,
+            amount: formattedAmount,
+            orderId: orderDetails.id,
+            status: emailStatus,
+            statusMessage,
+            additionalInfo,
+            address: formattedAddress,
+            shippedBy,
+            cancelReason: orderDetails.cancelation_reason,
+          }),
+        });
+      } catch (error) {
+        console.error(`Error al enviar correo a ${recipient.email}:`, error);
+        return null;
+      }
     });
 
     // Esperar a que todos los correos se envíen
     const results = await Promise.all(emailPromises);
+    const validResults = results.filter(Boolean);
 
     return {
-      success: true,
-      results,
+      success: validResults.length > 0,
+      results: validResults,
+      sent: validResults.length,
+      total: recipients.length,
     };
   } catch (error) {
     console.error("Error al enviar correo electrónico:", error);
     return {
       success: false,
       error,
+      sent: 0,
+      total: recipients.length,
     };
   }
 }

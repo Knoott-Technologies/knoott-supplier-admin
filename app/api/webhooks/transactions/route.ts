@@ -143,15 +143,52 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Obtener usuarios del proveedor
+    // Resultados de notificaciones
+    const notificationResults = {
+      push: { sent: 0, success: true },
+      email: { sent: 0, success: true },
+    };
+
+    // Primero obtenemos los IDs de usuario asociados con el negocio del proveedor
+    const { data: providerBusinessUsers, error: providerBusinessUsersError } =
+      await supabase
+        .from("provider_business_users")
+        .select("user_id")
+        .eq("business_id", record.provider_business_id);
+
+    if (providerBusinessUsersError) {
+      console.error(
+        "Error al obtener usuarios del proveedor:",
+        providerBusinessUsersError
+      );
+      return NextResponse.json(
+        { error: "Error al procesar datos" },
+        { status: 500 }
+      );
+    }
+
+    // Si no hay usuarios para notificar, terminar
+    if (!providerBusinessUsers || providerBusinessUsers.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: "No hay usuarios para notificar",
+        notificationResults,
+      });
+    }
+
+    // Extraer los IDs de usuario
+    const userIds = providerBusinessUsers.map((pu) => pu.user_id);
+
+    // Luego obtenemos los detalles de esos usuarios desde la tabla users
     const { data: providerUsers, error: providerUsersError } = await supabase
-      .from("provider_business_users")
-      .select("user_id, users(first_name, last_name, email)")
-      .eq("business_id", record.provider_business_id);
+      .from("users")
+      .select("id, first_name, last_name, email")
+      .in("id", userIds)
+      .eq("status", "active"); // Solo usuarios activos
 
     if (providerUsersError) {
       console.error(
-        "Error al obtener usuarios del proveedor:",
+        "Error al obtener detalles de usuarios:",
         providerUsersError
       );
       return NextResponse.json(
@@ -160,22 +197,34 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Resultados de notificaciones
-    const notificationResults = {
-      push: { sent: 0, success: true },
-      email: { sent: 0, success: true },
-    };
+    // Preparar destinatarios de correo electrónico
+    const emailRecipients = providerUsers
+      .filter((user) => user.email)
+      .map((user) => ({
+        email: user.email,
+        name: `${user.first_name || ""} ${user.last_name || ""}`.trim(),
+      }));
 
-    // Si no hay usuarios para notificar, terminar
-    if (!providerUsers || providerUsers.length === 0) {
-      return NextResponse.json({
-        success: true,
-        message: "No hay usuarios para notificar",
-        notificationResults,
-      });
+    // Enviar notificaciones por correo electrónico
+    if (emailRecipients.length > 0) {
+      try {
+        const emailResult = await sendOrderNotificationEmail(
+          orderDetails,
+          emailRecipients,
+          weddingName,
+          isNewRecord,
+          old_record?.status
+        );
+
+        notificationResults.email = {
+          sent: emailResult.sent || 0,
+          success: emailResult.success,
+        };
+      } catch (emailError) {
+        console.error("Error al enviar correos electrónicos:", emailError);
+        notificationResults.email.success = false;
+      }
     }
-
-    const userIds = providerUsers.map((pu) => pu.user_id);
 
     // Obtener suscripciones push para estos usuarios
     const { data: subscriptions, error: subscriptionsError } = await supabase
@@ -186,36 +235,7 @@ export async function POST(req: NextRequest) {
 
     if (subscriptionsError) {
       console.error("Error al obtener suscripciones:", subscriptionsError);
-      return NextResponse.json(
-        { error: "Error al procesar datos" },
-        { status: 500 }
-      );
-    }
-
-    // Preparar destinatarios de correo electrónico para proveedores
-    const emailRecipients = providerUsers
-      .filter(
-        (pu) => pu.users && typeof pu.users === "object" && "email" in pu.users
-      )
-      .map((pu) => ({
-        email: pu.users[0].email,
-        name: `${pu.users[0].first_name || ""} ${pu.users[0].last_name || ""}`.trim(),
-      }));
-
-    // Enviar notificaciones por correo electrónico a proveedores
-    if (emailRecipients.length > 0) {
-      const emailResult = await sendOrderNotificationEmail(
-        orderDetails,
-        emailRecipients,
-        weddingName,
-        isNewRecord,
-        old_record?.status
-      );
-
-      notificationResults.email = {
-        sent: emailRecipients.length,
-        success: emailResult.success,
-      };
+      // Continuar con el proceso aunque haya error en las suscripciones push
     }
 
     // Si no hay suscripciones push, terminar después de enviar correos
@@ -228,44 +248,49 @@ export async function POST(req: NextRequest) {
     }
 
     // Enviar notificaciones push a cada suscripción
-    const notificationPromises = subscriptions.map((subscription) => {
-      const pushSubscription = {
-        endpoint: subscription.endpoint,
-        keys: {
-          p256dh: subscription.p256dh,
-          auth: subscription.auth,
-        },
-      };
+    try {
+      const notificationPromises = subscriptions.map((subscription) => {
+        const pushSubscription = {
+          endpoint: subscription.endpoint,
+          keys: {
+            p256dh: subscription.p256dh,
+            auth: subscription.auth,
+          },
+        };
 
-      const payload = JSON.stringify({
-        title: notificationTitle,
-        body: notificationBody,
-        icon: "/icon/logo-192x192.png",
-        badge: "/icon/badge-72x72.png",
-        url: notificationUrl,
+        const payload = JSON.stringify({
+          title: notificationTitle,
+          body: notificationBody,
+          icon: "/icon/logo-192x192.png",
+          badge: "/icon/badge-72x72.png",
+          url: notificationUrl,
+        });
+
+        return webpush
+          .sendNotification(pushSubscription, payload)
+          .catch((error: { statusCode: number }) => {
+            console.error("Error al enviar notificación push:", error);
+
+            // Si la suscripción ya no es válida, eliminarla
+            if (error.statusCode === 410) {
+              return supabase
+                .from("push_subscriptions")
+                .delete()
+                .match({ id: subscription.id });
+            }
+          });
       });
 
-      return webpush
-        .sendNotification(pushSubscription, payload)
-        .catch((error: { statusCode: number }) => {
-          console.error("Error al enviar notificación push:", error);
+      await Promise.all(notificationPromises);
 
-          // Si la suscripción ya no es válida, eliminarla
-          if (error.statusCode === 410) {
-            return supabase
-              .from("push_subscriptions")
-              .delete()
-              .match({ id: subscription.id });
-          }
-        });
-    });
-
-    await Promise.all(notificationPromises);
-
-    notificationResults.push = {
-      sent: subscriptions.length,
-      success: true,
-    };
+      notificationResults.push = {
+        sent: subscriptions.length,
+        success: true,
+      };
+    } catch (pushError) {
+      console.error("Error al enviar notificaciones push:", pushError);
+      notificationResults.push.success = false;
+    }
 
     return NextResponse.json({
       success: true,
