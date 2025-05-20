@@ -9,14 +9,15 @@ import {
   Preview,
   Section,
   Text,
+  Button,
 } from "@react-email/components";
 import { Font } from "@react-email/font";
 import * as React from "react";
 
 interface OrderNotificationEmailProps {
   firstName?: string;
-  weddingName?: string;
   productName?: string;
+  productImage?: string;
   variantName?: string;
   brandName?: string;
   amount?: string;
@@ -28,12 +29,15 @@ interface OrderNotificationEmailProps {
   address?: string;
   shippedBy?: string;
   cancelReason?: string;
+  clientName?: string;
+  clientEmail?: string;
+  providerBusinessId?: string;
 }
 
 export const OrderNotificationEmail = ({
   firstName = "",
-  weddingName = "",
   productName = "",
+  productImage = "",
   variantName = "",
   brandName = "",
   amount = "",
@@ -44,6 +48,9 @@ export const OrderNotificationEmail = ({
   address = "",
   shippedBy = "",
   cancelReason = "",
+  clientName = "",
+  clientEmail = "",
+  providerBusinessId = "",
   logoUrl = "https://knoott-main-git-main-intello-ai.vercel.app/logo.png",
 }: OrderNotificationEmailProps) => {
   // Determinar el título del correo según el estado
@@ -80,6 +87,9 @@ export const OrderNotificationEmail = ({
       previewText = `Orden cancelada - ${orderId}`;
       break;
   }
+
+  // URL para ver la orden en el panel
+  const orderUrl = `https://partners.knoott.com/dashboard/${providerBusinessId}/orders/${orderId}`;
 
   return (
     <Html dir="ltr" lang="es">
@@ -142,7 +152,7 @@ export const OrderNotificationEmail = ({
 
           <Text style={secondaryText}>
             {statusMessage ||
-              `Te informamos sobre una actualización en tu orden para la boda ${weddingName}.`}
+              `Te informamos sobre una actualización en tu orden.`}
           </Text>
 
           <Section style={infoBox}>
@@ -152,13 +162,50 @@ export const OrderNotificationEmail = ({
             <Text style={{ ...secondaryText, margin: "5px 0" }}>
               Orden #: <strong>{orderId}</strong>
             </Text>
-            <Text style={{ ...secondaryText, margin: "5px 0" }}>
-              Producto: <strong>{productName}</strong>
-              {brandName ? ` de ${brandName}` : ""}
-            </Text>
-            <Text style={{ ...secondaryText, margin: "5px 0" }}>
-              Monto: <strong>{amount} MXN</strong>
-            </Text>
+
+            {/* Producto con imagen si está disponible */}
+            <Section style={{ display: "flex", marginBottom: "10px" }}>
+              {productImage && (
+                <Img
+                  src={productImage}
+                  width="80"
+                  height="80"
+                  alt={productName}
+                  style={{
+                    marginRight: "15px",
+                    objectFit: "cover",
+                    borderRadius: "4px",
+                  }}
+                />
+              )}
+              <div>
+                <Text style={{ ...secondaryText, margin: "5px 0" }}>
+                  Producto: <strong>{productName}</strong>
+                  {brandName ? ` de ${brandName}` : ""}
+                </Text>
+                {variantName && variantName !== "Default" && (
+                  <Text style={{ ...secondaryText, margin: "5px 0" }}>
+                    Variante: <strong>{variantName}</strong>
+                  </Text>
+                )}
+                <Text style={{ ...secondaryText, margin: "5px 0" }}>
+                  Monto: <strong>{amount}</strong>
+                </Text>
+              </div>
+            </Section>
+
+            {/* Información del cliente */}
+            {clientName && (
+              <Text style={{ ...secondaryText, margin: "5px 0" }}>
+                Cliente: <strong>{clientName}</strong>
+              </Text>
+            )}
+            {clientEmail && (
+              <Text style={{ ...secondaryText, margin: "5px 0" }}>
+                Email: <strong>{clientEmail}</strong>
+              </Text>
+            )}
+
             {address && (
               <Text style={{ ...secondaryText, margin: "5px 0" }}>
                 Dirección de envío: <strong>{address}</strong>
@@ -180,9 +227,34 @@ export const OrderNotificationEmail = ({
             <Text style={secondaryText}>{additionalInfo}</Text>
           )}
 
+          {/* Botón para ver en el panel */}
+          <Section
+            style={{
+              textAlign: "center",
+              marginTop: "20px",
+              marginBottom: "20px",
+            }}
+          >
+            <Button
+              href={orderUrl}
+              style={{
+                backgroundColor: "#5046e5",
+                color: "#ffffff",
+                padding: "12px 20px",
+                borderRadius: "4px",
+                textDecoration: "none",
+                fontWeight: "bold",
+                fontSize: "14px",
+                display: "inline-block",
+              }}
+            >
+              Ver en mi panel
+            </Button>
+          </Section>
+
           <Text style={secondaryText}>
-            Si tienes alguna pregunta sobre esta orden, por favor contacta al
-            administrador de la boda.
+            Si tienes alguna pregunta sobre esta orden, por favor contacta a
+            soporte.
           </Text>
 
           {/* Footer con logo y redes sociales */}

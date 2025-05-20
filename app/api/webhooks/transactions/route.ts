@@ -30,23 +30,26 @@ export async function POST(req: NextRequest) {
       .select(
         `
         *, 
-        address:wedding_addresses(*), 
-        client:users!wedding_product_orders_ordered_by_fkey(*), 
-        provider_shipped_user:users!wedding_product_orders_shipped_ordered_by_fkey(*), 
-        provider_user:users!wedding_product_orders_confirmed_by_fkey(*), 
-        product:wedding_products!wedding_product_orders_product_id_fkey(
-          id, 
-          variant:products_variant_options(
-            *, 
-            variant_list:products_variants(*)
-          ), 
-          product_info:products(
-            *, 
-            brand:catalog_brands(*), 
-            subcategory:catalog_collections(*)
-          )
+        address:wedding_addresses(
+          id, street_address, city, state, postal_code, country, additional_notes
+        ), 
+        client:users!wedding_product_orders_ordered_by_fkey(
+          id, first_name, last_name, email, phone_number
+        ), 
+        provider_shipped_user:users!wedding_product_orders_shipped_ordered_by_fkey(
+          id, first_name, last_name
+        ), 
+        provider_user:users!wedding_product_orders_confirmed_by_fkey(
+          id, first_name, last_name
         ),
-        wedding:weddings(name)
+        catalog_product:products!wedding_product_orders_catalog_product_id_fkey(
+          id, name, short_name, description, images_url,
+          brand:catalog_brands(id, name)
+        ),
+        catalog_variant:products_variant_options!wedding_product_orders_catalog_product_variant_id_fkey(
+          id, name, display_name, price,
+          variant:products_variants(id, name, display_name)
+        )
       `
       )
       .eq("id", record.id)
@@ -61,15 +64,23 @@ export async function POST(req: NextRequest) {
     }
 
     // Extraer información relevante para las notificaciones
-    const productName =
-      orderDetails?.product?.product_info?.name || "un producto";
-    const brandName = orderDetails?.product?.product_info?.brand?.name || "";
-    const variantName =
-      orderDetails?.product?.variant?.variant_list?.name +
-        ": " +
-        orderDetails?.product?.variant?.name || "";
+    const productName = orderDetails?.catalog_product?.name || "un producto";
+    const brandName = orderDetails?.catalog_product?.brand?.name || "";
+
+    // Solo mostrar la variante si no es "Default"
+    let variantName = "";
+    if (
+      orderDetails?.catalog_variant?.name &&
+      orderDetails.catalog_variant.name !== "Default" &&
+      orderDetails.catalog_variant.variant?.name
+    ) {
+      variantName = `${orderDetails.catalog_variant.variant.name}: ${orderDetails.catalog_variant.name}`;
+    }
+
     const formattedAmount = formatPrice(orderDetails?.total_amount || 0);
-    const weddingName = orderDetails?.wedding?.name || "Boda";
+
+    // Obtener la primera imagen del producto si existe
+    const productImage = orderDetails?.catalog_product?.images_url?.[0] || "";
 
     // Variables para la notificación
     let notificationTitle = "Actualización de orden";
@@ -86,7 +97,7 @@ export async function POST(req: NextRequest) {
       notificationTitle = "¡Nueva orden recibida! 🛍️";
       notificationBody = `Has recibido un pedido de ${productName}${
         variantName ? ` (${variantName})` : ""
-      }${brandName ? ` de ${brandName}` : ""} por MXN ${formattedAmount}.`;
+      }${brandName ? ` de ${brandName}` : ""} por ${formattedAmount}.`;
     } else if (statusChanged) {
       switch (record.status) {
         case "requires_confirmation":
@@ -208,10 +219,29 @@ export async function POST(req: NextRequest) {
     // Enviar notificaciones por correo electrónico
     if (emailRecipients.length > 0) {
       try {
+        // Preparar datos de la orden para el correo
+        const emailOrderData = {
+          ...orderDetails,
+          product: {
+            product_info: {
+              name: orderDetails.catalog_product?.name,
+              images_url: orderDetails.catalog_product?.images_url,
+              brand: {
+                name: orderDetails.catalog_product?.brand?.name,
+              },
+            },
+            variant: {
+              name: orderDetails.catalog_variant?.name,
+              variant_list: {
+                name: orderDetails.catalog_variant?.variant?.name,
+              },
+            },
+          },
+        };
+
         const emailResult = await sendOrderNotificationEmail(
-          orderDetails,
+          emailOrderData,
           emailRecipients,
-          weddingName,
           isNewRecord,
           old_record?.status
         );

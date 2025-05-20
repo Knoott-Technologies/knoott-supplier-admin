@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import OrderNotificationEmail from "@/components/emails/order-notification-email";
-import { formatPrice } from "./utils";
+import { formatPrice } from "@/lib/utils";
 
 // Inicializar Resend con la API key
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -11,16 +11,20 @@ interface OrderData {
   status: string;
   total_amount: number;
   cancelation_reason?: string;
+  provider_business_id?: string;
   address?: {
-    street: string;
+    street_address: string;
     city: string;
     state: string;
     postal_code: string;
+    country?: string;
+    additional_notes?: string;
   };
   client?: {
     first_name: string;
     last_name: string;
     email: string;
+    phone_number?: string;
   };
   provider_shipped_user?: {
     first_name: string;
@@ -30,9 +34,12 @@ interface OrderData {
     first_name: string;
     last_name: string;
   };
+  catalog_product_id?: number;
+  catalog_product_variant_id?: number;
   product?: {
     product_info?: {
       name: string;
+      images_url?: string[];
       brand?: {
         name: string;
       };
@@ -43,9 +50,6 @@ interface OrderData {
         name: string;
       };
     };
-  };
-  wedding?: {
-    name: string;
   };
 }
 
@@ -59,14 +63,20 @@ interface EmailRecipient {
 function formatAddress(address: any) {
   if (!address) return "";
 
-  return `${address.street}, ${address.city}, ${address.state}, ${address.postal_code}`;
+  let formattedAddress = address.street_address;
+  if (address.city) formattedAddress += `, ${address.city}`;
+  if (address.state) formattedAddress += `, ${address.state}`;
+  if (address.postal_code) formattedAddress += `, ${address.postal_code}`;
+  if (address.country && address.country !== "México")
+    formattedAddress += `, ${address.country}`;
+
+  return formattedAddress;
 }
 
 // Función para enviar correo electrónico de notificación de orden
 export async function sendOrderNotificationEmail(
   orderDetails: OrderData,
   recipients: EmailRecipient[],
-  weddingName: string,
   isNewRecord: boolean,
   oldStatus?: string
 ) {
@@ -80,11 +90,29 @@ export async function sendOrderNotificationEmail(
     const productName =
       orderDetails.product?.product_info?.name || "un producto";
     const brandName = orderDetails.product?.product_info?.brand?.name || "";
-    const variantName = orderDetails.product?.variant?.variant_list?.name
-      ? `${orderDetails.product.variant.variant_list.name}: ${orderDetails.product.variant.name || ""}`
-      : "";
+
+    // Solo mostrar la variante si no es "Default"
+    let variantName = "";
+    if (
+      orderDetails.product?.variant?.name &&
+      orderDetails.product.variant.name !== "Default" &&
+      orderDetails.product.variant.variant_list?.name
+    ) {
+      variantName = `${orderDetails.product.variant.variant_list.name}: ${orderDetails.product.variant.name}`;
+    }
+
     const formattedAmount = formatPrice(orderDetails.total_amount);
     const formattedAddress = formatAddress(orderDetails.address);
+
+    // Obtener la primera imagen del producto si existe
+    const productImage =
+      orderDetails.product?.product_info?.images_url?.[0] || "";
+
+    // Información del cliente
+    const clientName = orderDetails.client
+      ? `${orderDetails.client.first_name} ${orderDetails.client.last_name}`
+      : "";
+    const clientEmail = orderDetails.client?.email || "";
 
     // Variables para el correo
     let emailStatus = "";
@@ -95,7 +123,7 @@ export async function sendOrderNotificationEmail(
     // Personalizar correo según el estado de la orden
     if (isNewRecord) {
       emailStatus = "new";
-      statusMessage = `Has recibido un nuevo pedido para la boda ${weddingName}.`;
+      statusMessage = `Has recibido un nuevo pedido.`;
       additionalInfo =
         "Por favor, revisa y confirma esta orden lo antes posible.";
     } else {
@@ -174,8 +202,8 @@ export async function sendOrderNotificationEmail(
           subject,
           react: OrderNotificationEmail({
             firstName: recipient.name?.split(" ")[0] || "Usuario",
-            weddingName,
             productName,
+            productImage,
             variantName,
             brandName,
             amount: formattedAmount,
@@ -186,6 +214,9 @@ export async function sendOrderNotificationEmail(
             address: formattedAddress,
             shippedBy,
             cancelReason: orderDetails.cancelation_reason,
+            clientName,
+            clientEmail,
+            providerBusinessId: orderDetails.provider_business_id,
           }),
         });
       } catch (error) {
