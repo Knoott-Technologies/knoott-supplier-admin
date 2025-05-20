@@ -1,8 +1,8 @@
-// app/api/webhooks/orders/route.ts
 import { createAdminClient } from "@/utils/supabase/admin";
 import { type NextRequest, NextResponse } from "next/server";
 import webpush from "web-push";
 import { formatPrice } from "@/lib/utils";
+import { sendOrderNotificationEmail } from "@/lib/email-service";
 
 // Configurar VAPID keys
 webpush.setVapidDetails(
@@ -45,7 +45,8 @@ export async function POST(req: NextRequest) {
             brand:catalog_brands(*), 
             subcategory:catalog_collections(*)
           )
-        )
+        ),
+        wedding:weddings(name)
       `
       )
       .eq("id", record.id)
@@ -68,6 +69,7 @@ export async function POST(req: NextRequest) {
         ": " +
         orderDetails?.product?.variant?.name || "";
     const formattedAmount = formatPrice(orderDetails?.total_amount || 0);
+    const weddingName = orderDetails?.wedding?.name || "Boda";
 
     // Variables para la notificación
     let notificationTitle = "Actualización de orden";
@@ -105,9 +107,7 @@ export async function POST(req: NextRequest) {
         case "paid":
           // Pagada - lista para enviar
           notificationTitle = "Pago recibido 💰";
-          notificationBody = `El pago de la orden #${
-            record.id
-          } de ${productName}${
+          notificationBody = `El pago de la orden #${record.id} de ${productName}${
             variantName ? ` (${variantName})` : ""
           } ha sido procesado. Ya puedes preparar y enviar el pedido.`;
           break;
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
     // Obtener usuarios del proveedor
     const { data: providerUsers, error: providerUsersError } = await supabase
       .from("provider_business_users")
-      .select("user_id")
+      .select("user_id, users(first_name, last_name, email)")
       .eq("business_id", record.provider_business_id);
 
     if (providerUsersError) {
@@ -160,11 +160,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Resultados de notificaciones
+    const notificationResults = {
+      push: { sent: 0, success: true },
+      email: { sent: 0, success: true },
+    };
+
     // Si no hay usuarios para notificar, terminar
     if (!providerUsers || providerUsers.length === 0) {
       return NextResponse.json({
         success: true,
         message: "No hay usuarios para notificar",
+        notificationResults,
       });
     }
 
@@ -185,15 +192,42 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Si no hay suscripciones, terminar
+    // Preparar destinatarios de correo electrónico para proveedores
+    const emailRecipients = providerUsers
+      .filter(
+        (pu) => pu.users && typeof pu.users === "object" && "email" in pu.users
+      )
+      .map((pu) => ({
+        email: pu.users[0].email,
+        name: `${pu.users[0].first_name || ""} ${pu.users[0].last_name || ""}`.trim(),
+      }));
+
+    // Enviar notificaciones por correo electrónico a proveedores
+    if (emailRecipients.length > 0) {
+      const emailResult = await sendOrderNotificationEmail(
+        orderDetails,
+        emailRecipients,
+        weddingName,
+        isNewRecord,
+        old_record?.status
+      );
+
+      notificationResults.email = {
+        sent: emailRecipients.length,
+        success: emailResult.success,
+      };
+    }
+
+    // Si no hay suscripciones push, terminar después de enviar correos
     if (!subscriptions || subscriptions.length === 0) {
       return NextResponse.json({
         success: true,
-        message: "No hay suscripciones para notificar",
+        message: "Correos enviados, no hay suscripciones push para notificar",
+        notificationResults,
       });
     }
 
-    // Enviar notificaciones a cada suscripción
+    // Enviar notificaciones push a cada suscripción
     const notificationPromises = subscriptions.map((subscription) => {
       const pushSubscription = {
         endpoint: subscription.endpoint,
@@ -228,9 +262,14 @@ export async function POST(req: NextRequest) {
 
     await Promise.all(notificationPromises);
 
+    notificationResults.push = {
+      sent: subscriptions.length,
+      success: true,
+    };
+
     return NextResponse.json({
       success: true,
-      notified: subscriptions.length,
+      notificationResults,
       notification: {
         title: notificationTitle,
         body: notificationBody,
