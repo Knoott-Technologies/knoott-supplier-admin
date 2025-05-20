@@ -94,7 +94,7 @@ const DashboardPage = async () => {
                   No tienes negocios asignados.
                 </p>
                 <Button asChild variant="outline" className="mt-4">
-                  <Link href="/dashboard/new-business">
+                  <Link href="/onboarding">
                     <Plus className="mr-2 h-4 w-4" />
                     Crear nuevo negocio
                   </Link>
