@@ -16,7 +16,9 @@ export async function POST(request: Request) {
 
     // Generar el embedding utilizando la AI SDK de Vercel
     const { embedding } = await embed({
-      model: openai.embedding("text-embedding-3-small"),
+      model: openai.embedding("text-embedding-3-small", {
+        dimensions: 1536,
+      }),
       value: embeddingText,
     });
 
