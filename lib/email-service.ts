@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import OrderNotificationEmail from "@/components/emails/order-notification-email";
+import { formatPrice } from "./utils";
 
 // Inicializar Resend con la API key
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -11,8 +12,7 @@ interface OrderData {
   total_amount: number;
   cancelation_reason?: string;
   address?: {
-    address_line1: string;
-    address_line2?: string;
+    street: string;
     city: string;
     state: string;
     postal_code: string;
@@ -59,7 +59,7 @@ interface EmailRecipient {
 function formatAddress(address: any) {
   if (!address) return "";
 
-  return `${address.address_line1}${address.address_line2 ? ", " + address.address_line2 : ""}, ${address.city}, ${address.state}, ${address.postal_code}`;
+  return `${address.street}, ${address.city}, ${address.state}, ${address.postal_code}`;
 }
 
 // Función para enviar correo electrónico de notificación de orden
@@ -83,7 +83,7 @@ export async function sendOrderNotificationEmail(
     const variantName = orderDetails.product?.variant?.variant_list?.name
       ? `${orderDetails.product.variant.variant_list.name}: ${orderDetails.product.variant.name || ""}`
       : "";
-    const formattedAmount = orderDetails.total_amount.toLocaleString("es-MX");
+    const formattedAmount = formatPrice(orderDetails.total_amount);
     const formattedAddress = formatAddress(orderDetails.address);
 
     // Variables para el correo

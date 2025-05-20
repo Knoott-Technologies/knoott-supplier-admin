@@ -154,7 +154,6 @@ export const OrderNotificationEmail = ({
             </Text>
             <Text style={{ ...secondaryText, margin: "5px 0" }}>
               Producto: <strong>{productName}</strong>
-              {variantName ? ` (${variantName})` : ""}
               {brandName ? ` de ${brandName}` : ""}
             </Text>
             <Text style={{ ...secondaryText, margin: "5px 0" }}>
