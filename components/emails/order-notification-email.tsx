@@ -238,14 +238,15 @@ export const OrderNotificationEmail = ({
             <Button
               href={orderUrl}
               style={{
-                backgroundColor: "#5046e5",
+                backgroundColor: "#0a0a0a",
                 color: "#ffffff",
                 padding: "12px 20px",
-                borderRadius: "4px",
+                borderRadius: "0px",
                 textDecoration: "none",
                 fontWeight: "bold",
                 fontSize: "14px",
                 display: "inline-block",
+                width: "100%",
               }}
             >
               Ver en mi panel
