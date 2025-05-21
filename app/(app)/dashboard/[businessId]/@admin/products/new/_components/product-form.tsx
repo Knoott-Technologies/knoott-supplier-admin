@@ -185,13 +185,50 @@ export default function ProductForm({
       // Handle variants or single product
       if (hasVariants && data.variants && data.variants.length > 0) {
         // Create variants
-        await fetch(`/api/products/${newProductId}/variants`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ variants: data.variants }),
-        });
+        const variantsResponse = await fetch(
+          `/api/products/${newProductId}/variants`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ variants: data.variants }),
+          }
+        );
+
+        if (!variantsResponse.ok) {
+          throw new Error("Error creating variants");
+        }
+
+        const variantsResult = await variantsResponse.json();
+        const createdOptions = variantsResult.createdOptions || [];
+
+        // Process variant options with images
+        if (createdOptions.length > 0) {
+          // Filter options that have images
+          const optionsWithImages = createdOptions
+            .filter(
+              (option: { images_url: string | any[] }) =>
+                option.images_url && option.images_url.length > 0
+            )
+            .map((option: { id: any; images_url: any }) => ({
+              id: option.id,
+              images_url: option.images_url,
+            }));
+
+          // If there are options with images, move them
+          if (optionsWithImages.length > 0) {
+            await fetch(`/api/products/${newProductId}/variants/move-images`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                variantOptions: optionsWithImages,
+              }),
+            });
+          }
+        }
       } else if (!hasVariants) {
         // Create a default variant for a product without variants
         const defaultVariant = {

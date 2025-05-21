@@ -18,6 +18,8 @@ export async function POST(
       return NextResponse.json({ success: true });
     }
 
+    const createdOptions = [];
+
     // Process each variant
     for (const variant of variants) {
       // Insert the variant
@@ -43,22 +45,24 @@ export async function POST(
       // Process each option for this variant
       for (const [index, option] of variant.options.entries()) {
         // Insert the option
-        const { error: optionError } = await supabase
+        const { data: optionData, error: optionError } = await supabase
           .from("products_variant_options")
           .insert({
             variant_id: variantData.id,
             name: option.name,
-            display_name: option.display_name || option.name, // Aseguramos que display_name tenga un valor
+            display_name: option.display_name || option.name,
             price: option.price || null,
             accorded_commision:
-              option.accorded_commision || option.accorded_commission || 0.085, // Corregimos el nombre del campo y valor por defecto
+              option.accorded_commision || option.accorded_commission || 0.085,
             stock: option.stock || null,
             position: index,
             is_default: option.is_default || false,
             metadata: option.metadata || null,
             sku: option.sku || null,
-            images_url: option.images_url || [], // Aseguramos que sea un array vacío en lugar de null
-          });
+            images_url: option.images_url || [],
+          })
+          .select()
+          .single();
 
         if (optionError) {
           console.error("Error creating option:", optionError);
@@ -67,10 +71,15 @@ export async function POST(
             { status: 500 }
           );
         }
+
+        createdOptions.push(optionData);
       }
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      createdOptions,
+    });
   } catch (error) {
     console.error("Error processing request:", error);
     return NextResponse.json(
@@ -93,7 +102,7 @@ export async function PUT(
 
     // First, get existing variants for this product
     const { data: existingVariants, error: fetchError } = await supabase
-      .from("products_variants") // Corregimos el nombre de la tabla
+      .from("products_variants")
       .select("*")
       .eq("product_id", productId);
 
@@ -104,7 +113,7 @@ export async function PUT(
 
     // Get existing variant options
     const { data: existingOptions, error: fetchOptionsError } = await supabase
-      .from("products_variant_options") // Corregimos el nombre de la tabla
+      .from("products_variant_options")
       .select("*")
       .in("variant_id", existingVariants?.map((v) => v.id) || []);
 
@@ -148,11 +157,13 @@ export async function PUT(
       }
     }
 
+    const createdOptions: any[] = [];
+
     // Insert new variants
     const variantPromises = variants.map(
       async (variant: any, index: number) => {
         const { data: newVariant, error: insertVariantError } = await supabase
-          .from("products_variants") // Corregimos el nombre de la tabla
+          .from("products_variants")
           .insert({
             product_id: productId,
             name: variant.name,
@@ -170,8 +181,8 @@ export async function PUT(
         // Insert options for this variant
         const optionPromises = variant.options.map(
           async (option: any, optionIndex: number) => {
-            const { error: insertOptionError } = await supabase
-              .from("products_variant_options") // Corregimos el nombre de la tabla
+            const { data: newOption, error: insertOptionError } = await supabase
+              .from("products_variant_options")
               .insert({
                 variant_id: newVariant.id,
                 name: option.name,
@@ -180,19 +191,23 @@ export async function PUT(
                 accorded_commision:
                   option.accorded_commision ||
                   option.accorded_commission ||
-                  0.085, // Corregimos el nombre del campo
+                  0.085,
                 stock: option.stock,
                 is_default: option.is_default,
                 sku: option.sku || "",
                 images_url: option.images_url || [],
                 metadata: option.metadata || null,
                 position: optionIndex,
-              });
+              })
+              .select()
+              .single();
 
             if (insertOptionError) {
               console.error("Error inserting option:", insertOptionError);
               throw insertOptionError;
             }
+
+            createdOptions.push(newOption);
           }
         );
 
@@ -202,7 +217,10 @@ export async function PUT(
     );
 
     const results = await Promise.all(variantPromises);
-    return NextResponse.json(results);
+    return NextResponse.json({
+      variants: results,
+      createdOptions,
+    });
   } catch (error) {
     console.error("Error processing request:", error);
     return NextResponse.json(
@@ -224,7 +242,7 @@ export async function GET(
 
     // Get variants for this product
     const { data: variants, error: variantsError } = await supabase
-      .from("products_variants") // Corregimos el nombre de la tabla
+      .from("products_variants")
       .select("*")
       .eq("product_id", productId)
       .order("position");
@@ -246,7 +264,7 @@ export async function GET(
     }
 
     const { data: options, error: optionsError } = await supabase
-      .from("products_variant_options") // Corregimos el nombre de la tabla
+      .from("products_variant_options")
       .select("*")
       .in("variant_id", variantIds)
       .order("position");
