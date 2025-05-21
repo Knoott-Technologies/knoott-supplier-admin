@@ -10,7 +10,6 @@ import { TotalTransactionsCard } from "../_components/total-received-card";
 import { TotalTransactionsNumber } from "../_components/total-transactions";
 import { TotalProductsCard } from "../_components/total-products-card";
 import TransactionChart from "../_components/transaction-chart";
-import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = {
   title: "Vista general",
