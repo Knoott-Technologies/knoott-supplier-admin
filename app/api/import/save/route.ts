@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
+import { openai } from "@ai-sdk/openai";
+import { embed } from "ai";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +22,18 @@ export async function POST(request: NextRequest) {
     const results = await Promise.all(
       products.map(async (product) => {
         try {
-          // 1. Insert the product
+          // Generate embedding for the product
+          const embeddingText = generateProductText(product);
+
+          // Generate the embedding using the AI SDK of Vercel
+          const { embedding } = await embed({
+            model: openai.embedding("text-embedding-3-small", {
+              dimensions: 1536,
+            }),
+            value: embeddingText,
+          });
+
+          // 1. Insert the product with embedding
           const { data: productData, error: productError } = await supabase
             .from("products")
             .insert({
@@ -38,6 +51,7 @@ export async function POST(request: NextRequest) {
               status: product.status,
               provider_business_id: businessId,
               shipping_cost: product.shipping_cost,
+              embedding: embedding, // Add the embedding here
             })
             .select("id")
             .single();
@@ -201,6 +215,69 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Genera un texto completo con todos los datos relevantes del producto
+ * para crear un embedding de alta calidad
+ */
+function generateProductText(product: any): string {
+  const parts: string[] = [];
+
+  // Información básica del producto
+  parts.push(`Nombre: ${product.name}`);
+  parts.push(`Nombre corto: ${product.short_name}`);
+  parts.push(`Descripción: ${product.description}`);
+  parts.push(`Descripción corta: ${product.short_description}`);
+
+  // Palabras clave
+  if (product.keywords && product.keywords.length > 0) {
+    parts.push(`Palabras clave: ${product.keywords.join(", ")}`);
+  }
+
+  // Dimensiones
+  if (product.dimensions && typeof product.dimensions === "object") {
+    const dimensionsText = Object.entries(product.dimensions)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(", ");
+    parts.push(`Dimensiones: ${dimensionsText}`);
+  }
+
+  // Especificaciones
+  if (product.specs && typeof product.specs === "object") {
+    const specsText = Object.entries(product.specs)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(", ");
+    parts.push(`Especificaciones: ${specsText}`);
+  }
+
+  // Información de envío
+  if (product.shipping_cost !== undefined) {
+    parts.push(`Costo de envío: ${product.shipping_cost}`);
+  }
+
+  // Variantes
+  if (product.variants && product.variants.length > 0) {
+    const variantsText = product.variants
+      .map((variant: any) => {
+        if (!variant.options || !Array.isArray(variant.options)) {
+          return `${variant.name}: sin opciones`;
+        }
+
+        const optionsText = variant.options
+          .map(
+            (option: any) =>
+              `${option.name} (${option.price !== null ? option.price : "Sin precio"} ${option.stock !== null ? `- Stock: ${option.stock}` : ""})`
+          )
+          .join(", ");
+        return `${variant.name}: ${optionsText}`;
+      })
+      .join("; ");
+    parts.push(`Variantes: ${variantsText}`);
+  }
+
+  // Unir todas las partes con saltos de línea
+  return parts.join("\n");
 }
 
 // Helper function to move images from temp folder to product folder
