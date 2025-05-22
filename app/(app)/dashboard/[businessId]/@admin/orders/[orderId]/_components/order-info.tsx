@@ -13,7 +13,7 @@ import Image from "next/image";
 import { libre } from "@/components/fonts/font-def";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { Download, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
 
@@ -220,8 +220,8 @@ export const OrderInfo = ({ order }: { order: Order }) => {
                 )
                   ? "Total a recibir"
                   : ["delivered", "shipped", "paid"].includes(order.status)
-                  ? "Total recibido"
-                  : "Total devuelto"}
+                    ? "Total recibido"
+                    : "Total devuelto"}
               </p>
               <p className="text-base font-semibold">
                 MXN {formatPrice(order.povider_received_amount)}
@@ -229,6 +229,21 @@ export const OrderInfo = ({ order }: { order: Order }) => {
             </span>
           </CardContent>
         </Card>
+        {order.status === "canceled" && order.cancelation_reason && (
+          <Card className="w-full border-destructive">
+            <CardHeader className="border-destructive">
+              <span className="gap-y-0">
+                <p className="text-base font-semibold">Motivo de cancelación</p>
+                <p className="text-sm text-muted-foreground">
+                  Motivo de cancelación de la orden
+                </p>
+              </span>
+            </CardHeader>
+            <CardContent className="w-full h-fit items-start justify-start flex flex-col gap-y-4 bg-destructive/5">
+              <p className="text-sm text-destructive">{order.cancelation_reason}</p>
+            </CardContent>
+          </Card>
+        )}
       </CardContent>
     </Card>
   );

@@ -276,7 +276,7 @@ export const PageHeaderWithLogo = ({
       <div className="flex flex-col gap-y-1 items-start justify-start max-w-3xl">
         {(logo && (
           <span className="flex gap-x-2 items-center">
-            <Avatar className="size-6 xl:size-[30px] rounded-none">
+            <Avatar className="size-6 xl:size-[30px] rounded-none ring-1 ring-border">
               <AvatarImage src={logo} alt={"imagen logo"} />
             </Avatar>
             <h1

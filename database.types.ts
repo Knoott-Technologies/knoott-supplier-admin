@@ -51,6 +51,13 @@ export type Database = {
             referencedRelation: "provider_business"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "business_invitations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "z_provider_business"
+            referencedColumns: ["id"]
+          },
         ]
       }
       cart_items: {
@@ -179,10 +186,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "catalog_banners_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "z_catalog_brands"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "catalog_banners_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "catalog_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_banners_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "z_catalog_collections"
             referencedColumns: ["id"]
           },
           {
@@ -193,10 +214,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "catalog_banners_placement_fkey"
+            columns: ["placement"]
+            isOneToOne: false
+            referencedRelation: "z_catalog_collections"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "catalog_banners_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_banners_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "z_products"
             referencedColumns: ["id"]
           },
         ]
@@ -267,6 +302,13 @@ export type Database = {
             referencedRelation: "catalog_collections"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "catalog_collections_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "z_catalog_collections"
+            referencedColumns: ["id"]
+          },
         ]
       }
       gift_cards: {
@@ -321,6 +363,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "gift_cards_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "z_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "gift_cards_last_updated_by_fkey"
             columns: ["last_updated_by"]
             isOneToOne: false
@@ -328,10 +377,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "gift_cards_last_updated_by_fkey"
+            columns: ["last_updated_by"]
+            isOneToOne: false
+            referencedRelation: "z_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "gift_cards_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_cards_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "z_weddings"
             referencedColumns: ["id"]
           },
         ]
@@ -376,10 +439,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "knoott_ai_conversations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "z_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "knoott_ai_conversations_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knoott_ai_conversations_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "z_weddings"
             referencedColumns: ["id"]
           },
         ]
@@ -449,10 +526,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "payment_intents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "z_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "payment_intents_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_intents_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "z_weddings"
             referencedColumns: ["id"]
           },
         ]
@@ -470,6 +561,7 @@ export type Database = {
           name: string
           presence_in_gifts: number
           provider_business_id: string | null
+          rejected_reason: string | null
           shipping_cost: number
           short_description: string
           short_name: string
@@ -490,6 +582,7 @@ export type Database = {
           name: string
           presence_in_gifts?: number
           provider_business_id?: string | null
+          rejected_reason?: string | null
           shipping_cost?: number
           short_description: string
           short_name: string
@@ -510,6 +603,7 @@ export type Database = {
           name?: string
           presence_in_gifts?: number
           provider_business_id?: string | null
+          rejected_reason?: string | null
           shipping_cost?: number
           short_description?: string
           short_name?: string
@@ -534,6 +628,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "z_catalog_brands"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "products_provider_business_id_fkey"
             columns: ["provider_business_id"]
             isOneToOne: false
@@ -541,10 +642,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "products_provider_business_id_fkey"
+            columns: ["provider_business_id"]
+            isOneToOne: false
+            referencedRelation: "z_provider_business"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "products_subcategory_id_fkey"
             columns: ["subcategory_id"]
             isOneToOne: false
             referencedRelation: "catalog_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "z_catalog_collections"
             referencedColumns: ["id"]
           },
         ]
@@ -644,6 +759,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "z_products"
+            referencedColumns: ["id"]
+          },
         ]
       }
       provider_business: {
@@ -670,6 +792,7 @@ export type Database = {
           neighborhood: string | null
           postal_code: string | null
           reference: string
+          rejection_reason: string | null
           social_media: Json | null
           state: string | null
           street: string | null
@@ -699,6 +822,7 @@ export type Database = {
           neighborhood?: string | null
           postal_code?: string | null
           reference?: string
+          rejection_reason?: string | null
           social_media?: Json | null
           state?: string | null
           street?: string | null
@@ -728,6 +852,7 @@ export type Database = {
           neighborhood?: string | null
           postal_code?: string | null
           reference?: string
+          rejection_reason?: string | null
           social_media?: Json | null
           state?: string | null
           street?: string | null
@@ -744,6 +869,7 @@ export type Database = {
           id: number
           order_id: number | null
           provider_business_id: string | null
+          receipt_url: string
           reference: string
           status: Database["public"]["Enums"]["transaction_status"]
         }
@@ -754,6 +880,7 @@ export type Database = {
           id?: number
           order_id?: number | null
           provider_business_id?: string | null
+          receipt_url: string
           reference: string
           status?: Database["public"]["Enums"]["transaction_status"]
         }
@@ -764,6 +891,7 @@ export type Database = {
           id?: number
           order_id?: number | null
           provider_business_id?: string | null
+          receipt_url?: string
           reference?: string
           status?: Database["public"]["Enums"]["transaction_status"]
         }
@@ -780,6 +908,13 @@ export type Database = {
             columns: ["provider_business_id"]
             isOneToOne: false
             referencedRelation: "provider_business"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_business_transactions_provider_business_id_fkey"
+            columns: ["provider_business_id"]
+            isOneToOne: false
+            referencedRelation: "z_provider_business"
             referencedColumns: ["id"]
           },
         ]
@@ -815,10 +950,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "provider_business_users_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "z_provider_business"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "provider_business_users_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_business_users_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "z_users"
             referencedColumns: ["id"]
           },
         ]
@@ -859,6 +1008,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "z_users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       shopify_auth_states: {
@@ -889,6 +1045,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "provider_business"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shopify_auth_states_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "z_provider_business"
             referencedColumns: ["id"]
           },
         ]
@@ -1001,6 +1164,13 @@ export type Database = {
             referencedRelation: "provider_business"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "shopify_integrations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "z_provider_business"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_carts: {
@@ -1008,7 +1178,6 @@ export type Database = {
           created_at: string
           id: number
           message: string | null
-          payment_intent_id: number | null
           status: Database["public"]["Enums"]["cart_status"]
           user_id: string
           wedding_id: string
@@ -1017,7 +1186,6 @@ export type Database = {
           created_at?: string
           id?: number
           message?: string | null
-          payment_intent_id?: number | null
           status?: Database["public"]["Enums"]["cart_status"]
           user_id: string
           wedding_id: string
@@ -1026,19 +1194,11 @@ export type Database = {
           created_at?: string
           id?: number
           message?: string | null
-          payment_intent_id?: number | null
           status?: Database["public"]["Enums"]["cart_status"]
           user_id?: string
           wedding_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "user_carts_payment_intent_id_fkey"
-            columns: ["payment_intent_id"]
-            isOneToOne: false
-            referencedRelation: "payment_intents"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "user_carts_user_id_fkey"
             columns: ["user_id"]
@@ -1047,10 +1207,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "user_carts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "z_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_carts_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_carts_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "z_weddings"
             referencedColumns: ["id"]
           },
         ]
@@ -1085,6 +1259,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_feedback_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "z_users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_preferences: {
@@ -1115,6 +1296,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "z_users"
             referencedColumns: ["id"]
           },
         ]
@@ -1150,10 +1338,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "user_weddings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "z_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_weddings_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_weddings_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "z_weddings"
             referencedColumns: ["id"]
           },
         ]
@@ -1248,6 +1450,13 @@ export type Database = {
             referencedRelation: "weddings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "wedding_addresses_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "z_weddings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       wedding_invitations: {
@@ -1289,6 +1498,13 @@ export type Database = {
             referencedRelation: "weddings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "wedding_invitations_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "z_weddings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       wedding_memories: {
@@ -1327,6 +1543,13 @@ export type Database = {
             referencedRelation: "weddings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "wedding_memories_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: true
+            referencedRelation: "z_weddings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       wedding_product_orders: {
@@ -1334,6 +1557,8 @@ export type Database = {
           address_id: string
           cancelation_reason: string | null
           canceled_at: string | null
+          catalog_product_id: number | null
+          catalog_product_variant_id: number | null
           confirmed_by: string | null
           created_at: string
           delivered_at: string | null
@@ -1358,6 +1583,8 @@ export type Database = {
           address_id: string
           cancelation_reason?: string | null
           canceled_at?: string | null
+          catalog_product_id?: number | null
+          catalog_product_variant_id?: number | null
           confirmed_by?: string | null
           created_at?: string
           delivered_at?: string | null
@@ -1382,6 +1609,8 @@ export type Database = {
           address_id?: string
           cancelation_reason?: string | null
           canceled_at?: string | null
+          catalog_product_id?: number | null
+          catalog_product_variant_id?: number | null
           confirmed_by?: string | null
           created_at?: string
           delivered_at?: string | null
@@ -1411,8 +1640,43 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "wedding_product_orders_catalog_product_id_fkey"
+            columns: ["catalog_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wedding_product_orders_catalog_product_id_fkey"
+            columns: ["catalog_product_id"]
+            isOneToOne: false
+            referencedRelation: "z_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wedding_product_orders_catalog_product_variant_id_fkey"
+            columns: ["catalog_product_variant_id"]
+            isOneToOne: false
+            referencedRelation: "products_variant_options"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "wedding_product_orders_confirmed_by_fkey"
             columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wedding_product_orders_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "z_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wedding_product_orders_ordered_by_fkey"
+            columns: ["ordered_by"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -1421,7 +1685,7 @@ export type Database = {
             foreignKeyName: "wedding_product_orders_ordered_by_fkey"
             columns: ["ordered_by"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "z_users"
             referencedColumns: ["id"]
           },
           {
@@ -1439,6 +1703,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "wedding_product_orders_provider_business_id_fkey"
+            columns: ["provider_business_id"]
+            isOneToOne: false
+            referencedRelation: "z_provider_business"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "wedding_product_orders_shipped_ordered_by_fkey"
             columns: ["shipped_ordered_by"]
             isOneToOne: false
@@ -1446,10 +1717,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "wedding_product_orders_shipped_ordered_by_fkey"
+            columns: ["shipped_ordered_by"]
+            isOneToOne: false
+            referencedRelation: "z_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "wedding_product_orders_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wedding_product_orders_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "z_weddings"
             referencedColumns: ["id"]
           },
         ]
@@ -1500,6 +1785,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "wedding_products_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "z_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "wedding_products_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
@@ -1514,6 +1806,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "wedding_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "z_products"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "wedding_products_product_variant_option_id_fkey"
             columns: ["product_variant_option_id"]
             isOneToOne: false
@@ -1525,6 +1824,13 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wedding_products_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "z_weddings"
             referencedColumns: ["id"]
           },
         ]
@@ -1591,43 +1897,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "wedding_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "z_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "wedding_transactions_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "wedding_transactions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "z_weddings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       wedding_verify: {
         Row: {
+          created_at: string
           document_back_url: string | null
           document_front_url: string
           document_type: string
           full_name: string
           id: number
+          rejected_reason: string | null
           selfie_url: string
           status: Database["public"]["Enums"]["verify_status"]
           user_id: string
           wedding_id: string
         }
         Insert: {
+          created_at?: string
           document_back_url?: string | null
           document_front_url: string
           document_type: string
           full_name: string
           id?: number
+          rejected_reason?: string | null
           selfie_url: string
           status?: Database["public"]["Enums"]["verify_status"]
           user_id: string
           wedding_id: string
         }
         Update: {
+          created_at?: string
           document_back_url?: string | null
           document_front_url?: string
           document_type?: string
           full_name?: string
           id?: number
+          rejected_reason?: string | null
           selfie_url?: string
           status?: Database["public"]["Enums"]["verify_status"]
           user_id?: string
@@ -1642,10 +1968,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "wedding_verify_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "z_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "wedding_verify_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: true
             referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wedding_verify_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: true
+            referencedRelation: "z_weddings"
             referencedColumns: ["id"]
           },
         ]
@@ -1739,6 +2079,193 @@ export type Database = {
         }
         Relationships: []
       }
+      z_catalog_brands: {
+        Row: {
+          created_at: string | null
+          id: number | null
+          image_url: string | null
+          logo_url: string | null
+          name: string | null
+          status: Database["public"]["Enums"]["brand_status"] | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number | null
+          image_url?: string | null
+          logo_url?: string | null
+          name?: string | null
+          status?: Database["public"]["Enums"]["brand_status"] | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number | null
+          image_url?: string | null
+          logo_url?: string | null
+          name?: string | null
+          status?: Database["public"]["Enums"]["brand_status"] | null
+        }
+        Relationships: []
+      }
+      z_catalog_collections: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: number | null
+          image_url: string | null
+          name: string | null
+          parent_id: number | null
+          parent_name: string | null
+          status: Database["public"]["Enums"]["collection_status"] | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_collections_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_collections_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "z_catalog_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      z_knoott_account_balances: {
+        Row: {
+          account: string | null
+          amount: number | null
+          created_at: string | null
+          description: string | null
+          id: number | null
+          provider_business_id: string | null
+          provider_name: string | null
+          running_balance: number | null
+          source: string | null
+          transaction_id: string | null
+          type: string | null
+          user_id: string | null
+          user_name: string | null
+          wedding_id: string | null
+          wedding_name: string | null
+        }
+        Relationships: []
+      }
+      z_knoott_account_summary: {
+        Row: {
+          account: string | null
+          current_balance: number | null
+          total_income: number | null
+          total_outcome: number | null
+        }
+        Relationships: []
+      }
+      z_knoott_commissions: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          description: string | null
+          operation_type: string | null
+          order_id: number | null
+          provider_business_id: string | null
+          provider_name: string | null
+          reference: string | null
+          source: string | null
+          status: Database["public"]["Enums"]["transaction_status"] | null
+          transaction_id: string | null
+          type: string | null
+          user_id: string | null
+          user_name: string | null
+          wedding_id: string | null
+          wedding_name: string | null
+        }
+        Relationships: []
+      }
+      z_knoott_transactions: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          description: string | null
+          destination: string | null
+          is_commission: boolean | null
+          operation_type: string | null
+          order_id: number | null
+          provider_business_id: string | null
+          provider_name: string | null
+          reference: string | null
+          source: string | null
+          status: Database["public"]["Enums"]["transaction_status"] | null
+          transaction_id: string | null
+          type: string | null
+          user_id: string | null
+          user_name: string | null
+          wedding_id: string | null
+          wedding_name: string | null
+        }
+        Relationships: []
+      }
+      z_products: {
+        Row: {
+          brand: string | null
+          category: string | null
+          created_at: string | null
+          id: number | null
+          images_url: string[] | null
+          name: string | null
+          partner: string | null
+          price: number | null
+          shipping_cost: number | null
+          status: Database["public"]["Enums"]["product_status"] | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
+      z_provider_business: {
+        Row: {
+          id: string | null
+          name: string | null
+          sector: string | null
+          status: boolean | null
+          total_active_products: number | null
+          total_in_sales: number | null
+          total_pending_sales: number | null
+          total_sales: number | null
+        }
+        Relationships: []
+      }
+      z_users: {
+        Row: {
+          email: string | null
+          has_gifted: boolean | null
+          has_table: boolean | null
+          id: string | null
+          is_provider: boolean | null
+          name: string | null
+          phone: string | null
+          ticket_promedio: number | null
+          total_contribution: number | null
+          total_contribution_amount: number | null
+        }
+        Relationships: []
+      }
+      z_weddings: {
+        Row: {
+          balance: number | null
+          id: string | null
+          name: string | null
+          status: Database["public"]["Enums"]["wedding_status"] | null
+          total_contribution_count: number | null
+          total_income: number | null
+          total_purchases: number | null
+          total_withdrawal: number | null
+          wedding_date: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       bytea_to_text: {
@@ -1820,14 +2347,30 @@ export type Database = {
         Args: { business_id: string }
         Returns: boolean
       }
+      match_products: {
+        Args: {
+          query_embedding: string
+          match_threshold: number
+          match_count: number
+        }
+        Returns: {
+          id: number
+          similarity: number
+        }[]
+      }
       search_products_by_delivery_zone: {
         Args: {
           p_city: string
           p_state: string
-          p_query?: string
+          p_product_name?: string
+          p_product_keywords?: string[]
+          p_description?: string
+          p_brand_name?: string
           p_subcategory_id?: number
           p_brand_id?: number
-          p_status?: Database["public"]["Enums"]["product_status"]
+          p_status?: string
+          p_min_price?: number
+          p_max_price?: number
           p_limit?: number
           p_offset?: number
           p_debug?: boolean
@@ -1837,6 +2380,10 @@ export type Database = {
       text_to_bytea: {
         Args: { data: string }
         Returns: string
+      }
+      update_embedding_column: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       urlencode: {
         Args: { data: Json } | { string: string } | { string: string }
@@ -1864,6 +2411,7 @@ export type Database = {
         | "draft"
         | "requires_verification"
         | "deleted"
+        | "rejected"
       provider_businees_user_roles: "admin" | "supervisor" | "staff"
       transaction_status: "completed" | "pending" | "canceled"
       transaction_types: "income" | "egress" | "purchase"
@@ -2024,6 +2572,7 @@ export const Constants = {
         "draft",
         "requires_verification",
         "deleted",
+        "rejected",
       ],
       provider_businees_user_roles: ["admin", "supervisor", "staff"],
       transaction_status: ["completed", "pending", "canceled"],

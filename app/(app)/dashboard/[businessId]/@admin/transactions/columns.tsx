@@ -5,6 +5,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { formatInTimeZone } from "date-fns-tz";
 import { es } from "date-fns/locale";
 import NumberFlow from "@number-flow/react";
+import Link from "next/link";
+import { Download } from "lucide-react";
 
 export type TransactionWallet =
   Database["public"]["Tables"]["provider_business_transactions"]["Row"];
@@ -115,6 +117,21 @@ export const columns: ColumnDef<TransactionWallet>[] = [
     minSize: 100,
     cell: (info) => {
       return <div>Cuenta CLABE</div>;
+    },
+  },
+  {
+    id: "Comprobante",
+    header: "Comprobante",
+    accessorKey: "receipt_url",
+    minSize: 100,
+    cell: (info) => {
+      return (
+        <div className="w-full ">
+          <Link className="flex items-center justify-start gap-x-1.5 hover:underline text-contrast transition-all" href={info.row.original.receipt_url}>
+            Descargar <Download className="size-3.5" />
+          </Link>
+        </div>
+      );
     },
   },
 ];

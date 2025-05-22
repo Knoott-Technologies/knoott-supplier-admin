@@ -3,12 +3,21 @@
 import { Button } from "@/components/ui/button";
 import type { Order } from "../../page";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Check, Loader2, Upload } from "lucide-react";
+import { ArrowRight, Check, Loader2, X } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShippingGuideUpload } from "./shipping-guide-upload";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -87,6 +96,9 @@ export const OrderActions = ({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [cancelationReason, setCancelationReason] = useState("");
+  const [isCanceling, setIsCanceling] = useState(false);
 
   // No mostrar acciones para órdenes entregadas o canceladas
   if (order.status === "delivered" || order.status === "canceled") {
@@ -145,6 +157,55 @@ export const OrderActions = ({
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!cancelationReason.trim()) {
+      toast.error("Error", {
+        description: "Debes proporcionar un motivo para la cancelación",
+      });
+      return;
+    }
+
+    setIsCanceling(true);
+    try {
+      const response = await fetch(`/api/orders/${order.id}/cancel`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          businessId: businessId,
+          cancelationReason: cancelationReason,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Ha ocurrido un error");
+      }
+
+      toast.success("¡Éxito!", {
+        description: "Orden cancelada correctamente",
+      });
+
+      setIsCancelDialogOpen(false);
+      setCancelationReason("");
+
+      // Refrescar la página para mostrar los cambios
+      router.refresh();
+    } catch (error) {
+      console.error("Error al cancelar la orden:", error);
+      toast.error("Error", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Ha ocurrido un error inesperado",
+      });
+    } finally {
+      setIsCanceling(false);
     }
   };
 
@@ -263,6 +324,128 @@ export const OrderActions = ({
           onClose={() => setIsUploadModalOpen(false)}
           onSuccess={handleShippingGuideUploaded}
         />
+      </>
+    );
+  }
+
+  // Renderizar botones para requires_confirmation con opción de cancelar
+  if (order.status === "requires_confirmation") {
+    return (
+      <>
+        <div className="bg-background z-50 sticky bottom-0 w-full mt-auto">
+          <div
+            className={cn(
+              "w-full h-fit p-3 py-2 pb-8 md:pb-2 border-t",
+              getStatusActionBannerClass(order.status)
+            )}
+          >
+            <div className="flex justify-end w-full">
+              <div className="flex gap-2 w-full justify-end">
+                <Button
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  variant="destructive"
+                  size="sm"
+                  disabled={isLoading}
+                  onClick={() => setIsCancelDialogOpen(true)}
+                >
+                  Rechazar
+                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      className={cn(
+                        getStatusButtonClass(order.status),
+                        "w-full md:w-auto min-w-[250px] justify-between"
+                      )}
+                      variant={"ghost"}
+                      size="sm"
+                      disabled={isLoading}
+                    >
+                      {getStatusText(order.status)}
+                      {isLoading && <Loader2 className="animate-spin" />}
+                      {!isLoading && <ArrowRight />}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="center"
+                    side="top"
+                    sideOffset={5}
+                    className="w-[--radix-dropdown-menu-trigger-width] bg-background"
+                  >
+                    <DropdownMenuLabel>
+                      ¿Deseas confirmar la acción?
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleAction}
+                      disabled={isLoading}
+                      className="w-full justify-between cursor-pointer text-success focus:bg-success/10 focus:text-success"
+                    >
+                      {isLoading && <Loader2 className="animate-spin" />}
+                      Confirmar
+                      {!isLoading && <Check />}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>Cancelar</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Diálogo para cancelar orden */}
+        <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+          <DialogContent className="p-0">
+            <DialogHeader className="p-3 bg-sidebar border-b">
+              <DialogTitle>Rechazar orden</DialogTitle>
+              <DialogDescription>
+                Por favor, indica el motivo por el cual no puedes realizar esta
+                orden. Esta información será compartida con el cliente.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 p-3">
+              <Textarea
+                placeholder="Escribe aquí el motivo de rechazo..."
+                value={cancelationReason}
+                onChange={(e) => setCancelationReason(e.target.value)}
+                className="min-h-[120px] bg-sidebar"
+              />
+            </div>
+            <DialogFooter className="sm:justify-between p-3 bg-sidebar border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsCancelDialogOpen(false);
+                  setCancelationReason("");
+                }}
+                disabled={isCanceling}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleCancelOrder}
+                disabled={isCanceling || !cancelationReason.trim()}
+              >
+                {isCanceling ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    <X className="mr-2 h-4 w-4" />
+                    Rechazar orden
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </>
     );
   }
