@@ -173,10 +173,12 @@ export const OrderInfo = ({ order }: { order: Order }) => {
                     </p>
                   </span>
                   <span className="w-full items-center justify-between flex">
-                    <p className="text-sm">
-                      {order.product.variant.variant_list.name}:{" "}
-                      {order.product.variant.name}
-                    </p>
+                    {order.product.variant.name !== "Default" && (
+                      <p className="text-sm">
+                        {order.product.variant.variant_list.name}:{" "}
+                        {order.product.variant.name}
+                      </p>
+                    )}
                     <p className="text-sm font-semibold text-foreground">
                       MXN {formatPrice(order.product.variant.price!)}
                     </p>
@@ -240,7 +242,9 @@ export const OrderInfo = ({ order }: { order: Order }) => {
               </span>
             </CardHeader>
             <CardContent className="w-full h-fit items-start justify-start flex flex-col gap-y-4 bg-destructive/5">
-              <p className="text-sm text-destructive">{order.cancelation_reason}</p>
+              <p className="text-sm text-destructive">
+                {order.cancelation_reason}
+              </p>
             </CardContent>
           </Card>
         )}
