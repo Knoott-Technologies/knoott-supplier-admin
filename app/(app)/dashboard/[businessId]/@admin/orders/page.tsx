@@ -1,5 +1,4 @@
 import { PageHeader } from "@/components/universal/headers";
-import { createAdminClient } from "@/utils/supabase/admin";
 import { FilterBar } from "./_components/filter-bar";
 import { OrdersSummary } from "./_components/orders-summary";
 import { OrdersTable } from "./_components/orders-table";

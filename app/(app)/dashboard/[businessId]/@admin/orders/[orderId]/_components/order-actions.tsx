@@ -26,6 +26,52 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+
+// Motivos de rechazo predefinidos
+const CANCELLATION_REASONS = [
+  {
+    value:
+      "Lo sentimos, actualmente no contamos con suficiente stock para completar tu pedido.",
+    label: "Stock insuficiente",
+  },
+  {
+    value:
+      "Hemos detectado un problema con el producto solicitado que nos impide procesarlo correctamente.",
+    label: "Problema con el producto",
+  },
+  {
+    value:
+      "Este producto se encuentra temporalmente fuera de temporada. Estará disponible próximamente.",
+    label: "Producto fuera de temporada",
+  },
+  {
+    value:
+      "Detectamos un error en el precio mostrado en nuestro sistema. Lamentamos los inconvenientes.",
+    label: "Precio incorrecto en el sistema",
+  },
+  {
+    value:
+      "Lamentablemente este producto no está disponible para entrega en tu zona geográfica.",
+    label: "No disponible para la zona de entrega",
+  },
+  {
+    value:
+      "En este momento nuestra capacidad de producción está al máximo y no podemos procesar más pedidos.",
+    label: "Capacidad de producción excedida",
+  },
+  {
+    value: "otro",
+    label: "Otro motivo",
+  },
+];
 
 const getStatusText = (status: string): string => {
   switch (status) {
@@ -97,7 +143,8 @@ export const OrderActions = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
-  const [cancelationReason, setCancelationReason] = useState("");
+  const [selectedReasonType, setSelectedReasonType] = useState("");
+  const [customReason, setCustomReason] = useState("");
   const [isCanceling, setIsCanceling] = useState(false);
 
   // No mostrar acciones para órdenes entregadas o canceladas
@@ -161,11 +208,29 @@ export const OrderActions = ({
   };
 
   const handleCancelOrder = async () => {
-    if (!cancelationReason.trim()) {
-      toast.error("Error", {
-        description: "Debes proporcionar un motivo para la cancelación",
-      });
-      return;
+    // Obtener el motivo de cancelación según la selección
+    let finalReason = "";
+
+    if (selectedReasonType === "otro") {
+      if (!customReason.trim()) {
+        toast.error("Error", {
+          description: "Debes proporcionar un motivo para la cancelación",
+        });
+        return;
+      }
+      finalReason = customReason.trim();
+    } else {
+      // Buscar el label del motivo seleccionado
+      const selectedReason = CANCELLATION_REASONS.find(
+        (reason) => reason.value === selectedReasonType
+      );
+      if (!selectedReason) {
+        toast.error("Error", {
+          description: "Debes seleccionar un motivo para la cancelación",
+        });
+        return;
+      }
+      finalReason = selectedReason.value;
     }
 
     setIsCanceling(true);
@@ -178,7 +243,7 @@ export const OrderActions = ({
         body: JSON.stringify({
           userId: user.id,
           businessId: businessId,
-          cancelationReason: cancelationReason,
+          cancelationReason: finalReason,
         }),
       });
 
@@ -192,7 +257,8 @@ export const OrderActions = ({
       });
 
       setIsCancelDialogOpen(false);
-      setCancelationReason("");
+      setSelectedReasonType("");
+      setCustomReason("");
 
       // Refrescar la página para mostrar los cambios
       router.refresh();
@@ -405,13 +471,38 @@ export const OrderActions = ({
                 orden. Esta información será compartida con el cliente.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 p-3">
-              <Textarea
-                placeholder="Escribe aquí el motivo de rechazo..."
-                value={cancelationReason}
-                onChange={(e) => setCancelationReason(e.target.value)}
-                className="min-h-[120px] bg-sidebar"
-              />
+            <div className="grid gap-4 p-3 bg-background">
+              <div className="grid gap-2">
+                <Label htmlFor="reason-select">Motivo de rechazo</Label>
+                <Select
+                  value={selectedReasonType}
+                  onValueChange={setSelectedReasonType}
+                >
+                  <SelectTrigger id="reason-select" className="bg-white">
+                    <SelectValue placeholder="Selecciona un motivo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CANCELLATION_REASONS.map((reason) => (
+                      <SelectItem key={reason.value} value={reason.value}>
+                        {reason.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {selectedReasonType === "otro" && (
+                <div className="grid gap-2">
+                  <Label htmlFor="custom-reason">Especifica el motivo</Label>
+                  <Textarea
+                    id="custom-reason"
+                    placeholder="Escribe aquí el motivo de rechazo..."
+                    value={customReason}
+                    onChange={(e) => setCustomReason(e.target.value)}
+                    className="min-h-[120px] bg-white"
+                  />
+                </div>
+              )}
             </div>
             <DialogFooter className="sm:justify-between p-3 bg-sidebar border-t">
               <Button
@@ -419,7 +510,8 @@ export const OrderActions = ({
                 variant="outline"
                 onClick={() => {
                   setIsCancelDialogOpen(false);
-                  setCancelationReason("");
+                  setSelectedReasonType("");
+                  setCustomReason("");
                 }}
                 disabled={isCanceling}
               >
@@ -429,17 +521,21 @@ export const OrderActions = ({
                 type="button"
                 variant="destructive"
                 onClick={handleCancelOrder}
-                disabled={isCanceling || !cancelationReason.trim()}
+                disabled={
+                  isCanceling ||
+                  !selectedReasonType ||
+                  (selectedReasonType === "otro" && !customReason.trim())
+                }
               >
                 {isCanceling ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Procesando...
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   </>
                 ) : (
                   <>
-                    <X className="mr-2 h-4 w-4" />
                     Rechazar orden
+                    <X className="h-4 w-4" />
                   </>
                 )}
               </Button>
