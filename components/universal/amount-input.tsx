@@ -1,11 +1,10 @@
 "use client";
 
-import type React from "react";
-import { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 
 interface AmountInputProps {
-  value: number;
+  value: number; // Ahora este valor es un entero (ej: 135015 para $1,350.15)
   onChange: (value: number) => void;
   placeholder?: string;
   className?: string;
@@ -14,9 +13,9 @@ interface AmountInputProps {
 }
 
 /**
- * Input para montos monetarios con comportamiento bancario.
- * Cada dígito ingresado empuja los existentes a la izquierda.
- * Los últimos dos dígitos siempre son centavos.
+ * Input para montos monetarios que maneja valores como enteros.
+ * Si el usuario escribe 1350.15, el componente pasa 135015 como valor.
+ * Los últimos 2 dígitos representan los centavos.
  */
 export const AmountInput = ({
   value,
@@ -27,97 +26,127 @@ export const AmountInput = ({
   disabled = false,
 }: AmountInputProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [displayValue, setDisplayValue] = useState<string>("");
+  const [hasDecimalPoint, setHasDecimalPoint] = useState<boolean>(false);
 
-  // Convierte el valor numerico (en centavos) a formato de visualización
-  const formatAmount = (amount: number): string => {
-    // Convierte a string y asegura que tenga al menos 3 caracteres (0.00)
-    const valueStr = amount.toString().padStart(3, "0");
+  // Actualiza el valor de visualización cuando cambia el valor numérico
+  useEffect(() => {
+    // Si el usuario está editando, no sobrescribir
+    if (document.activeElement === inputRef.current) return;
 
-    // Separa los pesos de los centavos
-    const centavos = valueStr.slice(-2);
-    const pesos = valueStr.slice(0, -2) || "0";
+    // Formatea el valor entero para mostrar como decimal
+    setDisplayValue(formatIntegerToDisplay(value));
+  }, [value]);
 
-    // Formatea los pesos con separadores de miles
-    const formattedPesos = Number.parseInt(pesos).toLocaleString("es-MX");
+  // Convierte un valor entero (ej: 135015) a formato de visualización ($1,350.15)
+  const formatIntegerToDisplay = (intValue: number): string => {
+    if (intValue === 0 || isNaN(intValue)) return "";
 
-    return `${formattedPesos}.${centavos}`;
-  };
-
-  // Maneja cada tecla para comportamiento bancario
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Permitir navegación y borrado
-    if (
-      e.key === "ArrowLeft" ||
-      e.key === "ArrowRight" ||
-      e.key === "Delete" ||
-      e.key === "Tab" ||
-      e.ctrlKey ||
-      e.metaKey
-    ) {
-      return;
-    }
-
-    if (e.key === "Backspace") {
-      e.preventDefault();
-      handleBackspace();
-      return;
-    }
-
-    // Solo permitir dígitos
-    if (!/^\d$/.test(e.key)) {
-      e.preventDefault();
-      return;
-    }
-
-    e.preventDefault();
-
-    // Convertir el valor actual a centavos (solo dígitos)
-    const rawStr = value.toString();
-
-    // Agregar el nuevo dígito al final y limitar a 10 dígitos (evita overflow)
-    const newRawStr = (rawStr + e.key).slice(-10);
-    const newValue = Number.parseInt(newRawStr);
-
-    // Actualizar el valor
-    onChange(newValue);
-  };
-
-  // Manejar cambios directos del input (para dispositivos móviles)
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Extraer solo los dígitos del valor ingresado
-    const inputDigits = e.target.value.replace(/\D/g, "");
-
-    if (!inputDigits) {
-      onChange(0);
-      return;
-    }
-
-    // Si hay dígitos, actualizar el valor
-    const newValue = Number.parseInt(inputDigits.slice(-10));
-    onChange(newValue);
-  };
-
-  // Manejar borrado
-  const handleBackspace = () => {
     // Convertir a string
-    const rawStr = value.toString();
+    const strValue = intValue.toString();
 
-    // Eliminar el último dígito
-    const newRawStr = rawStr.slice(0, -1) || "0";
-    const newValue = Number.parseInt(newRawStr);
+    // Extraer los centavos (últimos 2 dígitos)
+    let dollars, cents;
 
-    // Actualizar el valor
-    onChange(newValue);
+    if (strValue.length <= 2) {
+      // Si es menor que 100, todo son centavos
+      dollars = "0";
+      cents = strValue.padStart(2, "0");
+    } else {
+      // Separar dólares y centavos
+      dollars = strValue.slice(0, -2);
+      cents = strValue.slice(-2);
+    }
+
+    // Formatear la parte entera con separadores de miles
+    dollars = dollars.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    // Unir con punto decimal
+    return `${dollars}.${cents}`;
+  };
+
+  // Formatea para mostrar en el input con el símbolo de moneda
+  const getInputDisplayValue = (): string => {
+    if (!displayValue) return "";
+    return `$${displayValue}`;
+  };
+
+  // Convierte un valor con formato decimal a entero
+  const convertToInteger = (decimalValue: string): number => {
+    // Eliminar todo excepto números y el primer punto decimal
+    const cleaned = decimalValue.replace(/[^\d.]/g, "");
+
+    if (cleaned === "") return 0;
+
+    if (cleaned.includes(".")) {
+      // Si tiene punto decimal
+      const parts = cleaned.split(".");
+      const dollars = parts[0] || "0";
+      // Tomar solo hasta 2 decimales
+      const cents = (parts[1] || "").padEnd(2, "0").substring(0, 2);
+
+      // Combinar como entero
+      return parseInt(dollars + cents, 10);
+    } else {
+      // Si no tiene punto decimal, multiplicar por 100
+      return parseInt(cleaned, 10) * 100;
+    }
+  };
+
+  // Maneja cambios en el input
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Obtener el valor sin el símbolo de moneda
+    const rawValue = e.target.value.replace(/^\$/, "");
+
+    // Eliminar caracteres no válidos, pero mantener el punto decimal
+    const cleaned = rawValue.replace(/[^\d.]/g, "");
+
+    // Asegurar que solo haya un punto decimal
+    let processed = cleaned;
+    const decimalIndex = cleaned.indexOf(".");
+
+    if (decimalIndex !== -1) {
+      const beforeDecimal = cleaned.substring(0, decimalIndex + 1);
+      const afterDecimal = cleaned
+        .substring(decimalIndex + 1)
+        .replace(/\./g, "");
+      processed = beforeDecimal + afterDecimal;
+      setHasDecimalPoint(true);
+    } else {
+      setHasDecimalPoint(false);
+    }
+
+    // Actualizar el valor de visualización
+    setDisplayValue(processed);
+
+    // Convertir a entero y pasar al padre
+    const integerValue = convertToInteger(processed);
+    onChange(integerValue);
   };
 
   // Cuando pierde el foco, asegurarse de que el formato sea correcto
   const handleBlur = () => {
     // Si no hay valor, establecer 0
-    if (value === 0 || !value) {
+    if (!displayValue) {
       onChange(0);
-    }
+      setDisplayValue("");
+    } else {
+      // Convertir a entero
+      const integerValue = convertToInteger(displayValue);
 
-    onBlur?.(value);
+      // Formatear para visualización
+      const formattedValue = formatIntegerToDisplay(integerValue);
+      setDisplayValue(formattedValue);
+
+      // Notificar al componente padre
+      onBlur?.(integerValue);
+    }
+  };
+
+  // Maneja el foco para mejorar la experiencia de usuario
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Seleccionar todo el texto para facilitar la edición
+    e.target.select();
   };
 
   return (
@@ -126,14 +155,14 @@ export const AmountInput = ({
         ref={inputRef}
         className={`bg-white ${className}`}
         placeholder={placeholder}
-        value={`$${formatAmount(value)}`}
+        value={getInputDisplayValue()}
         onChange={handleChange}
-        onKeyDown={handleKeyDown}
         onBlur={handleBlur}
+        onFocus={handleFocus}
         disabled={disabled}
         autoComplete="off"
         type="text"
-        inputMode="numeric"
+        inputMode="decimal"
       />
       <span className="text-foreground pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-3 text-sm peer-disabled:opacity-50">
         mxn

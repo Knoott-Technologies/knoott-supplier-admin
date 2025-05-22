@@ -28,6 +28,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Product } from "./columns";
+import { BulkActions } from "./bulk-actions";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -49,6 +51,7 @@ export function DataTable<TData, TValue>({
   const searchParams = useSearchParams();
 
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [rowSelection, setRowSelection] = useState({});
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -58,8 +61,10 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
+      rowSelection,
       pagination: {
         pageIndex: currentPage - 1,
         pageSize,
@@ -67,6 +72,7 @@ export function DataTable<TData, TValue>({
     },
     manualPagination: true,
     pageCount: totalPages,
+    enableRowSelection: true,
   });
 
   // Create a new query string with updated parameters
@@ -94,8 +100,17 @@ export function DataTable<TData, TValue>({
     );
   };
 
+  // Get selected rows data
+  const selectedRows = table
+    .getFilteredSelectedRowModel()
+    .rows.map((row) => row.original) as Product[];
+
   return (
     <div className="w-full flex flex-col gap-y-4">
+      {selectedRows.length > 0 && (
+        <BulkActions selectedProducts={selectedRows} />
+      )}
+
       <div className="rounded-md border overflow-hidden">
         <div className="overflow-x-auto">
           <Table>

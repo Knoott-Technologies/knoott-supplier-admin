@@ -46,9 +46,9 @@ export async function POST(request: NextRequest) {
               specs: product.specs,
               keywords: product.keywords,
               images_url: product.images_url,
-              subcategory_id: product.subcategory_id,
-              presence_in_gifts: product.presence_in_gifts,
-              status: product.status,
+              subcategory_id: product.subcategory_id || 1,
+              presence_in_gifts: product.presence_in_gifts || 0,
+              status: "requires_verification",
               provider_business_id: businessId,
               shipping_cost: product.shipping_cost,
               embedding: embedding, // Add the embedding here

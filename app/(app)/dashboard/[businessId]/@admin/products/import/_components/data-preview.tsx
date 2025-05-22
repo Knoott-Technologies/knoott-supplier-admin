@@ -256,10 +256,10 @@ export default function DataPreview({ data, businessId }: DataPreviewProps) {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="divide-x">
                   {Object.keys(data[0] || {}).map((key) => (
                     <TableHead
-                      className="w-fit max-w-[300px] min-w-[150px]"
+                      className="w-fit max-w-[250px] min-w-[150px]"
                       key={key}
                     >
                       <p className="truncate">{key}</p>
@@ -269,10 +269,10 @@ export default function DataPreview({ data, businessId }: DataPreviewProps) {
               </TableHeader>
               <TableBody>
                 {currentItems.map((row, rowIndex) => (
-                  <TableRow key={rowIndex}>
+                  <TableRow className="divide-x" key={rowIndex}>
                     {Object.values(row).map((value: any, cellIndex) => (
                       <TableCell
-                        className="w-fit max-w-[300px] min-w-[150px]"
+                        className="w-fit max-w-[250px] min-w-[150px]"
                         key={cellIndex}
                       >
                         <p className="truncate">

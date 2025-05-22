@@ -60,8 +60,8 @@ export async function GET() {
       { desc: "Nombre de la marca", example: "Ejemplo: Marca Ejemplo" },
       { desc: "Nombre de la categoría", example: "Ejemplo: Ropa > Camisetas" },
       {
-        desc: "Precio (centavos)",
-        example: "Ejemplo: 109900 (equivale a $1,099.00)",
+        desc: "Precio",
+        example: "Ejemplo en entero: 1099, en decimal: 1099.50",
       },
       { desc: "Stock", example: "Ejemplo: 100" },
       {
@@ -145,7 +145,7 @@ export async function GET() {
       [
         "4. Para las especificaciones, use el formato: nombre: valor, nombre: valor, ...",
       ],
-      ["5. Los precios deben ingresarse en centavos (ej. $10.99 = 1099)"],
+      ["5. Los precios deben ingresarse en enteros (ej. 1099), en caso de tener decimales, use el formato decimal (ej. 1099.50)"],
       ["6. El costo de envío también debe ingresarse en centavos"],
       ["7. Las palabras clave deben separarse por comas"],
       ["8. Las URLs de imágenes deben separarse por comas"],

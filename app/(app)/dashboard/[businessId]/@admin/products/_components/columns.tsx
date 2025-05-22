@@ -10,6 +10,8 @@ import { es } from "date-fns/locale";
 import { ProductActions } from "./product-actions";
 import { Shopify } from "@/components/svgs/icons";
 import { Icon } from "@/components/universal/logo";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ImageOff } from "lucide-react";
 
 // Definir el tipo Product basado en el esquema de la base de datos
 export type Product = Database["public"]["Tables"]["products"]["Row"] & {
@@ -21,29 +23,29 @@ const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 // Definir las columnas con tamaños explícitos para evitar compresión
 export const columns: ColumnDef<Product>[] = [
-  // {
-  //   id: "select",
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={
-  //         table.getIsAllPageRowsSelected() ||
-  //         (table.getIsSomePageRowsSelected() && "indeterminate")
-  //       }
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Seleccionar todos"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Seleccionar fila"
-  //     />
-  //   ),
-  //   size: 50, // Ancho fijo para evitar compresión
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Seleccionar todos"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Seleccionar fila"
+      />
+    ),
+    size: 50, // Ancho fijo para evitar compresión
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     id: "imagen",
     header: "Imagen",
@@ -53,14 +55,14 @@ export const columns: ColumnDef<Product>[] = [
         <div className="flex items-center justify-center w-10 border relative overflow-hidden aspect-[3/4]">
           {imageUrl && imageUrl !== "" ? (
             <Image
-              src={imageUrl}
+              src={imageUrl || "/placeholder.svg"}
               alt={row.original.name}
               fill
               className="object-cover"
             />
           ) : (
-            <div className="bg-muted h-full w-full flex items-center justify-center text-xs text-muted-foreground">
-              Sin imagen
+            <div className="bg-muted h-full w-full flex items-center justify-center text-xs text-muted-foreground/50">
+              <ImageOff className="!size-3"/>
             </div>
           )}
         </div>

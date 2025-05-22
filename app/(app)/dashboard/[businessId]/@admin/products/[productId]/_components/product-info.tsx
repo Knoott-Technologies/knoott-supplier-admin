@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Database } from "@/database.types";
+import { formatPrice } from "@/lib/utils";
 
 export const ProductInfo = ({
   product,
@@ -73,6 +74,15 @@ export const ProductInfo = ({
                 {product.short_description}
               </p>
             </span>
+            <span className="w-full flex flex-col gap-y-1">
+              <p className="text-sm font-semibold">Costo de envío:</p>
+              <p
+                title={formatPrice(product.shipping_cost)}
+                className="text-sm line-clamp-6 font-medium text-muted-foreground"
+              >
+                {formatPrice(product.shipping_cost)}
+              </p>
+            </span>
           </CardContent>
         </Card>
         <Card className="w-full bg-sidebar">
@@ -109,7 +119,13 @@ export const ProductInfo = ({
               <span className="w-full flex flex-wrap gap-1">
                 {product.keywords &&
                   product.keywords.map((keyword) => (
-                    <Badge key={keyword} className="font-medium border-border text-muted-foreground bg-sidebar hover:bg-sidebar/80" variant={"outline"}>{keyword}</Badge>
+                    <Badge
+                      key={keyword}
+                      className="font-medium border-border text-muted-foreground bg-sidebar hover:bg-sidebar/80"
+                      variant={"outline"}
+                    >
+                      {keyword}
+                    </Badge>
                   ))}
               </span>
             </span>
