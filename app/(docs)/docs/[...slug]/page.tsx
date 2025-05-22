@@ -13,8 +13,6 @@ interface DocPageProps {
 export default async function DocPage({ params }: DocPageProps) {
   const slug = params.slug || [];
 
-  console.log("Slug recibido:", slug); // Añadir para depuración
-
   const doc = await getDocBySlug(slug);
 
   if (!doc) {

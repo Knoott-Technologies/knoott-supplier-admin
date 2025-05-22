@@ -95,8 +95,6 @@ export async function POST(request: NextRequest) {
       .eq("id", businessId)
       .single();
 
-      console.log(business, businessError);
-
     if (businessError || !business) {
       return NextResponse.json(
         { error: "Negocio no encontrado" },

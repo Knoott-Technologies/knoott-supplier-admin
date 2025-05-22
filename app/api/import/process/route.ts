@@ -364,8 +364,6 @@ function tryRepairJson(jsonString: string): any {
     // Intentar parsear directamente primero
     return JSON.parse(jsonString);
   } catch (error) {
-    console.log("Error parsing JSON, attempting repair:", error);
-
     try {
       // Intentar corregir problemas comunes en el JSON
       let repairedJson = jsonString;

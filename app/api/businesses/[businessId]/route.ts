@@ -85,8 +85,6 @@ export async function PUT(
       })
       .eq("id", businessId)
 
-      console.log(updatedBusiness, updateError);
-
     if (updateError) {
       console.error("Error updating business:", updateError);
       return NextResponse.json({ error: updateError.message }, { status: 500 });

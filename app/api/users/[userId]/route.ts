@@ -28,8 +28,6 @@ export async function DELETE(
     .eq("user_id", userId)
     .eq("business_id", businessId);
 
-  console.log(error);
-
   if (error) {
     return NextResponse.json(
       { error: "Error al eliminar el usuario" },
