@@ -310,7 +310,7 @@ export const OrderNotificationEmail = ({
                               />
                             </Link>
                             <Link
-                              href="https://mx.pinterest.com/knoottgiftlist/"
+                              href="https://pinterest.com/knoottgiftlist/"
                               style={{
                                 textDecoration: "none",
                                 display: "inline-block",

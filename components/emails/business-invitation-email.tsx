@@ -27,7 +27,7 @@ export const BusinessInvitationEmail = ({
   businessName = "",
   inviteLink = "",
   role = "Colaborador",
-  logoUrl = "https://knoott.com/logo.png",
+  logoUrl = "https://knoott-main-git-main-intello-ai.vercel.app/logo.png",
 }: BusinessInvitationEmailProps) => {
   const previewText = `${invitedByName} te ha invitado a colaborar en ${businessName}`;
 
@@ -72,7 +72,7 @@ export const BusinessInvitationEmail = ({
             <Img
               src={logoUrl}
               height="36"
-              alt="Logo"
+              alt="Knoott"
               style={{
                 display: "block",
                 outline: "none",
@@ -150,24 +150,89 @@ export const BusinessInvitationEmail = ({
             </Link>
           </Text>
 
-          {/* Footer con logo */}
+          {/* Footer con logo y redes sociales */}
           <Section style={footerSection}>
-            <Img
-              src={logoUrl}
-              height="36"
-              alt="Logo"
-              style={{
-                display: "block",
-                outline: "none",
-                border: "none",
-                textDecoration: "none",
-              }}
-            />
+            <table
+              width="100%"
+              border={0}
+              cellPadding="0"
+              cellSpacing="0"
+              role="presentation"
+            >
+              <tbody>
+                <tr>
+                  <td style={{ width: "66%" }}>
+                    <Img
+                      src={logoUrl}
+                      height="36"
+                      alt="Knoott"
+                      style={{
+                        display: "block",
+                        outline: "none",
+                        border: "none",
+                        textDecoration: "none",
+                      }}
+                    />
+                  </td>
+                  <td>
+                    <table
+                      width="100%"
+                      border={0}
+                      cellPadding="0"
+                      cellSpacing="0"
+                      role="presentation"
+                    >
+                      <tbody>
+                        <tr>
+                          <td style={{ textAlign: "right" }}>
+                            <Link
+                              href="https://www.instagram.com/knoottmx/"
+                              style={{
+                                textDecoration: "none",
+                                display: "inline-block",
+                                marginLeft: "10px",
+                              }}
+                            >
+                              <Img
+                                src="https://knoott-main-git-main-intello-ai.vercel.app/instagram.png"
+                                width="32"
+                                height="32"
+                                alt="Instagram"
+                                style={{ border: "none" }}
+                              />
+                            </Link>
+                            <Link
+                              href="https://pinterest.com/knoottgiftlist/"
+                              style={{
+                                textDecoration: "none",
+                                display: "inline-block",
+                                marginLeft: "10px",
+                              }}
+                            >
+                              <Img
+                                src="https://knoott-main-git-main-intello-ai.vercel.app/pinterest.png"
+                                width="32"
+                                height="32"
+                                alt="Pinterest"
+                                style={{ border: "none" }}
+                              />
+                            </Link>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </Section>
 
           {/* Copyright information */}
           <Text style={copyright}>
-            ©{new Date().getFullYear()} Tu Negocio
+            ©{new Date().getFullYear()} Knoott Technologies, S.A.P.I.
+            <br />
+            Blvd. Centenario 586, Ejido La Unión, 27420, Torreón, Coah., México.
+            <br />
             <br />
             Todos los derechos reservados.
           </Text>
@@ -179,7 +244,7 @@ export const BusinessInvitationEmail = ({
 
 export default BusinessInvitationEmail;
 
-// Estilos
+// Estilos basados en el template proporcionado
 const main = {
   backgroundColor: "#ffffff",
   margin: "0 auto",
@@ -194,6 +259,7 @@ const container = {
 };
 
 const h1 = {
+  fontFamily: "'Playfair Display', serif",
   color: "#1d1c1d",
   fontSize: "32px",
   fontWeight: "700",
