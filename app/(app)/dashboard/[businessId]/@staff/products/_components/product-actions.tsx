@@ -444,7 +444,7 @@ export function ProductActions({ product }: ProductActionsProps) {
                 </>
               ) : (
                 <>
-                  Despublicar producto
+                  Poner en borrador
                   <EyeClosed className="!size-3.5" />
                 </>
               )}
