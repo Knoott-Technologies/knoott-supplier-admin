@@ -346,13 +346,13 @@ export function BulkActions({ selectedProducts }: BulkActionsProps) {
 
   return (
     <>
-      <div className="bg-muted/30 border rounded-md p-3 flex items-center justify-between">
+      <div className="bg-muted/30 border rounded-md p-3 gap-2 flex flex-col xl:flex-row items-start xl:items-center justify-between">
         <div className="text-sm font-medium">
           {selectedProducts.length} producto
           {selectedProducts.length !== 1 ? "s" : ""} seleccionado
           {selectedProducts.length !== 1 ? "s" : ""}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap xl:flex-row items-center gap-2">
           <Button
             variant="outline"
             size="sm"
