@@ -103,13 +103,13 @@ const ProductPage = async ({
       <section className="w-full flex flex-col items-start justify-start gap-y-5 lg:gap-y-7">
         <ProductStats product={product} />
         <div className="w-full h-fit grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-5 lg:gap-7">
-          <ProductImageCarousel images={product.images_url} />
+          <ProductImageCarousel
+            provider={product.provider_business_id}
+            images={product.images_url}
+          />
           <div className="w-full h-fit items-start justify-start flex flex-col gap-y-5 lg:gap-y-7">
             <ProductInfo product={product} />
-            <ProductVariantInfo
-              businessId={params.businessId}
-              variants={groupedVariants}
-            />
+            <ProductVariantInfo variants={groupedVariants} />
           </div>
         </div>
       </section>

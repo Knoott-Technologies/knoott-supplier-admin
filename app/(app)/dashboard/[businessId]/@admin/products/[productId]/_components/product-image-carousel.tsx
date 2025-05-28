@@ -16,7 +16,13 @@ import {
 } from "@/components/ui/carousel";
 import Image from "next/image";
 
-export const ProductImageCarousel = ({ images }: { images: string[] }) => {
+export const ProductImageCarousel = ({
+  images,
+  provider,
+}: {
+  images: string[];
+  provider: string;
+}) => {
   return (
     <Card className="w-full h-fit lg:sticky lg:top-[calc(56px_+_28px)]">
       <CardHeader gap->
@@ -34,7 +40,13 @@ export const ProductImageCarousel = ({ images }: { images: string[] }) => {
                   <CarouselItem key={index} className="pl-0">
                     <div className="relative w-full aspect-[3/4] overflow-hidden">
                       <Image
-                        src={image}
+                        src={
+                          (provider ===
+                            "8d519294-9df8-4a14-931e-c4943f4a7603" &&
+                            `/api/proxy/images?url=${image}`) ||
+                          image ||
+                          "/placeholder.svg"
+                        }
                         alt={`Image ${index}`}
                         fill
                         className="object-cover"

@@ -51,18 +51,25 @@ export const columns: ColumnDef<Product>[] = [
     header: "Imagen",
     cell: ({ row }) => {
       const imageUrl = row.original.images_url?.[0] || "";
+
       return (
         <div className="flex items-center justify-center w-10 border relative overflow-hidden aspect-[3/4]">
           {imageUrl && imageUrl !== "" ? (
             <Image
-              src={imageUrl || "/placeholder.svg"}
+              src={
+                (row.original.provider_business_id ===
+                  "8d519294-9df8-4a14-931e-c4943f4a7603" &&
+                  `/api/proxy/images?url=${imageUrl}`) ||
+                imageUrl ||
+                "/placeholder.svg"
+              }
               alt={row.original.name}
               fill
               className="object-cover"
             />
           ) : (
             <div className="bg-muted h-full w-full flex items-center justify-center text-xs text-muted-foreground/50">
-              <ImageOff className="!size-3"/>
+              <ImageOff className="!size-3" />
             </div>
           )}
         </div>

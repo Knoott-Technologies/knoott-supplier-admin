@@ -131,48 +131,26 @@ export const ProductInfo = ({
             </span>
           </CardContent>
         </Card>
-        <Card className="w-full bg-sidebar">
-          <CardHeader className="bg-sidebar">
-            <span className="gap-y-0">
-              <p className="text-base font-semibold">Especificaciones</p>
-              <p className="text-sm text-muted-foreground">
-                Especificaciones del producto, como su tamaño, peso, etc.
-              </p>
-            </span>
-          </CardHeader>
-          <CardContent className="w-full h-fit flex flex-col gap-4 bg-background">
-            {product.dimensions && (
-              <span className="w-full flex flex-col gap-y-1">
-                <p className="text-sm font-semibold">Dimensiones:</p>
-                <div className="w-full overflow-hidden border">
-                  <Table>
-                    <TableBody>
-                      {Object.entries(
-                        product.dimensions as unknown as JSON
-                      ).map(([key, value]) => (
-                        <TableRow
-                          key={key}
-                          className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r grid grid-cols-[1fr_1.5fr]"
-                        >
-                          <TableCell className="bg-muted/50 py-2 font-medium">
-                            {key}
-                          </TableCell>
-                          <TableCell className="py-2">{value}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+        {product.specs || product.dimensions ? (
+          <Card className="w-full bg-sidebar">
+            <CardHeader className="bg-sidebar">
+              <span className="gap-y-0">
+                <p className="text-base font-semibold">Especificaciones</p>
+                <p className="text-sm text-muted-foreground">
+                  Especificaciones del producto, como su tamaño, peso, etc.
+                </p>
               </span>
-            )}
-            {product.specs && (
-              <span className="w-full flex flex-col gap-y-1">
-                <p className="text-sm font-semibold">Detalles:</p>
-                <div className="w-full overflow-hidden border">
-                  <Table>
-                    <TableBody>
-                      {Object.entries(product.specs as unknown as JSON).map(
-                        ([key, value]) => (
+            </CardHeader>
+            <CardContent className="w-full h-fit flex flex-col gap-4 bg-background">
+              {product.dimensions && (
+                <span className="w-full flex flex-col gap-y-1">
+                  <p className="text-sm font-semibold">Dimensiones:</p>
+                  <div className="w-full overflow-hidden border">
+                    <Table>
+                      <TableBody>
+                        {Object.entries(
+                          product.dimensions as unknown as JSON
+                        ).map(([key, value]) => (
                           <TableRow
                             key={key}
                             className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r grid grid-cols-[1fr_1.5fr]"
@@ -182,15 +160,39 @@ export const ProductInfo = ({
                             </TableCell>
                             <TableCell className="py-2">{value}</TableCell>
                           </TableRow>
-                        )
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </span>
-            )}
-          </CardContent>
-        </Card>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </span>
+              )}
+              {product.specs && (
+                <span className="w-full flex flex-col gap-y-1">
+                  <p className="text-sm font-semibold">Detalles:</p>
+                  <div className="w-full overflow-hidden border">
+                    <Table>
+                      <TableBody>
+                        {Object.entries(product.specs as unknown as JSON).map(
+                          ([key, value]) => (
+                            <TableRow
+                              key={key}
+                              className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r grid grid-cols-[1fr_1.5fr]"
+                            >
+                              <TableCell className="bg-muted/50 py-2 font-medium">
+                                {key}
+                              </TableCell>
+                              <TableCell className="py-2">{value}</TableCell>
+                            </TableRow>
+                          )
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </span>
+              )}
+            </CardContent>
+          </Card>
+        ) : null}
       </CardContent>
     </Card>
   );
