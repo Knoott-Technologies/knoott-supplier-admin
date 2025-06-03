@@ -197,6 +197,7 @@ export const OrderInfo = ({ order }: { order: Order }) => {
                       <p className="text-sm text-muted-foreground line-clamp-2">
                         {order.product.product_info.description}
                       </p>
+                      <p className="text-sm mt-1">SKU: {order.product.variant.sku}</p>
                     </span>
                     <span className="w-full items-center justify-between flex">
                       {order.product.variant.name !== "Default" && (

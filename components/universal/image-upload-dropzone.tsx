@@ -4,11 +4,12 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import {
   ChevronDown,
-  X,
   ZoomIn,
   ZoomOut,
   SkipForward,
   AlertCircle,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,12 @@ interface ImageToProcess {
   error?: string;
 }
 
+interface EditingImage {
+  url: string;
+  index: number;
+  preview: string;
+}
+
 export function ImageUploadDropzone({
   value = [],
   onChange,
@@ -86,10 +93,12 @@ export function ImageUploadDropzone({
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [editingImage, setEditingImage] = useState<EditingImage | null>(null);
   const isMobile = useIsMobile();
 
   const currentImage = imagesToProcess[currentImageIndex];
   const remainingSlots = maxFiles - value.length;
+  const isEditMode = editingImage !== null;
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -127,6 +136,7 @@ export function ImageUploadDropzone({
         setCurrentImageIndex(0);
         setCrop({ x: 0, y: 0 });
         setZoom(1);
+        setEditingImage(null);
         setCropDialogOpen(true);
       }
     },
@@ -257,85 +267,132 @@ export function ImageUploadDropzone({
   };
 
   const handleCropSave = async () => {
-    if (!currentImage || !croppedAreaPixels) return;
+    if (isEditMode) {
+      // Handle editing existing image
+      if (!editingImage || !croppedAreaPixels) return;
 
-    try {
-      setIsUploading(true);
+      try {
+        setIsUploading(true);
 
-      // Update status of current image
-      setImagesToProcess((prev) => {
-        const updated = [...prev];
-        updated[currentImageIndex].status = "processing";
-        return updated;
-      });
+        // Get the cropped image as a blob
+        const croppedImageBlob = await getCroppedImage(
+          editingImage.preview,
+          croppedAreaPixels
+        );
 
-      // Get the cropped image as a blob
-      const croppedImageBlob = await getCroppedImage(
-        currentImage.preview,
-        croppedAreaPixels
-      );
-
-      // Create a File from the Blob to preserve the filename
-      const fileName = currentImage.file.name;
-      const fileType = currentImage.file.type;
-      const croppedFile = new File([croppedImageBlob], fileName, {
-        type: fileType,
-      });
-
-      // Upload the cropped image
-      const uploadedUrl = await uploadImage(croppedFile);
-
-      // Update the form value
-      onChange([...value, uploadedUrl]);
-
-      // Update status of current image
-      setImagesToProcess((prev) => {
-        const updated = [...prev];
-        updated[currentImageIndex].status = "complete";
-        return updated;
-      });
-
-      // Clean up current image
-      URL.revokeObjectURL(currentImage.preview);
-
-      // Move to next image or close dialog
-      if (currentImageIndex < imagesToProcess.length - 1) {
-        setCurrentImageIndex(currentImageIndex + 1);
-        setCrop({ x: 0, y: 0 });
-        setZoom(1);
-      } else {
-        // All images processed
-        toast.success("Imágenes subidas correctamente", {
-          description: `Se ${
-            imagesToProcess.length === 1
-              ? "ha subido 1 imagen"
-              : `han subido ${imagesToProcess.length} imágenes`
-          } correctamente.`,
+        // Create a File from the Blob
+        const fileName = `edited-image-${Date.now()}.jpg`;
+        const croppedFile = new File([croppedImageBlob], fileName, {
+          type: "image/jpeg",
         });
-        setImagesToProcess([]);
-        setCurrentImageIndex(0);
+
+        // Upload the cropped image
+        const uploadedUrl = await uploadImage(croppedFile);
+
+        // Replace the image in the array
+        const newImages = [...value];
+        newImages[editingImage.index] = uploadedUrl;
+        onChange(newImages);
+
+        // Clean up
+        URL.revokeObjectURL(editingImage.preview);
+        setEditingImage(null);
         setCropDialogOpen(false);
+
+        toast.success("Imagen editada correctamente");
+      } catch (error) {
+        console.error("Error editing image:", error);
+        toast.error("Error al editar la imagen", {
+          description:
+            error instanceof Error
+              ? error.message
+              : "Ocurrió un error al procesar la imagen",
+        });
+      } finally {
+        setIsUploading(false);
       }
-    } catch (error) {
-      console.error("Error processing cropped image:", error);
+    } else {
+      // Handle new image upload (existing logic)
+      if (!currentImage || !croppedAreaPixels) return;
 
-      // Update status of current image
-      setImagesToProcess((prev) => {
-        const updated = [...prev];
-        updated[currentImageIndex].status = "error";
-        updated[currentImageIndex].error =
-          error instanceof Error ? error.message : "Error desconocido";
-        return updated;
-      });
+      try {
+        setIsUploading(true);
 
-      toast.error("Error al subir la imagen", {
-        description:
-          error instanceof Error
-            ? error.message
-            : "Ocurrió un error al procesar la imagen",
-      });
-    } finally {
-      setIsUploading(false);
+        // Update status of current image
+        setImagesToProcess((prev) => {
+          const updated = [...prev];
+          updated[currentImageIndex].status = "processing";
+          return updated;
+        });
+
+        // Get the cropped image as a blob
+        const croppedImageBlob = await getCroppedImage(
+          currentImage.preview,
+          croppedAreaPixels
+        );
+
+        // Create a File from the Blob to preserve the filename
+        const fileName = currentImage.file.name;
+        const fileType = currentImage.file.type;
+        const croppedFile = new File([croppedImageBlob], fileName, {
+          type: fileType,
+        });
+
+        // Upload the cropped image
+        const uploadedUrl = await uploadImage(croppedFile);
+
+        // Update the form value
+        onChange([...value, uploadedUrl]);
+
+        // Update status of current image
+        setImagesToProcess((prev) => {
+          const updated = [...prev];
+          updated[currentImageIndex].status = "complete";
+          return updated;
+        });
+
+        // Clean up current image
+        URL.revokeObjectURL(currentImage.preview);
+
+        // Move to next image or close dialog
+        if (currentImageIndex < imagesToProcess.length - 1) {
+          setCurrentImageIndex(currentImageIndex + 1);
+          setCrop({ x: 0, y: 0 });
+          setZoom(1);
+        } else {
+          // All images processed
+          toast.success("Imágenes subidas correctamente", {
+            description: `Se ${
+              imagesToProcess.length === 1
+                ? "ha subido 1 imagen"
+                : `han subido ${imagesToProcess.length} imágenes`
+            } correctamente.`,
+          });
+          setImagesToProcess([]);
+          setCurrentImageIndex(0);
+          setCropDialogOpen(false);
+        }
+      } catch (error) {
+        console.error("Error processing cropped image:", error);
+
+        // Update status of current image
+        setImagesToProcess((prev) => {
+          const updated = [...prev];
+          updated[currentImageIndex].status = "error";
+          updated[currentImageIndex].error =
+            error instanceof Error ? error.message : "Error desconocido";
+          return updated;
+        });
+
+        toast.error("Error al subir la imagen", {
+          description:
+            error instanceof Error
+              ? error.message
+              : "Ocurrió un error al procesar la imagen",
+        });
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -346,12 +403,31 @@ export function ImageUploadDropzone({
     toast("Imagen eliminada correctamente");
   };
 
+  const handleEditImage = (url: string, index: number) => {
+    // Create a preview URL for the existing image
+    const preview = url;
+
+    setEditingImage({
+      url,
+      index,
+      preview,
+    });
+
+    // Reset crop settings
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+
+    // Open crop dialog
+    setCropDialogOpen(true);
+  };
+
   const handleZoomIn = () => {
     setZoom((prev) => Math.min(prev + 0.1, 3));
   };
 
   const handleZoomOut = () => {
-    setZoom((prev) => Math.max(prev - 0.1, 0.5));
+    setZoom((prev) => Math.max(prev - 0.1, 0.1));
   };
 
   const handleCancelAll = () => {
@@ -359,10 +435,26 @@ export function ImageUploadDropzone({
     imagesToProcess.forEach((img) => URL.revokeObjectURL(img.preview));
     setImagesToProcess([]);
     setCurrentImageIndex(0);
+
+    // Clean up editing image
+    if (editingImage) {
+      setEditingImage(null);
+    }
+
     setCropDialogOpen(false);
   };
 
   const handleSkipImage = () => {
+    if (isEditMode) {
+      // Cancel editing
+      if (editingImage) {
+        URL.revokeObjectURL(editingImage.preview);
+        setEditingImage(null);
+      }
+      setCropDialogOpen(false);
+      return;
+    }
+
     // Clean up current image
     URL.revokeObjectURL(currentImage.preview);
 
@@ -489,14 +581,28 @@ export function ImageUploadDropzone({
                       className="object-cover"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200"></div>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-2 right-2 size-7 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                      onClick={() => handleRemoveImage(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+
+                    {/* Action buttons */}
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="size-7 bg-white/90 hover:bg-white text-black"
+                        onClick={() => handleEditImage(url, index)}
+                        title="Editar imagen"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="size-7"
+                        onClick={() => handleRemoveImage(index)}
+                        title="Eliminar imagen"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 </CarouselItem>
               ))}
@@ -522,11 +628,13 @@ export function ImageUploadDropzone({
       <Dialog
         open={cropDialogOpen}
         onOpenChange={(open) => {
-          if (!open && imagesToProcess.length > 0) {
+          if (!open && (imagesToProcess.length > 0 || editingImage)) {
             // Confirm before closing if there are images to process
             if (
               confirm(
-                "¿Estás seguro de que deseas cancelar la subida de imágenes?"
+                isEditMode
+                  ? "¿Estás seguro de que deseas cancelar la edición?"
+                  : "¿Estás seguro de que deseas cancelar la subida de imágenes?"
               )
             ) {
               handleCancelAll();
@@ -540,14 +648,17 @@ export function ImageUploadDropzone({
           <DialogHeader className="p-3 bg-background border-b flex flex-row justify-between items-start space-y-0">
             <div className="flex flex-col gap-0">
               <DialogTitle className="flex items-center justify-between">
-                Ajustar imagen {currentImageIndex + 1} de{" "}
-                {imagesToProcess.length}
+                {isEditMode
+                  ? "Editar imagen"
+                  : `Ajustar imagen ${currentImageIndex + 1} de ${imagesToProcess.length}`}
               </DialogTitle>
               <DialogDescription>
-                Ajusta la imagen para que tenga una relación de aspecto 3:4
+                {isEditMode
+                  ? "Ajusta la imagen para que tenga una relación de aspecto 3:4"
+                  : "Ajusta la imagen para que tenga una relación de aspecto 3:4"}
               </DialogDescription>
             </div>
-            {imagesToProcess.length > 1 && (
+            {!isEditMode && imagesToProcess.length > 1 && (
               <div className="flex items-center text-xs text-muted-foreground">
                 <span>
                   {Math.round(
@@ -561,13 +672,15 @@ export function ImageUploadDropzone({
 
           <div className="w-full h-fit bg-sidebar">
             <div className="relative h-auto aspect-video w-full bg-white p-3">
-              {currentImage && (
+              {(currentImage || editingImage) && (
                 <Cropper
-                  image={currentImage.preview}
+                  image={
+                    isEditMode ? editingImage!.preview : currentImage.preview
+                  }
                   crop={crop}
                   zoom={zoom}
                   aspect={3 / 4}
-                  minZoom={0.5}
+                  minZoom={0.1}
                   onCropChange={setCrop}
                   onZoomChange={setZoom}
                   onCropComplete={onCropComplete}
@@ -592,7 +705,7 @@ export function ImageUploadDropzone({
                   variant="outline"
                   size="icon"
                   onClick={handleZoomOut}
-                  disabled={zoom <= 0.5 || isUploading}
+                  disabled={zoom <= 0.1 || isUploading}
                 >
                   <ZoomOut className="h-4 w-4" />
                 </Button>
@@ -601,7 +714,7 @@ export function ImageUploadDropzone({
                   <Slider
                     className="bg-foreground"
                     value={[zoom]}
-                    min={0.5}
+                    min={0.1}
                     max={3}
                     step={0.1}
                     onValueChange={(values) => setZoom(values[0])}
@@ -622,7 +735,9 @@ export function ImageUploadDropzone({
 
             {uploadProgress > 0 && (
               <div className="w-full px-3 pb-3">
-                <p className="text-sm mb-1">Subiendo imagen...</p>
+                <p className="text-sm mb-1">
+                  {isEditMode ? "Guardando cambios..." : "Subiendo imagen..."}
+                </p>
                 <Progress value={uploadProgress} className="h-2" />
               </div>
             )}
@@ -635,24 +750,32 @@ export function ImageUploadDropzone({
                 onClick={handleCancelAll}
                 disabled={isUploading}
               >
-                Cancelar todo
+                {isEditMode ? "Cancelar" : "Cancelar todo"}
               </Button>
-              <Button
-                variant="outline"
-                onClick={handleSkipImage}
-                disabled={isUploading}
-                title="Omitir esta imagen"
-              >
-                Omitir
-                <SkipForward className="h-4 w-4" />
-              </Button>
+              {!isEditMode && (
+                <Button
+                  variant="outline"
+                  onClick={handleSkipImage}
+                  disabled={isUploading}
+                  title="Omitir esta imagen"
+                >
+                  Omitir
+                  <SkipForward className="h-4 w-4" />
+                </Button>
+              )}
             </div>
             <Button
               variant={"defaultBlack"}
               onClick={handleCropSave}
               disabled={isUploading}
             >
-              {isUploading ? "Guardando..." : "Guardar"}
+              {isUploading
+                ? isEditMode
+                  ? "Guardando..."
+                  : "Guardando..."
+                : isEditMode
+                  ? "Guardar cambios"
+                  : "Guardar"}
             </Button>
           </DialogFooter>
         </DialogContent>

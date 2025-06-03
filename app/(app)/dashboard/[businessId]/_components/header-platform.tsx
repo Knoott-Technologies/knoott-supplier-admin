@@ -8,6 +8,7 @@ import { Database } from "@/database.types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SupportPopover } from "./support-popover";
+import { FeedBackPopover } from "./feedback-popover";
 
 interface NavProps {
   name: string;
@@ -86,6 +87,7 @@ export const HeaderPlatform = ({
               : "Staff"}
         </Button>
         <SupportPopover />
+        <FeedBackPopover user={user} />
         {/* {nav.map((item, index) => (
           <Button
             variant={"outline"}

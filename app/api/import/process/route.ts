@@ -456,7 +456,7 @@ export async function POST(request: Request) {
              ]
           8. CRITICAL: Each variant MUST have at least one option in the options array
           9. CRITICAL: Do NOT place dimensions or any other fields inside the variants array
-          10. For prices, store them as integers without decimal points (e.g., $13.45 = 1345)
+          10. CRITICAL: For prices, store them as integers without decimal points (e.g., $13.45 = 1345), if you have a decimal value make it integer, if you have a integer, add a double zero (e.g., $13 = 1300).
           11. If price is missing, make a reasonable estimate based on the product type
           12. If stock is missing, default to 10
           13. Generate a SKU if it's missing

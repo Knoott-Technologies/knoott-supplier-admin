@@ -232,3 +232,79 @@ export async function proceedAfterAuthentication(
     router.push("/dashboard");
   }
 }
+
+// utils.ts - Funciones de utilidad para validación
+
+interface CreateBusinessRequest {
+  business_name: string;
+  business_logo_url: string;
+  business_legal_name: string;
+  business_sector: string;
+  street: string;
+  external_number: string;
+  neighborhood: string;
+  postal_code: string;
+  city: string;
+  state: string;
+  reference: string;
+  main_phone_number?: string;
+  contact_phone_number?: string;
+  main_email?: string;
+  description?: string;
+  bank_account_number?: string;
+  bank_name?: string;
+  internal_number?: string;
+  website_url?: string;
+  tax_situation_url?: string;
+}
+
+export function validateBusinessData(data: any): data is CreateBusinessRequest {
+  const requiredFields = [
+    "business_name",
+    "business_logo_url",
+    "business_legal_name",
+    "business_sector",
+    "street",
+    "external_number",
+    "neighborhood",
+    "postal_code",
+    "city",
+    "state",
+    "reference",
+  ];
+
+  return requiredFields.every(
+    (field) =>
+      data[field] &&
+      typeof data[field] === "string" &&
+      data[field].trim().length > 0
+  );
+}
+
+export function sanitizeBusinessData(
+  data: CreateBusinessRequest
+): CreateBusinessRequest {
+  return {
+    ...data,
+    business_name: data.business_name.trim(),
+    business_legal_name: data.business_legal_name.trim(),
+    business_sector: data.business_sector.trim(),
+    street: data.street.trim(),
+    external_number: data.external_number.trim(),
+    neighborhood: data.neighborhood.trim(),
+    postal_code: data.postal_code.trim(),
+    city: data.city.trim(),
+    state: data.state.trim(),
+    reference: data.reference.trim(),
+    // Sanitizar campos opcionales
+    main_phone_number: data.main_phone_number?.trim(),
+    contact_phone_number: data.contact_phone_number?.trim(),
+    main_email: data.main_email?.trim(),
+    description: data.description?.trim(),
+    bank_account_number: data.bank_account_number?.trim(),
+    bank_name: data.bank_name?.trim(),
+    internal_number: data.internal_number?.trim(),
+    website_url: data.website_url?.trim(),
+    tax_situation_url: data.tax_situation_url?.trim(),
+  };
+}
