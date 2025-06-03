@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { ArrowRight, Loader2, Save } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import type { Database } from "@/database.types";
 import GeneralInfoSection from "../../../new/_components/general-info-section";
 import ImagesSection from "../../../new/_components/images-section";
@@ -218,8 +218,6 @@ export default function ProductFormEdit({
     }
   }, [product, variants, variantOptions]);
 
-  console.log("product", product);
-
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
 
@@ -347,9 +345,7 @@ export default function ProductFormEdit({
               Guardando...
             </>
           ) : (
-            <>
-              Actualizar Producto <Save />
-            </>
+            <>Actualizar Producto</>
           )}
         </Button>
       </div>
