@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 import { useState, useEffect } from "react";
 import { type UseFormReturn, useFieldArray } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -22,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { AmountInput } from "@/components/universal/amount-input";
 import { Plus, Trash2, X } from "lucide-react";
-import { SingleImageUpload } from "@/components/universal/single-image-upload";
+import { ImageUploadDropzone } from "@/components/universal/image-upload-dropzone";
 import { Separator } from "@/components/ui/separator";
 
 // Define types for variant options and combinations
@@ -33,7 +31,7 @@ interface VariantOption {
   stock: number | null;
   is_default: boolean;
   sku?: string;
-  image_url: string; // Changed from images_url array to single image_url
+  images_url: string[]; // Array of images for variant options
   metadata: any | null;
   accorded_commission: number; // Fixed commission rate
 }
@@ -87,9 +85,9 @@ export default function VariantsSection({
           stock: null,
           is_default: true,
           sku: "",
-          image_url: "", // Changed from images_url array to single image_url
+          images_url: [], // Array of images for variant options
           metadata: null,
-          accorded_commission: commission, // Fixed commission rate of 8.5%
+          accorded_commission: commission, // Fixed commission rate
         },
       ],
     });
@@ -124,9 +122,9 @@ export default function VariantsSection({
         stock: null,
         is_default: false,
         sku: newSku,
-        image_url: "", // Changed from images_url array to single image_url
+        images_url: [], // Array of images for variant options
         metadata: null,
-        accorded_commission: 0.085, // Fixed commission rate of 8.5%
+        accorded_commission: commission, // Fixed commission rate
       },
     ];
 
@@ -242,9 +240,8 @@ export default function VariantsSection({
       options.forEach((_: any, optionIndex: number) => {
         const key = `${variantIndex}-${optionIndex}`;
         if (!newVariantOptionIds[key]) {
-          newVariantOptionIds[key] = `temp-${Math.random()
-            .toString(36)
-            .substring(2, 11)}`;
+          newVariantOptionIds[key] =
+            `temp-${Math.random().toString(36).substring(2, 11)}`;
         }
       });
     });
@@ -421,22 +418,39 @@ export default function VariantsSection({
 
                 return (
                   <Card key={index} className="overflow-hidden">
-                    <CardContent className="flex flex-col gap-4">
+                    <CardContent className="flex flex-col gap-4 pt-6">
                       <p className="text-base font-medium">
                         {combination
                           .map((item: VariantOptionItem) => item.optionName)
                           .join(" / ")}
                       </p>
-                      <div className="flex gap-4 items-stretch justify-start">
+
+                      {/* Images Section */}
+                      <div className="w-full">
                         <FormField
                           control={form.control}
-                          name={`variants.${variantIndex}.options.${optionIndex}.image_url`}
+                          name={`variants.${variantIndex}.options.${optionIndex}.images_url`}
                           render={({ field }) => (
-                            <FormItem className="">
+                            <FormItem>
+                              <FormLabel>Imágenes de la variante</FormLabel>
                               <FormControl>
-                                <SingleImageUpload
-                                  value={field.value || ""}
+                                <ImageUploadDropzone
+                                  value={field.value || []}
                                   onChange={field.onChange}
+                                  onValueChange={(urls, options) => {
+                                    // Use setValue with proper options to control dirty state
+                                    form.setValue(
+                                      `variants.${variantIndex}.options.${optionIndex}.images_url`,
+                                      urls,
+                                      {
+                                        shouldDirty:
+                                          options?.shouldDirty ?? true,
+                                        shouldValidate:
+                                          options?.shouldValidate ?? true,
+                                      }
+                                    );
+                                  }}
+                                  maxFiles={10}
                                   productId={productId || undefined}
                                   variantOptionId={
                                     variantOptionIds[variantKey] || undefined
@@ -447,91 +461,92 @@ export default function VariantsSection({
                             </FormItem>
                           )}
                         />
+                      </div>
 
-                        <div className="flex flex-col gap-4 items-stretch justify-start flex-1">
-                          <FormItem>
-                            <FormLabel>SKU</FormLabel>
-                            <FormField
-                              control={form.control}
-                              name={`variants.${variantIndex}.options.${optionIndex}.sku`}
-                              render={({ field }) => (
-                                <Input
-                                  placeholder="SKU"
-                                  className="bg-sidebar"
-                                  {...field}
-                                  value={field.value || ""}
-                                  onChange={(e) => {
-                                    field.onChange(e.target.value);
-                                    // Si es la primera opción de esta variante y se cambió el SKU, generar SKUs secuenciales
-                                    if (optionIndex === 0 && e.target.value) {
-                                      generateSequentialSKUs(
-                                        e.target.value,
-                                        variantIndex
-                                      );
-                                    }
-                                  }}
-                                />
-                              )}
-                            />
-                          </FormItem>
-
-                          <div className="grid grid-cols-2 gap-4">
-                            <FormItem>
-                              <FormLabel>Precio</FormLabel>
-                              <FormField
-                                control={form.control}
-                                name={`variants.${variantIndex}.options.${optionIndex}.price`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <AmountInput
-                                        className="bg-sidebar"
-                                        value={field.value || 0}
-                                        onChange={field.onChange}
-                                      />
-                                    </FormControl>
-                                  </FormItem>
-                                )}
-                              />
-                            </FormItem>
-                            <FormItem>
-                              <FormLabel>Disponible</FormLabel>
-                              <FormField
-                                control={form.control}
-                                name={`variants.${variantIndex}.options.${optionIndex}.stock`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input
-                                        type="number"
-                                        placeholder="0"
-                                        className="bg-sidebar"
-                                        {...field}
-                                        value={field.value ?? ""}
-                                        onChange={(e) =>
-                                          field.onChange(
-                                            e.target.value
-                                              ? Number.parseInt(e.target.value)
-                                              : null
-                                          )
-                                        }
-                                      />
-                                    </FormControl>
-                                  </FormItem>
-                                )}
-                              />
-                            </FormItem>
-                          </div>
-                          {/* Hidden field for fixed commission rate */}
+                      {/* Product Details Section */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormItem>
+                          <FormLabel>SKU</FormLabel>
                           <FormField
                             control={form.control}
-                            name={`variants.${variantIndex}.options.${optionIndex}.accorded_commission`}
+                            name={`variants.${variantIndex}.options.${optionIndex}.sku`}
                             render={({ field }) => (
-                              <input type="hidden" {...field} value={0.085} />
+                              <Input
+                                placeholder="SKU"
+                                className="bg-sidebar"
+                                {...field}
+                                value={field.value || ""}
+                                onChange={(e) => {
+                                  field.onChange(e.target.value);
+                                  // Si es la primera opción de esta variante y se cambió el SKU, generar SKUs secuenciales
+                                  if (optionIndex === 0 && e.target.value) {
+                                    generateSequentialSKUs(
+                                      e.target.value,
+                                      variantIndex
+                                    );
+                                  }
+                                }}
+                              />
                             )}
                           />
-                        </div>
+                        </FormItem>
+
+                        <FormItem>
+                          <FormLabel>Precio</FormLabel>
+                          <FormField
+                            control={form.control}
+                            name={`variants.${variantIndex}.options.${optionIndex}.price`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <AmountInput
+                                    className="bg-sidebar"
+                                    value={field.value || 0}
+                                    onChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </FormItem>
+
+                        <FormItem>
+                          <FormLabel>Disponible</FormLabel>
+                          <FormField
+                            control={form.control}
+                            name={`variants.${variantIndex}.options.${optionIndex}.stock`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="0"
+                                    className="bg-sidebar"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                    onChange={(e) =>
+                                      field.onChange(
+                                        e.target.value
+                                          ? Number.parseInt(e.target.value)
+                                          : null
+                                      )
+                                    }
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </FormItem>
                       </div>
+
+                      {/* Hidden field for fixed commission rate */}
+                      <FormField
+                        control={form.control}
+                        name={`variants.${variantIndex}.options.${optionIndex}.accorded_commission`}
+                        render={({ field }) => (
+                          <input type="hidden" {...field} value={commission} />
+                        )}
+                      />
                     </CardContent>
                   </Card>
                 );

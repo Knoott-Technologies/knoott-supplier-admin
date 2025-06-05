@@ -9,13 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 import type { Database } from "@/database.types";
+import { toast } from "sonner";
 import GeneralInfoSection from "../../../new/_components/general-info-section";
 import ImagesSection from "../../../new/_components/images-section";
 import SpecificationsSection from "../../../new/_components/specifications-section";
-import VariantsSection from "../../../new/_components/variants-section";
-import CategorizationSection from "../../../new/_components/categorization-section";
-import ShippingSection from "../../../new/_components/shipping-section";
 import NoVariantsSection from "../../../new/_components/no-variants-section";
+import VariantsSection from "../../../new/_components/variants-section";
+import ShippingSection from "../../../new/_components/shipping-section";
+import CategorizationSection from "../../../new/_components/categorization-section";
 
 // Define the combined schema for all form sections
 const productFormSchema = z.object({
@@ -79,8 +80,9 @@ const productFormSchema = z.object({
               stock: z.number().nullable(),
               is_default: z.boolean().default(false),
               sku: z.string().optional(),
-              images_url: z.array(z.string()).default([]),
+              images_url: z.array(z.string()).default([]), // Array of images for variant options
               metadata: z.any().nullable(),
+              accorded_commission: z.number().optional(),
             })
           )
           .min(1, "Al menos una opción es requerida"),
@@ -101,7 +103,7 @@ interface ProductFormEditProps {
   variantOptions: any[];
   brands: Brand[];
   categories: Category[];
-  commision: number;
+  commission: number;
 }
 
 export default function ProductFormEdit({
@@ -110,65 +112,134 @@ export default function ProductFormEdit({
   variantOptions,
   brands,
   categories,
-  commision,
+  commission,
 }: ProductFormEditProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasVariants, setHasVariants] = useState(
-    product?.hasVariants !== false
-  );
+  const [hasVariants, setHasVariants] = useState(product?.hasVariants === true);
 
   // Process dimensions and specs from JSON to array format
   const processDimensions = () => {
     if (!product.dimensions) return [];
-    return Object.entries(product.dimensions).map(([label, value]) => ({
-      label,
-      value: value as string,
-    }));
+    try {
+      // Si dimensions es un array (como viene del form), devolverlo directamente
+      if (Array.isArray(product.dimensions)) {
+        return product.dimensions.map(
+          (dim: { label: any; value: { toString: () => any } }) => ({
+            label: dim.label || "",
+            value:
+              typeof dim.value === "number"
+                ? dim.value.toString()
+                : dim.value || "",
+          })
+        );
+      }
+
+      if (typeof product.dimensions === "string") {
+        const parsed = JSON.parse(product.dimensions);
+        return Object.entries(parsed).map(([label, value]) => ({
+          label,
+          value:
+            typeof value === "number" ? value.toString() : (value as string),
+        }));
+      }
+
+      if (typeof product.dimensions === "object") {
+        return Object.entries(product.dimensions).map(([label, value]) => ({
+          label,
+          value:
+            typeof value === "number" ? value.toString() : (value as string),
+        }));
+      }
+
+      return [];
+    } catch (error) {
+      console.error("Error processing dimensions:", error);
+      return [];
+    }
   };
 
   const processSpecs = () => {
     if (!product.specs) return [];
-    return Object.entries(product.specs).map(([label, value]) => ({
-      label,
-      value: value as string,
-    }));
+    try {
+      // Si specs es un array (como viene del form), devolverlo directamente
+      if (Array.isArray(product.specs)) {
+        return product.specs.map(
+          (spec: { label: any; value: { toString: () => any } }) => ({
+            label: spec.label || "",
+            value:
+              typeof spec.value === "number"
+                ? spec.value.toString()
+                : spec.value || "",
+          })
+        );
+      }
+
+      if (typeof product.specs === "string") {
+        const parsed = JSON.parse(product.specs);
+        return Object.entries(parsed).map(([label, value]) => ({
+          label,
+          value:
+            typeof value === "number" ? value.toString() : (value as string),
+        }));
+      }
+
+      if (typeof product.specs === "object") {
+        return Object.entries(product.specs).map(([label, value]) => ({
+          label,
+          value:
+            typeof value === "number" ? value.toString() : (value as string),
+        }));
+      }
+
+      return [];
+    } catch (error) {
+      console.error("Error processing specs:", error);
+      return [];
+    }
   };
 
-  // Process variants and options
+  // Process variants and options - Fixed logic
   const processVariants = () => {
-    if (!variants || variants.length === 0) return [];
+    // If no variants or explicitly marked as no variants, return empty array
+    if (!variants || variants.length === 0 || product?.hasVariants === false) {
+      return [];
+    }
 
-    // Si es un producto simple (sin variantes reales), no devolvemos las variantes
+    // Check if this is a default variant (single product)
     if (
       variants.length === 1 &&
       variants[0].name === "Default" &&
-      variantOptions.length === 1 &&
-      variantOptions[0].name === "Default"
+      variantOptions.length <= 1 &&
+      (variantOptions.length === 0 || variantOptions[0]?.name === "Default")
     ) {
       return [];
     }
 
-    return variants.map((variant) => {
+    // Process real variants
+    const processedVariants = variants.map((variant) => {
       const options = variantOptions
         .filter((option) => option.variant_id === variant.id)
         .map((option) => ({
-          name: option.name,
-          display_name: option.display_name,
-          price: option.price,
+          name: option.name || "",
+          display_name: option.display_name || option.name || "",
+          price: option.price || 0,
           stock: option.stock,
-          is_default: option.is_default,
-          sku: option.sku,
-          images_url: option.images_url || [],
+          is_default: option.is_default || false,
+          sku: option.sku || "",
+          images_url: option.images_url || [], // Keep as array for variant option images
           metadata: option.metadata,
+          accorded_commission: option.accorded_commission || commission,
         }));
 
       return {
-        name: variant.name,
-        display_name: variant.display_name,
+        name: variant.name || "",
+        display_name: variant.display_name || variant.name || "",
         options,
       };
     });
+
+    return processedVariants;
   };
 
   const form = useForm<ProductFormValues>({
@@ -188,7 +259,7 @@ export default function ProductFormEdit({
       single_price: product?.single_price || 0,
       single_stock: product?.single_stock || null,
       single_sku: product?.single_sku || "",
-      single_commission: product?.single_commission || commision,
+      single_commission: product?.single_commission || commission,
       variants: processVariants(),
     },
   });
@@ -196,6 +267,9 @@ export default function ProductFormEdit({
   // Update form values when product data changes
   useEffect(() => {
     if (product) {
+      const processedVariants = processVariants();
+      const shouldHaveVariants = processedVariants.length > 0;
+
       form.reset({
         name: product.name || "",
         short_name: product.short_name || "",
@@ -211,12 +285,13 @@ export default function ProductFormEdit({
         single_price: product.single_price || 0,
         single_stock: product.single_stock || null,
         single_sku: product.single_sku || "",
-        single_commission: product.single_commission || commision,
-        variants: processVariants(),
+        single_commission: product.single_commission || commission,
+        variants: processedVariants,
       });
-      setHasVariants(product.hasVariants !== false);
+
+      setHasVariants(shouldHaveVariants);
     }
-  }, [product, variants, variantOptions]);
+  }, [product, variants, variantOptions, commission]);
 
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
@@ -240,7 +315,8 @@ export default function ProductFormEdit({
       });
 
       if (!response.ok) {
-        throw new Error("Error updating product");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Error updating product");
       }
 
       const result = await response.json();
@@ -262,14 +338,59 @@ export default function ProductFormEdit({
 
       // Update variants
       if (hasVariants && data.variants && data.variants.length > 0) {
-        await fetch(`/api/products/${product.id}/variants`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ variants: data.variants }),
-        });
+        const variantsResponse = await fetch(
+          `/api/products/${product.id}/variants`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ variants: data.variants }),
+          }
+        );
+
+        if (!variantsResponse.ok) {
+          throw new Error("Error updating variants");
+        }
+      } else if (!hasVariants) {
+        // Create a default variant for a product without variants
+        const defaultVariant = {
+          name: "Default",
+          display_name: "Default",
+          options: [
+            {
+              name: "Default",
+              display_name: "Default",
+              price: data.single_price || 0,
+              stock: data.single_stock,
+              is_default: true,
+              sku: data.single_sku || "",
+              images_url: data.images_url || [],
+              metadata: null,
+              accorded_commission: data.single_commission || commission,
+            },
+          ],
+        };
+
+        const variantsResponse = await fetch(
+          `/api/products/${product.id}/variants`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ variants: [defaultVariant] }),
+          }
+        );
+
+        if (!variantsResponse.ok) {
+          throw new Error("Error updating default variant");
+        }
       }
+
+      toast.success("Producto actualizado", {
+        description: "El producto ha sido actualizado correctamente",
+      });
 
       // Navigate to the product detail page
       router.push(
@@ -277,6 +398,12 @@ export default function ProductFormEdit({
       );
     } catch (error) {
       console.error("Error updating product:", error);
+      toast.error("Error al actualizar el producto", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Ha ocurrido un error al actualizar el producto",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -293,18 +420,23 @@ export default function ProductFormEdit({
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 lg:gap-y-7">
             <section className="w-full flex flex-col gap-y-5 lg:gap-y-7">
               <GeneralInfoSection form={form} />
-              <ImagesSection form={form} />
+              {/* Only show ImagesSection when hasVariants is true */}
+              <ImagesSection
+                form={form}
+                productId={product?.id}
+                hasVariants={hasVariants}
+              />
               <SpecificationsSection form={form} />
               <NoVariantsSection
                 form={form}
                 productId={product?.id}
-                commission={commision}
+                commission={commission}
                 hasVariants={hasVariants}
                 onToggleVariants={setHasVariants}
               />
               {hasVariants && (
                 <VariantsSection
-                  commission={commision}
+                  commission={commission}
                   form={form}
                   productId={product?.id}
                 />

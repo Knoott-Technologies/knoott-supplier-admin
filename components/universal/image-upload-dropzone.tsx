@@ -9,6 +9,7 @@ import {
   ZoomOut,
   SkipForward,
   AlertCircle,
+  Edit,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -61,18 +62,27 @@ interface ImageUploadDropzoneProps {
   maxFiles?: number;
   productId?: string;
   variantOptionId?: string;
+  // Add these props to handle form state properly
+  onValueChange?: (
+    urls: string[],
+    options?: { shouldDirty?: boolean; shouldValidate?: boolean }
+  ) => void;
 }
 
 interface ImageToProcess {
-  file: File;
+  file?: File;
+  url?: string; // For editing existing images
   preview: string;
   status: "pending" | "processing" | "complete" | "error";
   error?: string;
+  isEdit?: boolean; // Flag to identify if this is an edit operation
+  editIndex?: number; // Index of the image being edited
 }
 
 export function ImageUploadDropzone({
   value = [],
   onChange,
+  onValueChange,
   maxFiles = 20,
   productId,
   variantOptionId,
@@ -90,6 +100,20 @@ export function ImageUploadDropzone({
 
   const currentImage = imagesToProcess[currentImageIndex];
   const remainingSlots = maxFiles - value.length;
+
+  // Helper function to update form values with proper options
+  const updateFormValue = (newUrls: string[], isEdit = false) => {
+    if (onValueChange) {
+      // Use onValueChange with proper options when available
+      onValueChange(newUrls, {
+        shouldDirty: !isEdit, // Don't mark as dirty when editing existing images
+        shouldValidate: true,
+      });
+    } else {
+      // Fallback to onChange
+      onChange(newUrls);
+    }
+  };
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -120,6 +144,7 @@ export function ImageUploadDropzone({
         file,
         preview: URL.createObjectURL(file),
         status: "pending" as const,
+        isEdit: false,
       }));
 
       if (newImagesToProcess.length > 0) {
@@ -276,8 +301,9 @@ export function ImageUploadDropzone({
       );
 
       // Create a File from the Blob to preserve the filename
-      const fileName = currentImage.file.name;
-      const fileType = currentImage.file.type;
+      const fileName =
+        currentImage.file?.name || `edited-image-${Date.now()}.jpg`;
+      const fileType = currentImage.file?.type || "image/jpeg";
       const croppedFile = new File([croppedImageBlob], fileName, {
         type: fileType,
       });
@@ -285,8 +311,17 @@ export function ImageUploadDropzone({
       // Upload the cropped image
       const uploadedUrl = await uploadImage(croppedFile);
 
-      // Update the form value
-      onChange([...value, uploadedUrl]);
+      // Update the form value with proper dirty state handling
+      if (currentImage.isEdit && currentImage.editIndex !== undefined) {
+        // Replace the existing image - don't mark as dirty since we're just replacing
+        const newImages = [...value];
+        const oldUrl = newImages[currentImage.editIndex];
+        newImages[currentImage.editIndex] = uploadedUrl;
+        updateFormValue(newImages, true); // true = isEdit
+      } else {
+        // Add new image - mark as dirty since it's a new addition
+        updateFormValue([...value, uploadedUrl], false); // false = not edit
+      }
 
       // Update status of current image
       setImagesToProcess((prev) => {
@@ -296,7 +331,9 @@ export function ImageUploadDropzone({
       });
 
       // Clean up current image
-      URL.revokeObjectURL(currentImage.preview);
+      if (currentImage.file) {
+        URL.revokeObjectURL(currentImage.preview);
+      }
 
       // Move to next image or close dialog
       if (currentImageIndex < imagesToProcess.length - 1) {
@@ -305,12 +342,14 @@ export function ImageUploadDropzone({
         setZoom(1);
       } else {
         // All images processed
-        toast.success("Imágenes subidas correctamente", {
-          description: `Se ${
-            imagesToProcess.length === 1
-              ? "ha subido 1 imagen"
-              : `han subido ${imagesToProcess.length} imágenes`
-          } correctamente.`,
+        const actionText = currentImage.isEdit ? "editada" : "subida";
+        const countText =
+          imagesToProcess.length === 1
+            ? `Se ha ${actionText} 1 imagen`
+            : `Se han ${imagesToProcess.some((img) => img.isEdit) ? "editado" : "subido"} ${imagesToProcess.length} imágenes`;
+
+        toast.success(`Imágenes ${actionText}s correctamente`, {
+          description: `${countText} correctamente.`,
         });
         setImagesToProcess([]);
         setCurrentImageIndex(0);
@@ -328,7 +367,7 @@ export function ImageUploadDropzone({
         return updated;
       });
 
-      toast.error("Error al subir la imagen", {
+      toast.error("Error al procesar la imagen", {
         description:
           error instanceof Error
             ? error.message
@@ -342,8 +381,27 @@ export function ImageUploadDropzone({
   const handleRemoveImage = (index: number) => {
     const newImages = [...value];
     newImages.splice(index, 1);
-    onChange(newImages);
+    updateFormValue(newImages, false); // Removing is considered a change, so mark as dirty
     toast("Imagen eliminada correctamente");
+  };
+
+  const handleEditImage = (index: number) => {
+    const imageUrl = value[index];
+    // Create an image to process for editing
+    const imageToEdit: ImageToProcess = {
+      url: imageUrl,
+      preview: imageUrl, // Use the URL directly as preview
+      status: "pending",
+      isEdit: true,
+      editIndex: index,
+    };
+
+    setImagesToProcess([imageToEdit]);
+    setCurrentImageIndex(0);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCropDialogOpen(true);
+
   };
 
   const handleZoomIn = () => {
@@ -351,20 +409,26 @@ export function ImageUploadDropzone({
   };
 
   const handleZoomOut = () => {
-    setZoom((prev) => Math.max(prev - 0.1, 0.5));
+    setZoom((prev) => Math.max(prev - 0.1, 0.1));
   };
 
   const handleCancelAll = () => {
-    // Clean up all previews
-    imagesToProcess.forEach((img) => URL.revokeObjectURL(img.preview));
+    // Clean up all previews (only for new uploads, not edits)
+    imagesToProcess.forEach((img) => {
+      if (img.file && !img.isEdit) {
+        URL.revokeObjectURL(img.preview);
+      }
+    });
     setImagesToProcess([]);
     setCurrentImageIndex(0);
     setCropDialogOpen(false);
   };
 
   const handleSkipImage = () => {
-    // Clean up current image
-    URL.revokeObjectURL(currentImage.preview);
+    // Clean up current image (only for new uploads, not edits)
+    if (currentImage.file && !currentImage.isEdit) {
+      URL.revokeObjectURL(currentImage.preview);
+    }
 
     // Remove the current image from the queue
     setImagesToProcess((prev) => {
@@ -464,7 +528,7 @@ export function ImageUploadDropzone({
                       "¿Estás seguro de que deseas eliminar todas las imágenes?"
                     )
                   ) {
-                    onChange([]);
+                    updateFormValue([], false); // Mark as dirty since we're removing all images
                     toast("Todas las imágenes han sido eliminadas");
                   }
                 }}
@@ -489,14 +553,30 @@ export function ImageUploadDropzone({
                       className="object-cover"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200"></div>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-2 right-2 size-7 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                      onClick={() => handleRemoveImage(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+
+                    {/* Action buttons */}
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        className="size-7 bg-white/90 hover:bg-white"
+                        onClick={() => handleEditImage(index)}
+                        title="Editar imagen"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="size-7"
+                        onClick={() => handleRemoveImage(index)}
+                        title="Eliminar imagen"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 </CarouselItem>
               ))}
@@ -524,9 +604,12 @@ export function ImageUploadDropzone({
         onOpenChange={(open) => {
           if (!open && imagesToProcess.length > 0) {
             // Confirm before closing if there are images to process
+            const actionText = imagesToProcess.some((img) => img.isEdit)
+              ? "edición"
+              : "subida";
             if (
               confirm(
-                "¿Estás seguro de que deseas cancelar la subida de imágenes?"
+                `¿Estás seguro de que deseas cancelar la ${actionText} de imágenes?`
               )
             ) {
               handleCancelAll();
@@ -540,11 +623,13 @@ export function ImageUploadDropzone({
           <DialogHeader className="p-3 bg-background border-b flex flex-row justify-between items-start space-y-0">
             <div className="flex flex-col gap-0">
               <DialogTitle className="flex items-center justify-between">
-                Ajustar imagen {currentImageIndex + 1} de{" "}
-                {imagesToProcess.length}
+                {currentImage?.isEdit ? "Editar" : "Ajustar"} imagen{" "}
+                {currentImageIndex + 1} de {imagesToProcess.length}
               </DialogTitle>
               <DialogDescription>
-                Ajusta la imagen para que tenga una relación de aspecto 3:4
+                {currentImage?.isEdit
+                  ? "Edita y recorta la imagen existente para que tenga una relación de aspecto 3:4"
+                  : "Ajusta la imagen para que tenga una relación de aspecto 3:4"}
               </DialogDescription>
             </div>
             {imagesToProcess.length > 1 && (
@@ -567,7 +652,7 @@ export function ImageUploadDropzone({
                   crop={crop}
                   zoom={zoom}
                   aspect={3 / 4}
-                  minZoom={0.5}
+                  minZoom={0.1}
                   onCropChange={setCrop}
                   onZoomChange={setZoom}
                   onCropComplete={onCropComplete}
@@ -590,9 +675,10 @@ export function ImageUploadDropzone({
               <div className="flex items-center justify-center gap-2 w-full">
                 <Button
                   variant="outline"
+                  type="button"
                   size="icon"
                   onClick={handleZoomOut}
-                  disabled={zoom <= 0.5 || isUploading}
+                  disabled={zoom <= 0.1 || isUploading}
                 >
                   <ZoomOut className="h-4 w-4" />
                 </Button>
@@ -601,7 +687,7 @@ export function ImageUploadDropzone({
                   <Slider
                     className="bg-foreground"
                     value={[zoom]}
-                    min={0.5}
+                    min={0.1}
                     max={3}
                     step={0.1}
                     onValueChange={(values) => setZoom(values[0])}
@@ -610,6 +696,7 @@ export function ImageUploadDropzone({
                 </div>
 
                 <Button
+                  type="button"
                   variant="outline"
                   size="icon"
                   onClick={handleZoomIn}
@@ -622,7 +709,11 @@ export function ImageUploadDropzone({
 
             {uploadProgress > 0 && (
               <div className="w-full px-3 pb-3">
-                <p className="text-sm mb-1">Subiendo imagen...</p>
+                <p className="text-sm mb-1">
+                  {currentImage?.isEdit
+                    ? "Guardando imagen editada..."
+                    : "Subiendo imagen..."}
+                </p>
                 <Progress value={uploadProgress} className="h-2" />
               </div>
             )}
@@ -637,22 +728,29 @@ export function ImageUploadDropzone({
               >
                 Cancelar todo
               </Button>
-              <Button
-                variant="outline"
-                onClick={handleSkipImage}
-                disabled={isUploading}
-                title="Omitir esta imagen"
-              >
-                Omitir
-                <SkipForward className="h-4 w-4" />
-              </Button>
+              {!currentImage?.isEdit && (
+                <Button
+                  variant="outline"
+                  onClick={handleSkipImage}
+                  disabled={isUploading}
+                  title="Omitir esta imagen"
+                >
+                  Omitir
+                  <SkipForward className="h-4 w-4" />
+                </Button>
+              )}
             </div>
             <Button
+              type="button"
               variant={"defaultBlack"}
               onClick={handleCropSave}
               disabled={isUploading}
             >
-              {isUploading ? "Guardando..." : "Guardar"}
+              {isUploading
+                ? "Guardando..."
+                : currentImage?.isEdit
+                  ? "Guardar cambios"
+                  : "Guardar"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -36,23 +36,53 @@ export default async function ProductEditPage({
     .order("name")
     .eq("status", "active");
 
-  // Fetch product variants - Corregido el nombre de la tabla
+  // Fetch product variants
   const { data: variants } = await supabase
-    .from("products_variants") // Corregido: product_variants → products_variants
+    .from("products_variants")
     .select("*")
     .eq("product_id", params.productId);
 
-  // Fetch variant options - Corregido el nombre de la tabla y la consulta
-  const { data: variantOptions } = await supabase
-    .from("products_variant_options") // Corregido: product_variant_options → products_variant_options
-    .select("*")
-    .in("variant_id", variants?.map((v) => v.id) || []); // Corregido: consulta por variant_id en lugar de product_id
+  // Fetch variant options only if we have variants
+  let variantOptions: any[] = [];
+  if (variants && variants.length > 0) {
+    const { data: options } = await supabase
+      .from("products_variant_options")
+      .select("*")
+      .in(
+        "variant_id",
+        variants.map((v) => v.id)
+      );
+    variantOptions = options || [];
+  }
 
-  const { data: commision } = await supabase
+  const { data: commission } = await supabase
     .from("provider_business")
     .select("accorded_commission")
     .eq("id", params.businessId)
     .single();
+
+  // Determine if product has real variants (not just default)
+  const hasRealVariants =
+    variants &&
+    variants.length > 0 &&
+    !(
+      variants.length === 1 &&
+      variants[0].name === "Default" &&
+      variantOptions.length === 1 &&
+      variantOptions[0]?.name === "Default"
+    );
+
+  // Process single product data from default variant if no real variants
+  let singleProductData = {};
+  if (!hasRealVariants && variantOptions.length > 0) {
+    const defaultOption = variantOptions[0];
+    singleProductData = {
+      single_price: defaultOption.price,
+      single_stock: defaultOption.stock,
+      single_sku: defaultOption.sku,
+      single_commission: defaultOption.accorded_commission,
+    };
+  }
 
   return (
     <main className="h-fit w-full mx-auto no-scrollbar">
@@ -63,8 +93,12 @@ export default async function ProductEditPage({
         />
       </div>
       <ProductFormEdit
-        commision={commision?.accorded_commission || 0.058}
-        product={product}
+        commission={commission?.accorded_commission || 0.058}
+        product={{
+          ...product,
+          ...singleProductData,
+          hasVariants: hasRealVariants,
+        }}
         variants={variants || []}
         variantOptions={variantOptions || []}
         brands={brands || []}
