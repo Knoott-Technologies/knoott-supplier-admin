@@ -178,9 +178,28 @@ export const columns: ColumnDef<Product>[] = [
     header: "Colección",
     id: "subcategory",
     accessorKey: "subcategory.name",
-    cell: ({ row }) => (
-      <div className="truncate">{row.original.subcategory?.name || "-"}</div>
-    ),
+    cell: ({ row }) => {
+      const name = row.original.subcategory?.name;
+
+      if (name) {
+        return (
+          <div className="truncate">
+            {row.original.subcategory?.name || "-"}
+          </div>
+        );
+      } else {
+        return (
+          <div className="truncate">
+            <Badge
+              variant={"secondary"}
+              className="bg-amber-100 text-yellow-600 hover:bg-amber-100 hover:text-yellow-600"
+            >
+              Selecciona una categoría
+            </Badge>
+          </div>
+        );
+      }
+    },
     size: 120, // Ancho fijo para evitar compresión
     enableHiding: false,
   },

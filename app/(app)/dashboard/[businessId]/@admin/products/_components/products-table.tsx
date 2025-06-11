@@ -18,6 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   Pagination,
@@ -54,6 +61,9 @@ export function DataTable<TData, TValue>({
   const [rowSelection, setRowSelection] = useState({});
 
   const totalPages = Math.ceil(totalCount / pageSize);
+
+  // Opciones para el tamaño de página
+  const pageSizeOptions = [20, 30, 40, 50, 100];
 
   const table = useReactTable({
     data,
@@ -96,6 +106,16 @@ export function DataTable<TData, TValue>({
       `${pathname}?${createQueryString({
         page: page.toString(),
         pageSize: pageSize.toString(),
+      })}`
+    );
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newPageSize: string) => {
+    router.push(
+      `${pathname}?${createQueryString({
+        page: "1", // Reset to first page when changing page size
+        pageSize: newPageSize,
       })}`
     );
   };
@@ -183,16 +203,45 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
 
-      {/* Pagination with shadcn/ui components */}
-      {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-          <div className="text-sm text-muted-foreground order-2 sm:order-1">
+      {/* Pagination and Page Size Selector */}
+      <div className="flex flex-col lg:flex-row items-center justify-between py-4 gap-4">
+        {/* Left side: Records info and page size selector */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 order-2 lg:order-1">
+          <div className="text-sm text-muted-foreground">
             Mostrando {data.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} a{" "}
             {Math.min(currentPage * pageSize, totalCount)} de {totalCount}{" "}
             registros
           </div>
 
-          <Pagination className="order-1 sm:order-2 w-fit">
+          {/* Page size selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground whitespace-nowrap">
+              Mostrar
+            </span>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={handlePageSizeChange}
+            >
+              <SelectTrigger className="w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {pageSizeOptions.map((size) => (
+                  <SelectItem key={size} value={size.toString()}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-muted-foreground whitespace-nowrap">
+              por página
+            </span>
+          </div>
+        </div>
+
+        {/* Right side: Pagination */}
+        {totalPages > 1 && (
+          <Pagination className="order-1 lg:order-2 w-fit">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
@@ -302,8 +351,8 @@ export function DataTable<TData, TValue>({
               </PaginationItem>
             </PaginationContent>
           </Pagination>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
