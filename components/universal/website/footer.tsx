@@ -77,10 +77,14 @@ const LinkGroups: LinkGroup[] = [
       {
         href: "/terms-and-conditions",
         label: "Términos y condiciones",
+        target: "_blank",
+        rel: "noopener noreferrer",
       },
       {
         href: "/privacy-policy",
         label: "Avsio de privacidad",
+        target: "_blank",
+        rel: "noopener noreferrer",
       },
       // {
       //   href: "/politica-de-envíos",
